@@ -1,0 +1,1985 @@
+{
+ "effektivzins_prozent": -8.8145,
+ "zeilen": [
+  {
+   "valuta": "30.12.1999",
+   "beschreibung": "Einzahlung der Einlage",
+   "betrag": 102258.38,
+   "saldo": 102258.38,
+   "zins": 0.0,
+   "tilgung": 102258.38,
+   "kumuliert": 0.0,
+   "abschluss": 102258.38
+  },
+  {
+   "valuta": "01.01.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102257.86,
+   "zins": -25.04,
+   "tilgung": -25.55,
+   "kumuliert": -25.04,
+   "abschluss": 102232.83
+  },
+  {
+   "valuta": "01.02.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102257.35,
+   "zins": -751.12,
+   "tilgung": -751.63,
+   "kumuliert": -776.16,
+   "abschluss": 101481.19
+  },
+  {
+   "valuta": "01.03.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102256.84,
+   "zins": -751.12,
+   "tilgung": -751.63,
+   "kumuliert": -1527.28,
+   "abschluss": 100729.56
+  },
+  {
+   "valuta": "01.04.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102256.33,
+   "zins": -751.12,
+   "tilgung": -751.63,
+   "kumuliert": -2278.4,
+   "abschluss": 99977.93
+  },
+  {
+   "valuta": "01.05.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102255.82,
+   "zins": -751.11,
+   "tilgung": -751.62,
+   "kumuliert": -3029.51,
+   "abschluss": 99226.31
+  },
+  {
+   "valuta": "01.06.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102255.31,
+   "zins": -751.11,
+   "tilgung": -751.62,
+   "kumuliert": -3780.62,
+   "abschluss": 98474.69
+  },
+  {
+   "valuta": "01.07.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102254.8,
+   "zins": -751.1,
+   "tilgung": -751.62,
+   "kumuliert": -4531.72,
+   "abschluss": 97723.08
+  },
+  {
+   "valuta": "01.08.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102254.29,
+   "zins": -751.1,
+   "tilgung": -751.61,
+   "kumuliert": -5282.82,
+   "abschluss": 96971.46
+  },
+  {
+   "valuta": "01.09.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102253.77,
+   "zins": -751.1,
+   "tilgung": -751.61,
+   "kumuliert": -6033.92,
+   "abschluss": 96219.85
+  },
+  {
+   "valuta": "01.10.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102253.26,
+   "zins": -751.09,
+   "tilgung": -751.6,
+   "kumuliert": -6785.01,
+   "abschluss": 95468.25
+  },
+  {
+   "valuta": "01.11.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102252.75,
+   "zins": -751.09,
+   "tilgung": -751.6,
+   "kumuliert": -7536.1,
+   "abschluss": 94716.65
+  },
+  {
+   "valuta": "01.12.2000",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 102252.24,
+   "zins": -751.09,
+   "tilgung": -751.6,
+   "kumuliert": -8287.19,
+   "abschluss": 93965.05
+  },
+  {
+   "valuta": "30.12.2000",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -9013.23,
+   "saldo": 93239.01,
+   "zins": -726.05,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 93239.01
+  },
+  {
+   "valuta": "01.01.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93238.5,
+   "zins": -22.83,
+   "tilgung": -23.34,
+   "kumuliert": -22.83,
+   "abschluss": 93215.67
+  },
+  {
+   "valuta": "01.02.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93237.98,
+   "zins": -684.87,
+   "tilgung": -685.38,
+   "kumuliert": -707.7,
+   "abschluss": 92530.28
+  },
+  {
+   "valuta": "01.03.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93237.47,
+   "zins": -684.87,
+   "tilgung": -685.38,
+   "kumuliert": -1392.57,
+   "abschluss": 91844.9
+  },
+  {
+   "valuta": "01.04.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93236.96,
+   "zins": -684.87,
+   "tilgung": -685.38,
+   "kumuliert": -2077.44,
+   "abschluss": 91159.53
+  },
+  {
+   "valuta": "01.05.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93236.45,
+   "zins": -684.86,
+   "tilgung": -685.37,
+   "kumuliert": -2762.3,
+   "abschluss": 90474.15
+  },
+  {
+   "valuta": "01.06.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93235.94,
+   "zins": -684.86,
+   "tilgung": -685.37,
+   "kumuliert": -3447.15,
+   "abschluss": 89788.78
+  },
+  {
+   "valuta": "01.07.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93235.43,
+   "zins": -684.85,
+   "tilgung": -685.37,
+   "kumuliert": -4132.01,
+   "abschluss": 89103.42
+  },
+  {
+   "valuta": "01.08.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93234.92,
+   "zins": -684.85,
+   "tilgung": -685.36,
+   "kumuliert": -4816.86,
+   "abschluss": 88418.06
+  },
+  {
+   "valuta": "01.09.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93234.4,
+   "zins": -684.85,
+   "tilgung": -685.36,
+   "kumuliert": -5501.71,
+   "abschluss": 87732.7
+  },
+  {
+   "valuta": "01.10.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93233.89,
+   "zins": -684.84,
+   "tilgung": -685.35,
+   "kumuliert": -6186.55,
+   "abschluss": 87047.35
+  },
+  {
+   "valuta": "01.11.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93233.38,
+   "zins": -684.84,
+   "tilgung": -685.35,
+   "kumuliert": -6871.39,
+   "abschluss": 86362.0
+  },
+  {
+   "valuta": "01.12.2001",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 93232.87,
+   "zins": -684.84,
+   "tilgung": -685.35,
+   "kumuliert": -7556.22,
+   "abschluss": 85676.65
+  },
+  {
+   "valuta": "30.12.2001",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -8218.23,
+   "saldo": 85014.65,
+   "zins": -662.0,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 85014.65
+  },
+  {
+   "valuta": "01.01.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85014.13,
+   "zins": -20.82,
+   "tilgung": -21.33,
+   "kumuliert": -20.82,
+   "abschluss": 84993.32
+  },
+  {
+   "valuta": "01.02.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85013.62,
+   "zins": -624.46,
+   "tilgung": -624.97,
+   "kumuliert": -645.28,
+   "abschluss": 84368.35
+  },
+  {
+   "valuta": "01.03.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85013.11,
+   "zins": -624.46,
+   "tilgung": -624.97,
+   "kumuliert": -1269.73,
+   "abschluss": 83743.38
+  },
+  {
+   "valuta": "01.04.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85012.6,
+   "zins": -624.45,
+   "tilgung": -624.97,
+   "kumuliert": -1894.19,
+   "abschluss": 83118.41
+  },
+  {
+   "valuta": "01.05.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85012.09,
+   "zins": -624.45,
+   "tilgung": -624.96,
+   "kumuliert": -2518.64,
+   "abschluss": 82493.45
+  },
+  {
+   "valuta": "01.06.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85011.58,
+   "zins": -624.45,
+   "tilgung": -624.96,
+   "kumuliert": -3143.09,
+   "abschluss": 81868.49
+  },
+  {
+   "valuta": "01.07.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85011.07,
+   "zins": -624.44,
+   "tilgung": -624.95,
+   "kumuliert": -3767.53,
+   "abschluss": 81243.54
+  },
+  {
+   "valuta": "01.08.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85010.55,
+   "zins": -624.44,
+   "tilgung": -624.95,
+   "kumuliert": -4391.97,
+   "abschluss": 80618.59
+  },
+  {
+   "valuta": "01.09.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85010.04,
+   "zins": -624.44,
+   "tilgung": -624.95,
+   "kumuliert": -5016.4,
+   "abschluss": 79993.64
+  },
+  {
+   "valuta": "01.10.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85009.53,
+   "zins": -624.43,
+   "tilgung": -624.94,
+   "kumuliert": -5640.83,
+   "abschluss": 79368.7
+  },
+  {
+   "valuta": "01.11.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85009.02,
+   "zins": -624.43,
+   "tilgung": -624.94,
+   "kumuliert": -6265.26,
+   "abschluss": 78743.76
+  },
+  {
+   "valuta": "01.12.2002",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 85008.51,
+   "zins": -624.42,
+   "tilgung": -624.94,
+   "kumuliert": -6889.69,
+   "abschluss": 78118.82
+  },
+  {
+   "valuta": "30.12.2002",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -7493.29,
+   "saldo": 77515.22,
+   "zins": -603.61,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 77515.22
+  },
+  {
+   "valuta": "01.01.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77514.71,
+   "zins": -18.98,
+   "tilgung": -19.49,
+   "kumuliert": -18.98,
+   "abschluss": 77495.73
+  },
+  {
+   "valuta": "01.02.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77514.19,
+   "zins": -569.38,
+   "tilgung": -569.89,
+   "kumuliert": -588.35,
+   "abschluss": 76925.84
+  },
+  {
+   "valuta": "01.03.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77513.68,
+   "zins": -569.37,
+   "tilgung": -569.88,
+   "kumuliert": -1157.73,
+   "abschluss": 76355.96
+  },
+  {
+   "valuta": "01.04.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77513.17,
+   "zins": -569.37,
+   "tilgung": -569.88,
+   "kumuliert": -1727.09,
+   "abschluss": 75786.08
+  },
+  {
+   "valuta": "01.05.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77512.66,
+   "zins": -569.36,
+   "tilgung": -569.88,
+   "kumuliert": -2296.46,
+   "abschluss": 75216.2
+  },
+  {
+   "valuta": "01.06.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77512.15,
+   "zins": -569.36,
+   "tilgung": -569.87,
+   "kumuliert": -2865.82,
+   "abschluss": 74646.33
+  },
+  {
+   "valuta": "01.07.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77511.64,
+   "zins": -569.36,
+   "tilgung": -569.87,
+   "kumuliert": -3435.18,
+   "abschluss": 74076.46
+  },
+  {
+   "valuta": "01.08.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77511.13,
+   "zins": -569.35,
+   "tilgung": -569.86,
+   "kumuliert": -4004.53,
+   "abschluss": 73506.6
+  },
+  {
+   "valuta": "01.09.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77510.62,
+   "zins": -569.35,
+   "tilgung": -569.86,
+   "kumuliert": -4573.88,
+   "abschluss": 72936.74
+  },
+  {
+   "valuta": "01.10.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77510.1,
+   "zins": -569.35,
+   "tilgung": -569.86,
+   "kumuliert": -5143.22,
+   "abschluss": 72366.88
+  },
+  {
+   "valuta": "01.11.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77509.59,
+   "zins": -569.34,
+   "tilgung": -569.85,
+   "kumuliert": -5712.56,
+   "abschluss": 71797.03
+  },
+  {
+   "valuta": "01.12.2003",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 77509.08,
+   "zins": -569.34,
+   "tilgung": -569.85,
+   "kumuliert": -6281.9,
+   "abschluss": 71227.18
+  },
+  {
+   "valuta": "30.12.2003",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -6832.26,
+   "saldo": 70676.82,
+   "zins": -550.36,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 70676.82
+  },
+  {
+   "valuta": "01.01.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70676.31,
+   "zins": -17.3,
+   "tilgung": -17.82,
+   "kumuliert": -17.3,
+   "abschluss": 70659.01
+  },
+  {
+   "valuta": "01.02.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70675.8,
+   "zins": -519.14,
+   "tilgung": -519.66,
+   "kumuliert": -536.45,
+   "abschluss": 70139.35
+  },
+  {
+   "valuta": "01.03.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70675.29,
+   "zins": -519.14,
+   "tilgung": -519.65,
+   "kumuliert": -1055.59,
+   "abschluss": 69619.7
+  },
+  {
+   "valuta": "01.04.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70674.78,
+   "zins": -519.14,
+   "tilgung": -519.65,
+   "kumuliert": -1574.73,
+   "abschluss": 69100.05
+  },
+  {
+   "valuta": "01.05.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70674.27,
+   "zins": -519.13,
+   "tilgung": -519.64,
+   "kumuliert": -2093.86,
+   "abschluss": 68580.41
+  },
+  {
+   "valuta": "01.06.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70673.76,
+   "zins": -519.13,
+   "tilgung": -519.64,
+   "kumuliert": -2612.99,
+   "abschluss": 68060.77
+  },
+  {
+   "valuta": "01.07.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70673.24,
+   "zins": -519.13,
+   "tilgung": -519.64,
+   "kumuliert": -3132.12,
+   "abschluss": 67541.13
+  },
+  {
+   "valuta": "01.08.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70672.73,
+   "zins": -519.12,
+   "tilgung": -519.63,
+   "kumuliert": -3651.24,
+   "abschluss": 67021.49
+  },
+  {
+   "valuta": "01.09.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70672.22,
+   "zins": -519.12,
+   "tilgung": -519.63,
+   "kumuliert": -4170.36,
+   "abschluss": 66501.86
+  },
+  {
+   "valuta": "01.10.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70671.71,
+   "zins": -519.11,
+   "tilgung": -519.63,
+   "kumuliert": -4689.47,
+   "abschluss": 65982.24
+  },
+  {
+   "valuta": "01.11.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70671.2,
+   "zins": -519.11,
+   "tilgung": -519.62,
+   "kumuliert": -5208.58,
+   "abschluss": 65462.62
+  },
+  {
+   "valuta": "01.12.2004",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 70670.69,
+   "zins": -519.11,
+   "tilgung": -519.62,
+   "kumuliert": -5727.69,
+   "abschluss": 64943.0
+  },
+  {
+   "valuta": "30.12.2004",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -6229.49,
+   "saldo": 64441.2,
+   "zins": -501.8,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 64441.2
+  },
+  {
+   "valuta": "01.01.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64440.69,
+   "zins": -15.78,
+   "tilgung": -16.29,
+   "kumuliert": -15.78,
+   "abschluss": 64424.91
+  },
+  {
+   "valuta": "01.02.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64440.18,
+   "zins": -473.34,
+   "tilgung": -473.85,
+   "kumuliert": -489.12,
+   "abschluss": 63951.06
+  },
+  {
+   "valuta": "01.03.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64439.66,
+   "zins": -473.34,
+   "tilgung": -473.85,
+   "kumuliert": -962.46,
+   "abschluss": 63477.21
+  },
+  {
+   "valuta": "01.04.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64439.15,
+   "zins": -473.33,
+   "tilgung": -473.85,
+   "kumuliert": -1435.79,
+   "abschluss": 63003.36
+  },
+  {
+   "valuta": "01.05.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64438.64,
+   "zins": -473.33,
+   "tilgung": -473.84,
+   "kumuliert": -1909.12,
+   "abschluss": 62529.52
+  },
+  {
+   "valuta": "01.06.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64438.13,
+   "zins": -473.33,
+   "tilgung": -473.84,
+   "kumuliert": -2382.45,
+   "abschluss": 62055.68
+  },
+  {
+   "valuta": "01.07.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64437.62,
+   "zins": -473.32,
+   "tilgung": -473.83,
+   "kumuliert": -2855.77,
+   "abschluss": 61581.85
+  },
+  {
+   "valuta": "01.08.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64437.11,
+   "zins": -473.32,
+   "tilgung": -473.83,
+   "kumuliert": -3329.09,
+   "abschluss": 61108.02
+  },
+  {
+   "valuta": "01.09.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64436.6,
+   "zins": -473.32,
+   "tilgung": -473.83,
+   "kumuliert": -3802.41,
+   "abschluss": 60634.19
+  },
+  {
+   "valuta": "01.10.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64436.09,
+   "zins": -473.31,
+   "tilgung": -473.82,
+   "kumuliert": -4275.72,
+   "abschluss": 60160.37
+  },
+  {
+   "valuta": "01.11.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64435.57,
+   "zins": -473.31,
+   "tilgung": -473.82,
+   "kumuliert": -4749.03,
+   "abschluss": 59686.55
+  },
+  {
+   "valuta": "01.12.2005",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 64435.06,
+   "zins": -473.3,
+   "tilgung": -473.82,
+   "kumuliert": -5222.33,
+   "abschluss": 59212.73
+  },
+  {
+   "valuta": "30.12.2005",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -5679.85,
+   "saldo": 58755.21,
+   "zins": -457.52,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 58755.21
+  },
+  {
+   "valuta": "01.01.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58754.7,
+   "zins": -14.39,
+   "tilgung": -14.9,
+   "kumuliert": -14.39,
+   "abschluss": 58740.31
+  },
+  {
+   "valuta": "01.02.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58754.19,
+   "zins": -431.58,
+   "tilgung": -432.09,
+   "kumuliert": -445.96,
+   "abschluss": 58308.22
+  },
+  {
+   "valuta": "01.03.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58753.68,
+   "zins": -431.57,
+   "tilgung": -432.08,
+   "kumuliert": -877.53,
+   "abschluss": 57876.14
+  },
+  {
+   "valuta": "01.04.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58753.16,
+   "zins": -431.57,
+   "tilgung": -432.08,
+   "kumuliert": -1309.1,
+   "abschluss": 57444.06
+  },
+  {
+   "valuta": "01.05.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58752.65,
+   "zins": -431.56,
+   "tilgung": -432.08,
+   "kumuliert": -1740.67,
+   "abschluss": 57011.99
+  },
+  {
+   "valuta": "01.06.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58752.14,
+   "zins": -431.56,
+   "tilgung": -432.07,
+   "kumuliert": -2172.23,
+   "abschluss": 56579.91
+  },
+  {
+   "valuta": "01.07.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58751.63,
+   "zins": -431.56,
+   "tilgung": -432.07,
+   "kumuliert": -2603.78,
+   "abschluss": 56147.84
+  },
+  {
+   "valuta": "01.08.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58751.12,
+   "zins": -431.55,
+   "tilgung": -432.06,
+   "kumuliert": -3035.34,
+   "abschluss": 55715.78
+  },
+  {
+   "valuta": "01.09.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58750.61,
+   "zins": -431.55,
+   "tilgung": -432.06,
+   "kumuliert": -3466.89,
+   "abschluss": 55283.72
+  },
+  {
+   "valuta": "01.10.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58750.1,
+   "zins": -431.55,
+   "tilgung": -432.06,
+   "kumuliert": -3898.43,
+   "abschluss": 54851.66
+  },
+  {
+   "valuta": "01.11.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58749.58,
+   "zins": -431.54,
+   "tilgung": -432.05,
+   "kumuliert": -4329.98,
+   "abschluss": 54419.61
+  },
+  {
+   "valuta": "01.12.2006",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 58749.07,
+   "zins": -431.54,
+   "tilgung": -432.05,
+   "kumuliert": -4761.51,
+   "abschluss": 53987.56
+  },
+  {
+   "valuta": "30.12.2006",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -5178.66,
+   "saldo": 53570.41,
+   "zins": -417.15,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 53570.41
+  },
+  {
+   "valuta": "01.01.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53569.9,
+   "zins": -13.12,
+   "tilgung": -13.63,
+   "kumuliert": -13.12,
+   "abschluss": 53556.78
+  },
+  {
+   "valuta": "01.02.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53569.39,
+   "zins": -393.49,
+   "tilgung": -394.0,
+   "kumuliert": -406.61,
+   "abschluss": 53162.78
+  },
+  {
+   "valuta": "01.03.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53568.88,
+   "zins": -393.49,
+   "tilgung": -394.0,
+   "kumuliert": -800.1,
+   "abschluss": 52768.78
+  },
+  {
+   "valuta": "01.04.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53568.36,
+   "zins": -393.48,
+   "tilgung": -394.0,
+   "kumuliert": -1193.58,
+   "abschluss": 52374.78
+  },
+  {
+   "valuta": "01.05.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53567.85,
+   "zins": -393.48,
+   "tilgung": -393.99,
+   "kumuliert": -1587.06,
+   "abschluss": 51980.79
+  },
+  {
+   "valuta": "01.06.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53567.34,
+   "zins": -393.48,
+   "tilgung": -393.99,
+   "kumuliert": -1980.54,
+   "abschluss": 51586.8
+  },
+  {
+   "valuta": "01.07.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53566.83,
+   "zins": -393.47,
+   "tilgung": -393.98,
+   "kumuliert": -2374.01,
+   "abschluss": 51192.82
+  },
+  {
+   "valuta": "01.08.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53566.32,
+   "zins": -393.47,
+   "tilgung": -393.98,
+   "kumuliert": -2767.48,
+   "abschluss": 50798.84
+  },
+  {
+   "valuta": "01.09.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53565.81,
+   "zins": -393.47,
+   "tilgung": -393.98,
+   "kumuliert": -3160.94,
+   "abschluss": 50404.86
+  },
+  {
+   "valuta": "01.10.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53565.3,
+   "zins": -393.46,
+   "tilgung": -393.97,
+   "kumuliert": -3554.41,
+   "abschluss": 50010.89
+  },
+  {
+   "valuta": "01.11.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53564.78,
+   "zins": -393.46,
+   "tilgung": -393.97,
+   "kumuliert": -3947.86,
+   "abschluss": 49616.92
+  },
+  {
+   "valuta": "01.12.2007",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 53564.27,
+   "zins": -393.45,
+   "tilgung": -393.97,
+   "kumuliert": -4341.32,
+   "abschluss": 49222.96
+  },
+  {
+   "valuta": "30.12.2007",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -4721.65,
+   "saldo": 48842.62,
+   "zins": -380.34,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 48842.62
+  },
+  {
+   "valuta": "01.01.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48842.11,
+   "zins": -11.96,
+   "tilgung": -12.47,
+   "kumuliert": -11.96,
+   "abschluss": 48830.15
+  },
+  {
+   "valuta": "01.02.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48841.6,
+   "zins": -358.76,
+   "tilgung": -359.28,
+   "kumuliert": -370.72,
+   "abschluss": 48470.88
+  },
+  {
+   "valuta": "01.03.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48841.09,
+   "zins": -358.76,
+   "tilgung": -359.27,
+   "kumuliert": -729.48,
+   "abschluss": 48111.6
+  },
+  {
+   "valuta": "01.04.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48840.58,
+   "zins": -358.76,
+   "tilgung": -359.27,
+   "kumuliert": -1088.24,
+   "abschluss": 47752.34
+  },
+  {
+   "valuta": "01.05.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48840.07,
+   "zins": -358.75,
+   "tilgung": -359.26,
+   "kumuliert": -1446.99,
+   "abschluss": 47393.07
+  },
+  {
+   "valuta": "01.06.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48839.55,
+   "zins": -358.75,
+   "tilgung": -359.26,
+   "kumuliert": -1805.74,
+   "abschluss": 47033.81
+  },
+  {
+   "valuta": "01.07.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48839.04,
+   "zins": -358.75,
+   "tilgung": -359.26,
+   "kumuliert": -2164.49,
+   "abschluss": 46674.56
+  },
+  {
+   "valuta": "01.08.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48838.53,
+   "zins": -358.74,
+   "tilgung": -359.25,
+   "kumuliert": -2523.23,
+   "abschluss": 46315.3
+  },
+  {
+   "valuta": "01.09.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48838.02,
+   "zins": -358.74,
+   "tilgung": -359.25,
+   "kumuliert": -2881.97,
+   "abschluss": 45956.05
+  },
+  {
+   "valuta": "01.10.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48837.51,
+   "zins": -358.73,
+   "tilgung": -359.25,
+   "kumuliert": -3240.7,
+   "abschluss": 45596.81
+  },
+  {
+   "valuta": "01.11.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48837.0,
+   "zins": -358.73,
+   "tilgung": -359.24,
+   "kumuliert": -3599.43,
+   "abschluss": 45237.57
+  },
+  {
+   "valuta": "01.12.2008",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 48836.49,
+   "zins": -358.73,
+   "tilgung": -359.24,
+   "kumuliert": -3958.16,
+   "abschluss": 44878.33
+  },
+  {
+   "valuta": "30.12.2008",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -4304.92,
+   "saldo": 44531.56,
+   "zins": -346.77,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 44531.56
+  },
+  {
+   "valuta": "01.01.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44531.05,
+   "zins": -10.9,
+   "tilgung": -11.41,
+   "kumuliert": -10.9,
+   "abschluss": 44520.15
+  },
+  {
+   "valuta": "01.02.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44530.54,
+   "zins": -327.1,
+   "tilgung": -327.61,
+   "kumuliert": -338.0,
+   "abschluss": 44192.54
+  },
+  {
+   "valuta": "01.03.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44530.03,
+   "zins": -327.09,
+   "tilgung": -327.61,
+   "kumuliert": -665.1,
+   "abschluss": 43864.93
+  },
+  {
+   "valuta": "01.04.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44529.52,
+   "zins": -327.09,
+   "tilgung": -327.6,
+   "kumuliert": -992.19,
+   "abschluss": 43537.33
+  },
+  {
+   "valuta": "01.05.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44529.01,
+   "zins": -327.09,
+   "tilgung": -327.6,
+   "kumuliert": -1319.27,
+   "abschluss": 43209.73
+  },
+  {
+   "valuta": "01.06.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44528.5,
+   "zins": -327.08,
+   "tilgung": -327.59,
+   "kumuliert": -1646.35,
+   "abschluss": 42882.14
+  },
+  {
+   "valuta": "01.07.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44527.98,
+   "zins": -327.08,
+   "tilgung": -327.59,
+   "kumuliert": -1973.43,
+   "abschluss": 42554.55
+  },
+  {
+   "valuta": "01.08.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44527.47,
+   "zins": -327.08,
+   "tilgung": -327.59,
+   "kumuliert": -2300.51,
+   "abschluss": 42226.96
+  },
+  {
+   "valuta": "01.09.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44526.96,
+   "zins": -327.07,
+   "tilgung": -327.58,
+   "kumuliert": -2627.58,
+   "abschluss": 41899.38
+  },
+  {
+   "valuta": "01.10.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44526.45,
+   "zins": -327.07,
+   "tilgung": -327.58,
+   "kumuliert": -2954.65,
+   "abschluss": 41571.8
+  },
+  {
+   "valuta": "01.11.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44525.94,
+   "zins": -327.06,
+   "tilgung": -327.58,
+   "kumuliert": -3281.71,
+   "abschluss": 41244.23
+  },
+  {
+   "valuta": "01.12.2009",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 44525.43,
+   "zins": -327.06,
+   "tilgung": -327.57,
+   "kumuliert": -3608.77,
+   "abschluss": 40916.66
+  },
+  {
+   "valuta": "30.12.2009",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -3924.93,
+   "saldo": 40600.5,
+   "zins": -316.15,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 40600.5
+  },
+  {
+   "valuta": "01.01.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40599.99,
+   "zins": -9.94,
+   "tilgung": -10.45,
+   "kumuliert": -9.94,
+   "abschluss": 40590.05
+  },
+  {
+   "valuta": "01.02.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40599.48,
+   "zins": -298.22,
+   "tilgung": -298.73,
+   "kumuliert": -308.16,
+   "abschluss": 40291.32
+  },
+  {
+   "valuta": "01.03.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40598.97,
+   "zins": -298.22,
+   "tilgung": -298.73,
+   "kumuliert": -606.38,
+   "abschluss": 39992.59
+  },
+  {
+   "valuta": "01.04.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40598.46,
+   "zins": -298.22,
+   "tilgung": -298.73,
+   "kumuliert": -904.6,
+   "abschluss": 39693.86
+  },
+  {
+   "valuta": "01.05.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40597.94,
+   "zins": -298.21,
+   "tilgung": -298.72,
+   "kumuliert": -1202.81,
+   "abschluss": 39395.14
+  },
+  {
+   "valuta": "01.06.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40597.43,
+   "zins": -298.21,
+   "tilgung": -298.72,
+   "kumuliert": -1501.02,
+   "abschluss": 39096.42
+  },
+  {
+   "valuta": "01.07.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40596.92,
+   "zins": -298.2,
+   "tilgung": -298.72,
+   "kumuliert": -1799.22,
+   "abschluss": 38797.7
+  },
+  {
+   "valuta": "01.08.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40596.41,
+   "zins": -298.2,
+   "tilgung": -298.71,
+   "kumuliert": -2097.42,
+   "abschluss": 38498.99
+  },
+  {
+   "valuta": "01.09.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40595.9,
+   "zins": -298.2,
+   "tilgung": -298.71,
+   "kumuliert": -2395.62,
+   "abschluss": 38200.28
+  },
+  {
+   "valuta": "01.10.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40595.39,
+   "zins": -298.19,
+   "tilgung": -298.7,
+   "kumuliert": -2693.81,
+   "abschluss": 37901.58
+  },
+  {
+   "valuta": "01.11.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40594.88,
+   "zins": -298.19,
+   "tilgung": -298.7,
+   "kumuliert": -2992.0,
+   "abschluss": 37602.88
+  },
+  {
+   "valuta": "01.12.2010",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 40594.37,
+   "zins": -298.19,
+   "tilgung": -298.7,
+   "kumuliert": -3290.18,
+   "abschluss": 37304.18
+  },
+  {
+   "valuta": "30.12.2010",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -3578.42,
+   "saldo": 37015.94,
+   "zins": -288.24,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 37015.94
+  },
+  {
+   "valuta": "01.01.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37015.43,
+   "zins": -9.06,
+   "tilgung": -9.57,
+   "kumuliert": -9.06,
+   "abschluss": 37006.37
+  },
+  {
+   "valuta": "01.02.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37014.92,
+   "zins": -271.89,
+   "tilgung": -272.4,
+   "kumuliert": -280.96,
+   "abschluss": 36733.96
+  },
+  {
+   "valuta": "01.03.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37014.41,
+   "zins": -271.89,
+   "tilgung": -272.4,
+   "kumuliert": -552.84,
+   "abschluss": 36461.56
+  },
+  {
+   "valuta": "01.04.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37013.9,
+   "zins": -271.89,
+   "tilgung": -272.4,
+   "kumuliert": -824.73,
+   "abschluss": 36189.17
+  },
+  {
+   "valuta": "01.05.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37013.38,
+   "zins": -271.88,
+   "tilgung": -272.39,
+   "kumuliert": -1096.61,
+   "abschluss": 35916.77
+  },
+  {
+   "valuta": "01.06.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37012.87,
+   "zins": -271.88,
+   "tilgung": -272.39,
+   "kumuliert": -1368.49,
+   "abschluss": 35644.39
+  },
+  {
+   "valuta": "01.07.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37012.36,
+   "zins": -271.87,
+   "tilgung": -272.39,
+   "kumuliert": -1640.36,
+   "abschluss": 35372.0
+  },
+  {
+   "valuta": "01.08.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37011.85,
+   "zins": -271.87,
+   "tilgung": -272.38,
+   "kumuliert": -1912.23,
+   "abschluss": 35099.62
+  },
+  {
+   "valuta": "01.09.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37011.34,
+   "zins": -271.87,
+   "tilgung": -272.38,
+   "kumuliert": -2184.1,
+   "abschluss": 34827.24
+  },
+  {
+   "valuta": "01.10.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37010.83,
+   "zins": -271.86,
+   "tilgung": -272.37,
+   "kumuliert": -2455.96,
+   "abschluss": 34554.87
+  },
+  {
+   "valuta": "01.11.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37010.32,
+   "zins": -271.86,
+   "tilgung": -272.37,
+   "kumuliert": -2727.82,
+   "abschluss": 34282.5
+  },
+  {
+   "valuta": "01.12.2011",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 37009.81,
+   "zins": -271.86,
+   "tilgung": -272.37,
+   "kumuliert": -2999.68,
+   "abschluss": 34010.13
+  },
+  {
+   "valuta": "30.12.2011",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -3262.46,
+   "saldo": 33747.34,
+   "zins": -262.79,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 33747.34
+  },
+  {
+   "valuta": "01.01.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33746.83,
+   "zins": -8.26,
+   "tilgung": -8.77,
+   "kumuliert": -8.26,
+   "abschluss": 33738.57
+  },
+  {
+   "valuta": "01.02.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33746.32,
+   "zins": -247.88,
+   "tilgung": -248.39,
+   "kumuliert": -256.15,
+   "abschluss": 33490.17
+  },
+  {
+   "valuta": "01.03.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33745.81,
+   "zins": -247.88,
+   "tilgung": -248.39,
+   "kumuliert": -504.03,
+   "abschluss": 33241.78
+  },
+  {
+   "valuta": "01.04.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33745.3,
+   "zins": -247.88,
+   "tilgung": -248.39,
+   "kumuliert": -751.9,
+   "abschluss": 32993.39
+  },
+  {
+   "valuta": "01.05.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33744.78,
+   "zins": -247.87,
+   "tilgung": -248.38,
+   "kumuliert": -999.77,
+   "abschluss": 32745.01
+  },
+  {
+   "valuta": "01.06.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33744.27,
+   "zins": -247.87,
+   "tilgung": -248.38,
+   "kumuliert": -1247.64,
+   "abschluss": 32496.63
+  },
+  {
+   "valuta": "01.07.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33743.76,
+   "zins": -247.86,
+   "tilgung": -248.38,
+   "kumuliert": -1495.51,
+   "abschluss": 32248.25
+  },
+  {
+   "valuta": "01.08.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33743.25,
+   "zins": -247.86,
+   "tilgung": -248.37,
+   "kumuliert": -1743.37,
+   "abschluss": 31999.88
+  },
+  {
+   "valuta": "01.09.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33742.74,
+   "zins": -247.86,
+   "tilgung": -248.37,
+   "kumuliert": -1991.23,
+   "abschluss": 31751.51
+  },
+  {
+   "valuta": "01.10.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33742.23,
+   "zins": -247.85,
+   "tilgung": -248.36,
+   "kumuliert": -2239.08,
+   "abschluss": 31503.15
+  },
+  {
+   "valuta": "01.11.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33741.72,
+   "zins": -247.85,
+   "tilgung": -248.36,
+   "kumuliert": -2486.93,
+   "abschluss": 31254.79
+  },
+  {
+   "valuta": "01.12.2012",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 33741.21,
+   "zins": -247.85,
+   "tilgung": -248.36,
+   "kumuliert": -2734.77,
+   "abschluss": 31006.43
+  },
+  {
+   "valuta": "30.12.2012",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -2974.36,
+   "saldo": 30766.85,
+   "zins": -239.58,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 30766.85
+  },
+  {
+   "valuta": "01.01.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30766.34,
+   "zins": -7.53,
+   "tilgung": -8.04,
+   "kumuliert": -7.53,
+   "abschluss": 30758.81
+  },
+  {
+   "valuta": "01.02.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30765.83,
+   "zins": -225.99,
+   "tilgung": -226.5,
+   "kumuliert": -233.52,
+   "abschluss": 30532.3
+  },
+  {
+   "valuta": "01.03.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30765.32,
+   "zins": -225.99,
+   "tilgung": -226.5,
+   "kumuliert": -459.51,
+   "abschluss": 30305.81
+  },
+  {
+   "valuta": "01.04.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30764.81,
+   "zins": -225.98,
+   "tilgung": -226.49,
+   "kumuliert": -685.49,
+   "abschluss": 30079.31
+  },
+  {
+   "valuta": "01.05.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30764.29,
+   "zins": -225.98,
+   "tilgung": -226.49,
+   "kumuliert": -911.47,
+   "abschluss": 29852.82
+  },
+  {
+   "valuta": "01.06.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30763.78,
+   "zins": -225.98,
+   "tilgung": -226.49,
+   "kumuliert": -1137.45,
+   "abschluss": 29626.33
+  },
+  {
+   "valuta": "01.07.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30763.27,
+   "zins": -225.97,
+   "tilgung": -226.48,
+   "kumuliert": -1363.42,
+   "abschluss": 29399.85
+  },
+  {
+   "valuta": "01.08.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30762.76,
+   "zins": -225.97,
+   "tilgung": -226.48,
+   "kumuliert": -1589.39,
+   "abschluss": 29173.37
+  },
+  {
+   "valuta": "01.09.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30762.25,
+   "zins": -225.96,
+   "tilgung": -226.48,
+   "kumuliert": -1815.35,
+   "abschluss": 28946.9
+  },
+  {
+   "valuta": "01.10.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30761.74,
+   "zins": -225.96,
+   "tilgung": -226.47,
+   "kumuliert": -2041.31,
+   "abschluss": 28720.42
+  },
+  {
+   "valuta": "01.11.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30761.23,
+   "zins": -225.96,
+   "tilgung": -226.47,
+   "kumuliert": -2267.27,
+   "abschluss": 28493.96
+  },
+  {
+   "valuta": "01.12.2013",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 30760.72,
+   "zins": -225.95,
+   "tilgung": -226.46,
+   "kumuliert": -2493.22,
+   "abschluss": 28267.49
+  },
+  {
+   "valuta": "30.12.2013",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -2711.64,
+   "saldo": 28049.07,
+   "zins": -218.42,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 28049.07
+  },
+  {
+   "valuta": "01.01.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28048.56,
+   "zins": -6.87,
+   "tilgung": -7.38,
+   "kumuliert": -6.87,
+   "abschluss": 28041.7
+  },
+  {
+   "valuta": "01.02.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28048.05,
+   "zins": -206.03,
+   "tilgung": -206.54,
+   "kumuliert": -212.9,
+   "abschluss": 27835.16
+  },
+  {
+   "valuta": "01.03.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28047.54,
+   "zins": -206.02,
+   "tilgung": -206.54,
+   "kumuliert": -418.92,
+   "abschluss": 27628.62
+  },
+  {
+   "valuta": "01.04.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28047.03,
+   "zins": -206.02,
+   "tilgung": -206.53,
+   "kumuliert": -624.94,
+   "abschluss": 27422.09
+  },
+  {
+   "valuta": "01.05.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28046.52,
+   "zins": -206.02,
+   "tilgung": -206.53,
+   "kumuliert": -830.96,
+   "abschluss": 27215.56
+  },
+  {
+   "valuta": "01.06.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28046.01,
+   "zins": -206.01,
+   "tilgung": -206.52,
+   "kumuliert": -1036.97,
+   "abschluss": 27009.04
+  },
+  {
+   "valuta": "01.07.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28045.5,
+   "zins": -206.01,
+   "tilgung": -206.52,
+   "kumuliert": -1242.98,
+   "abschluss": 26802.52
+  },
+  {
+   "valuta": "01.08.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28044.98,
+   "zins": -206.0,
+   "tilgung": -206.52,
+   "kumuliert": -1448.98,
+   "abschluss": 26596.0
+  },
+  {
+   "valuta": "01.09.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28044.47,
+   "zins": -206.0,
+   "tilgung": -206.51,
+   "kumuliert": -1654.98,
+   "abschluss": 26389.49
+  },
+  {
+   "valuta": "01.10.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28043.96,
+   "zins": -206.0,
+   "tilgung": -206.51,
+   "kumuliert": -1860.98,
+   "abschluss": 26182.98
+  },
+  {
+   "valuta": "01.11.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28043.45,
+   "zins": -205.99,
+   "tilgung": -206.5,
+   "kumuliert": -2066.97,
+   "abschluss": 25976.48
+  },
+  {
+   "valuta": "01.12.2014",
+   "beschreibung": "monatliche Entnahme",
+   "betrag": -0.51,
+   "saldo": 28042.94,
+   "zins": -205.99,
+   "tilgung": -206.5,
+   "kumuliert": -2272.96,
+   "abschluss": 25769.97
+  },
+  {
+   "valuta": "30.12.2014",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -2472.08,
+   "saldo": 25570.85,
+   "zins": -199.12,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 25570.85
+  },
+  {
+   "valuta": "01.01.2015",
+   "beschreibung": "Entnahme Restguthaben",
+   "betrag": -25564.59,
+   "saldo": 6.26,
+   "zins": -6.26,
+   "tilgung": -25570.85,
+   "kumuliert": -6.26,
+   "abschluss": 0.0
+  },
+  {
+   "valuta": "01.01.2015",
+   "beschreibung": "Zinsverrechnung",
+   "betrag": -6.26,
+   "saldo": 0.0,
+   "zins": 0.0,
+   "tilgung": 0.0,
+   "kumuliert": 0.0,
+   "abschluss": 0.0
+  }
+ ]
+}

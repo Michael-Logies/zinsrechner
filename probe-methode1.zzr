@@ -1,0 +1,47 @@
+[Information]
+Erstellt=23.11.2026
+Bearbeitet=23.11.2026
+Typ=ZZR-Datei
+Version=1
+Erzeuger=Zuckers Zins Rechner
+Titel=Probe Methode1 Goldmaster
+EZ-Methode=1
+Euro=1
+Zahlungsstroeme=3
+
+[Zahlungsstrom1]
+Aktiv=1
+Stufen=1
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 0.00000000000000E+0000
+Realdatum=730118
+Ultimo=0
+Betrag=-1.02258380000000E+0005
+Raten= 1.00000000000000E+0000
+Abstand=1
+Notiz=Einlage
+
+[Zahlungsstrom2]
+Aktiv=1
+Stufen=1
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 0.00000000000000E+0000
+Realdatum=730120
+Ultimo=0
+Betrag= 5.10000000000000E-0001
+Raten= 1.80000000000000E+0002
+Abstand=1
+Notiz=monatliche Entnahme
+
+[Zahlungsstrom3]
+Aktiv=1
+Stufen=1
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 0.00000000000000E+0000
+Realdatum=735599
+Ultimo=0
+Betrag= 2.55645900000000E+0004
+Raten= 1.00000000000000E+0000
+Abstand=1
+Notiz=Entnahme Restguthaben
+

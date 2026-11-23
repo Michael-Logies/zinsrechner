@@ -1,0 +1,22 @@
+[Information]
+Erstellt=23.11.2026
+Bearbeitet=23.11.2026
+Typ=ZZR-Datei
+Version=1
+Erzeuger=Zuckers Zins Rechner
+Titel=Probe Zuwachs Absolut
+EZ-Methode=1
+Euro=1
+Zahlungsstroeme=1
+
+[Zahlungsstrom1]
+Aktiv=1
+Stufen=2
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 5.00000000000000E+0001
+Realdatum=730120
+Ultimo=0
+Betrag=-1.00000000000000E+0002
+Raten= 1.20000000000000E+0001
+Abstand=1
+Notiz=Miete Stufe 1+2 absolut
