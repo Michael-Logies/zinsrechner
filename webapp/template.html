@@ -58,6 +58,36 @@
       <button id="loeserKnopf">Ratenhöhe lösen</button>
     </span>
     <div id="effAnzeige" class="ergebnis"></div>
+    <details id="methodenErklaerung" style="margin-top:0.4em">
+      <summary>Erläuterung: die drei Effektivzins-Methoden</summary>
+      <div style="font-size:0.92em; line-height:1.45; margin-top:0.4em">
+        <p><b>PAngV (alt) — Vergleichskonto.</b> Nachbildung des Original-Verfahrens aus der
+        Preisangabenverordnung von 1985: ein „Vergleichskonto“, auf dem das Geschäft mit dem
+        effektiven Zins durchgespielt wird (30/360-Banktage, Zinsansammlung an jedem
+        Zahlungstermin, Verrechnung am Jahresjubiläum der Einlage). Die Methode ist seit der
+        PAngV-Novelle 2010/2011 aufgehoben — sie bleibt hier erhalten, weil der Nachbau das
+        Programm von Zucker (1999–2007) exakt wiedergeben soll.</p>
+        <p><b>EG-Anhang II (AIBD) — Tageszins.</b> Anhang II zu Art. 1a der EG-Richtlinie zum
+        Konsumentenkredit (Amtsblatt C 155/9, 23.6.1989, in der Fassung 98/7/EG): Der Zins löst
+        Barwert-Gleichheit der Zahlungen bei taggenauer Zinseszinsrechnung (Tage/365). Das
+        Original nennt das „AIBD“ — die Renditekonvention der internationalen
+        Anleihemärkte (Association of International Bond Dealers, heute ISMA/ICMA). Das
+        Originalprogramm berechnet damit auch sein Vergleichskonto (taggenaue Zinsen statt
+        30/360).</p>
+        <p><b>PAngV 2011/heute — Gesamtkreditkosten.</b> Die heute gültige Methode (Anlage zu
+        § 16 PAngV, aus der Verbraucherkreditrichtlinie 2008/48/EG, fortgeführt durch die
+        Richtlinie (EU) 2023/2225, anwendbar seit 20.11.2026): Barwert der Auszahlungen =
+        Barwert aller Rückzahlungen (Tilgung, Zinsen, Kosten). Zeiten in Jahren mit
+        kalendergenauen Zinstagen — 365, im Schaltjahr 366 („act/act“). Der Original-ZZR
+        (2007) kannte diese Methode noch nicht; sie ist hier als Ergänzung für heutige
+        Vergleichswerte enthalten. Für ein echtes Darlehen (eine Auszahlung B, Rückzahlungen
+        A<sub>k</sub>) lautet die amtliche Gleichung Σ A<sub>k</sub>·(1+X)<sup>−t<sub>k</sub></sup> = B;
+        bei allgemeinen Zahlungsmixen entspricht sie der obigen Barwert-Gleichung.</p>
+        <p>End-/Barwert-Messungen mit freiem Zins nutzen je nach EZ-Methode der Datei dieselben
+        Kontomechaniken: PAngV-Konto (30/360) bei „PAngV (alt)“, AIBD-Tageskonto bei
+        „AIBD/ISMA“.</p>
+      </div>
+    </details>
     <div style="margin-top:0.5em">
       <label>Endwert/Barwert: Stichtag (TT.MM.JJJJ, leer = letztes/erstes Zahlungsdatum) <input id="ewStichtag" type="text" style="width:7.5em"></label>
       <label>Zins % <input id="ewZins" type="text" value="5,0" style="width:5em"></label>
@@ -149,7 +179,7 @@ function tabelleLesen() {
 }
 
 function beideEffektivzins(flows) {
-  return { pangv: ZZR.effPAngV(flows), eg: ZZR.effEG(flows) };
+  return { pangv: ZZR.effPAngV(flows), eg: ZZR.effEG(flows), heu: ZZR.effPAngVHeu(flows) };
 }
 
 document.getElementById('plusZeile').onclick = function () {
@@ -169,7 +199,7 @@ document.getElementById('effKnopf').onclick = function () {
   const e = beideEffektivzins(flows);
   const f = function (x) { return x === null ? '—' : deZahl(x * 100, 4) + ' % p.a.'; };
   document.getElementById('effAnzeige').innerHTML =
-    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD): <b>' + f(e.eg) + '</b>';
+    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD): <b>' + f(e.eg) + '</b> &nbsp;·&nbsp; PAngV 2011/heute: <b>' + f(e.heu) + '</b>';
 };
 document.getElementById('kontoKnopf').onclick = function () {
   tabelleLesen();

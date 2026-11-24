@@ -227,6 +227,62 @@
     return (lo + hi) / 2;
   }
 
+  // -------------------------------- PAngV 2011/heute (Gesamtkreditkosten-Formel)
+  /*
+   * Heutige Rechtslage (Anlage zu § 16 PAngV, Umsetzung der Verbraucherkredit-
+   * richtlinie 2008/48/EG; fortgeführt durch RL (EU) 2023/2225 „CCD2", seit
+   * 20.11.2026 anwendbar): Der effektive Jahreszins X löst
+   *     Σ C_k·(1+X)^(-t_k) = Σ D_l·(1+X)^(-s_l)
+   * (Barwert der Auszahlungen = Barwert aller Rückzahlungen inkl. Kosten).
+   * Zeiten in Jahren mit je-Kalenderjahr-Zinstagen: 365, im Schaltjahr 366
+   * („act/act"). Für ein allgemeines Zahlungsgeschäft (Konto-Sicht, Nutzer-
+   * Vorzeichen) ist das äquivalent zur NPV-Gleichung Σ CF·(1+X)^(-t) = 0.
+   * Der ZZR (2007) kennt diese Methode NICHT (98/7/EG und PAngV 2011 kamen
+   * später) — daher ohne Original-Referenzpunkt. Verifikation:
+   *  - Identitätstest 365/365-Tage-Jahr = 10,000 % (tests/test-core.js),
+   *  - Abgleich mit den amtlichen Kommissions-Rechenbeispiele (ABl. C 127/2,
+   *    4.5.2012, CELEX 52012XC0504(01)) STEHT NOCH AUS (EUR-Lex-Abruf lieferte
+   *    am 24.11.2026 nur eine leere Seite).
+   * Anzeige-Rundung nach RL 2011/90/EU: eine Nachkommastelle (oder 0,1 prozent-
+   * punkte); die Fläche zeigt vier Stellen zur Genauigkeitskontrolle.
+   */
+  function jahreActAct(d0, d) {
+    // halb-offenes Intervall [d0, d): der Starttag zählt, der Endtag nicht —
+    // so bekommt ein 366-Tage-Intervall innerhalb eines Schaltjahres exakt
+    // 366/366 = 1,0 Jahre (ICMA/ISDA act/act-Attribution je Kalenderjahr)
+    let jahre = 0, von = d0, y = fromOrdinal(d0).y;
+    while (von < d) {
+      const jahresendeExkl = toOrdinal(y, 12, 31) + 1;
+      const bis = Math.min(jahresendeExkl, d);
+      jahre += (bis - von) / (isLeap(y) ? 366 : 365);
+      von = bis;
+      y += 1;
+    }
+    return jahre;
+  }
+  function effPAngVHeu(flows) {
+    if (flows.length === 0) return null;
+    const hatVorzeichenwechsel = flows.some(f => f.betrag > 0) && flows.some(f => f.betrag < 0);
+    if (!hatVorzeichenwechsel) return null;
+    const z = flows.map(f => jahreActAct(flows[0].datum, f.datum));
+    const npv = i => {
+      let s = 0;
+      for (let k = 0; k < flows.length; k++) s += flows[k].betrag * Math.pow(1 + i, -z[k]);
+      return s;
+    };
+    let lo = -0.9999, hi = 10, flo = npv(lo), fhi = npv(hi);
+    if (flo * fhi > 0) {
+      for (let hi2 = 10; hi2 <= 1e6; hi2 *= 10) { fhi = npv(hi2); hi = hi2; if (flo * fhi <= 0) break; }
+      if (flo * fhi > 0) return null;
+    }
+    for (let it = 0; it < 200; it++) {
+      const mid = (lo + hi) / 2, fm = npv(mid);
+      if (flo * fm <= 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
+      if (hi - lo < 1e-13) break;
+    }
+    return (lo + hi) / 2;
+  }
+
   // ------------------------------------------- AIBD-Vergleichskonto (EG-Methode)
   /*
    * Bewiesen am Original-Export (Analyse►Vergleichskonto erstellen, EZ-Methode=0,
@@ -477,7 +533,7 @@
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
     effEG, effPAngV, kontoSimulation, kontoAIBD,
-    loeseRatenhoehe, endwert, barwert
+    loeseRatenhoehe, endwert, barwert, effPAngVHeu
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.ZZR = API;

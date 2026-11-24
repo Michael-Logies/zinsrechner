@@ -58,6 +58,36 @@
       <button id="loeserKnopf">Ratenhöhe lösen</button>
     </span>
     <div id="effAnzeige" class="ergebnis"></div>
+    <details id="methodenErklaerung" style="margin-top:0.4em">
+      <summary>Erläuterung: die drei Effektivzins-Methoden</summary>
+      <div style="font-size:0.92em; line-height:1.45; margin-top:0.4em">
+        <p><b>PAngV (alt) — Vergleichskonto.</b> Nachbildung des Original-Verfahrens aus der
+        Preisangabenverordnung von 1985: ein „Vergleichskonto“, auf dem das Geschäft mit dem
+        effektiven Zins durchgespielt wird (30/360-Banktage, Zinsansammlung an jedem
+        Zahlungstermin, Verrechnung am Jahresjubiläum der Einlage). Die Methode ist seit der
+        PAngV-Novelle 2010/2011 aufgehoben — sie bleibt hier erhalten, weil der Nachbau das
+        Programm von Zucker (1999–2007) exakt wiedergeben soll.</p>
+        <p><b>EG-Anhang II (AIBD) — Tageszins.</b> Anhang II zu Art. 1a der EG-Richtlinie zum
+        Konsumentenkredit (Amtsblatt C 155/9, 23.6.1989, in der Fassung 98/7/EG): Der Zins löst
+        Barwert-Gleichheit der Zahlungen bei taggenauer Zinseszinsrechnung (Tage/365). Das
+        Original nennt das „AIBD“ — die Renditekonvention der internationalen
+        Anleihemärkte (Association of International Bond Dealers, heute ISMA/ICMA). Das
+        Originalprogramm berechnet damit auch sein Vergleichskonto (taggenaue Zinsen statt
+        30/360).</p>
+        <p><b>PAngV 2011/heute — Gesamtkreditkosten.</b> Die heute gültige Methode (Anlage zu
+        § 16 PAngV, aus der Verbraucherkreditrichtlinie 2008/48/EG, fortgeführt durch die
+        Richtlinie (EU) 2023/2225, anwendbar seit 20.11.2026): Barwert der Auszahlungen =
+        Barwert aller Rückzahlungen (Tilgung, Zinsen, Kosten). Zeiten in Jahren mit
+        kalendergenauen Zinstagen — 365, im Schaltjahr 366 („act/act“). Der Original-ZZR
+        (2007) kannte diese Methode noch nicht; sie ist hier als Ergänzung für heutige
+        Vergleichswerte enthalten. Für ein echtes Darlehen (eine Auszahlung B, Rückzahlungen
+        A<sub>k</sub>) lautet die amtliche Gleichung Σ A<sub>k</sub>·(1+X)<sup>−t<sub>k</sub></sup> = B;
+        bei allgemeinen Zahlungsmixen entspricht sie der obigen Barwert-Gleichung.</p>
+        <p>End-/Barwert-Messungen mit freiem Zins nutzen je nach EZ-Methode der Datei dieselben
+        Kontomechaniken: PAngV-Konto (30/360) bei „PAngV (alt)“, AIBD-Tageskonto bei
+        „AIBD/ISMA“.</p>
+      </div>
+    </details>
     <div style="margin-top:0.5em">
       <label>Endwert/Barwert: Stichtag (TT.MM.JJJJ, leer = letztes/erstes Zahlungsdatum) <input id="ewStichtag" type="text" style="width:7.5em"></label>
       <label>Zins % <input id="ewZins" type="text" value="5,0" style="width:5em"></label>
@@ -304,6 +334,62 @@
     }
     for (let it = 0; it < 200; it++) {
       const mid = (lo + hi) / 2, fm = npvEG(flows, mid, z);
+      if (flo * fm <= 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
+      if (hi - lo < 1e-13) break;
+    }
+    return (lo + hi) / 2;
+  }
+
+  // -------------------------------- PAngV 2011/heute (Gesamtkreditkosten-Formel)
+  /*
+   * Heutige Rechtslage (Anlage zu § 16 PAngV, Umsetzung der Verbraucherkredit-
+   * richtlinie 2008/48/EG; fortgeführt durch RL (EU) 2023/2225 „CCD2", seit
+   * 20.11.2026 anwendbar): Der effektive Jahreszins X löst
+   *     Σ C_k·(1+X)^(-t_k) = Σ D_l·(1+X)^(-s_l)
+   * (Barwert der Auszahlungen = Barwert aller Rückzahlungen inkl. Kosten).
+   * Zeiten in Jahren mit je-Kalenderjahr-Zinstagen: 365, im Schaltjahr 366
+   * („act/act"). Für ein allgemeines Zahlungsgeschäft (Konto-Sicht, Nutzer-
+   * Vorzeichen) ist das äquivalent zur NPV-Gleichung Σ CF·(1+X)^(-t) = 0.
+   * Der ZZR (2007) kennt diese Methode NICHT (98/7/EG und PAngV 2011 kamen
+   * später) — daher ohne Original-Referenzpunkt. Verifikation:
+   *  - Identitätstest 365/365-Tage-Jahr = 10,000 % (tests/test-core.js),
+   *  - Abgleich mit den amtlichen Kommissions-Rechenbeispiele (ABl. C 127/2,
+   *    4.5.2012, CELEX 52012XC0504(01)) STEHT NOCH AUS (EUR-Lex-Abruf lieferte
+   *    am 24.11.2026 nur eine leere Seite).
+   * Anzeige-Rundung nach RL 2011/90/EU: eine Nachkommastelle (oder 0,1 prozent-
+   * punkte); die Fläche zeigt vier Stellen zur Genauigkeitskontrolle.
+   */
+  function jahreActAct(d0, d) {
+    // halb-offenes Intervall [d0, d): der Starttag zählt, der Endtag nicht —
+    // so bekommt ein 366-Tage-Intervall innerhalb eines Schaltjahres exakt
+    // 366/366 = 1,0 Jahre (ICMA/ISDA act/act-Attribution je Kalenderjahr)
+    let jahre = 0, von = d0, y = fromOrdinal(d0).y;
+    while (von < d) {
+      const jahresendeExkl = toOrdinal(y, 12, 31) + 1;
+      const bis = Math.min(jahresendeExkl, d);
+      jahre += (bis - von) / (isLeap(y) ? 366 : 365);
+      von = bis;
+      y += 1;
+    }
+    return jahre;
+  }
+  function effPAngVHeu(flows) {
+    if (flows.length === 0) return null;
+    const hatVorzeichenwechsel = flows.some(f => f.betrag > 0) && flows.some(f => f.betrag < 0);
+    if (!hatVorzeichenwechsel) return null;
+    const z = flows.map(f => jahreActAct(flows[0].datum, f.datum));
+    const npv = i => {
+      let s = 0;
+      for (let k = 0; k < flows.length; k++) s += flows[k].betrag * Math.pow(1 + i, -z[k]);
+      return s;
+    };
+    let lo = -0.9999, hi = 10, flo = npv(lo), fhi = npv(hi);
+    if (flo * fhi > 0) {
+      for (let hi2 = 10; hi2 <= 1e6; hi2 *= 10) { fhi = npv(hi2); hi = hi2; if (flo * fhi <= 0) break; }
+      if (flo * fhi > 0) return null;
+    }
+    for (let it = 0; it < 200; it++) {
+      const mid = (lo + hi) / 2, fm = npv(mid);
       if (flo * fm <= 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
       if (hi - lo < 1e-13) break;
     }
@@ -560,7 +646,7 @@
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
     effEG, effPAngV, kontoSimulation, kontoAIBD,
-    loeseRatenhoehe, endwert, barwert
+    loeseRatenhoehe, endwert, barwert, effPAngVHeu
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.ZZR = API;
@@ -634,7 +720,7 @@ function tabelleLesen() {
 }
 
 function beideEffektivzins(flows) {
-  return { pangv: ZZR.effPAngV(flows), eg: ZZR.effEG(flows) };
+  return { pangv: ZZR.effPAngV(flows), eg: ZZR.effEG(flows), heu: ZZR.effPAngVHeu(flows) };
 }
 
 document.getElementById('plusZeile').onclick = function () {
@@ -654,7 +740,7 @@ document.getElementById('effKnopf').onclick = function () {
   const e = beideEffektivzins(flows);
   const f = function (x) { return x === null ? '—' : deZahl(x * 100, 4) + ' % p.a.'; };
   document.getElementById('effAnzeige').innerHTML =
-    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD): <b>' + f(e.eg) + '</b>';
+    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD): <b>' + f(e.eg) + '</b> &nbsp;·&nbsp; PAngV 2011/heute: <b>' + f(e.heu) + '</b>';
 };
 document.getElementById('kontoKnopf').onclick = function () {
   tabelleLesen();

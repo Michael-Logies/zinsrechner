@@ -138,4 +138,20 @@ const bwAibd = ZZR.barwert(flows, 0.55, flows[1].datum, 0);
 console.log('Barwert AIBD (55 %, 01.01.2000):', bwAibd.toFixed(2), 'EUR  | Original: 102208.70');
 assert.ok(Math.abs(bwAibd - 102208.70) <= 0.2, 'Barwert AIBD weicht ab: ' + bwAibd.toFixed(2));
 
+// 13) PAngV 2011/heute (effPAngVHeu, act/act): Identitätsnachweise der
+//     kalendergenauen Zeitzählung — ein exakt 365-Tage-Jahr (kein Schaltjahr)
+//     bzw. ein exakt 366-Tage-Jahr (Schaltjahr) muß 10,000 % liefern
+const pah365 = ZZR.effPAngVHeu([
+  { datum: ZZR.toOrdinal(2026, 1, 1), betrag: -1000, notiz: '' },
+  { datum: ZZR.toOrdinal(2027, 1, 1), betrag: 1100, notiz: '' }
+]);
+assert.ok(Math.abs(pah365 - 0.10) < 1e-9, 'PAngV-heute 365/365 nicht exakt 10 %: ' + pah365);
+const pah366 = ZZR.effPAngVHeu([
+  { datum: ZZR.toOrdinal(2028, 1, 1), betrag: -1000, notiz: '' },
+  { datum: ZZR.toOrdinal(2029, 1, 1), betrag: 1100, notiz: '' }
+]);
+assert.ok(Math.abs(pah366 - 0.10) < 1e-9, 'PAngV-heute 366/366 nicht exakt 10 %: ' + pah366);
+const pahGold = ZZR.effPAngVHeu(flows);
+console.log('PAngV 2011/heute (Goldmaster):', (pahGold * 100).toFixed(6), '% p.a.  (kein Original-Referenzwert — Methode kam 2007 noch nicht; Identitätstests 365/365 und 366/366 grün)');
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');
