@@ -53,9 +53,19 @@
     <button id="kontoKnopf">Vergleichskonto erstellen</button>
     <button id="druckKnopf">Drucken</button>
     <span style="float:right">
-      <label>Zielzins-Löser: Strom-Nr. <input id="loeserStrom" type="number" value="1" min="1" style="width:3.5em"></label>
+      <label>Strom-Nr. <input id="loeserStrom" type="number" value="1" min="1" style="width:3.5em"></label>
+      <label>Zielgröße <select id="loeserZielgroesse">
+        <option value="ratenhoehe">Ratenhöhe</option>
+        <option value="ratenanzahl">Anzahl der Raten</option>
+        <option value="datum">Datum der (ersten) Rate</option>
+        <option value="abstand">Ratenabstand (Monate)</option>
+        <option value="dynamik">Dynamik % je Stufe</option>
+        <option value="zuwachs">Zuwachs absolut je Stufe</option>
+        <option value="stufenzahl">Anzahl der Stufen</option>
+      </select></label>
       <label>Zielzins % <input id="loeserZiel" type="text" value="5,0" style="width:5em"></label>
-      <button id="loeserKnopf">Ratenhöhe lösen</button>
+      <button id="loeserKnopf">Lösen</button>
+      <label class="hinweis" title="nachfolgende Ströme mitschieben, damit ihr Abstand zum Wirkungsende erhalten bleibt (wie im Original)"><input id="loeserSchieben" type="checkbox"> Folge-Ströme mitschieben</label>
     </span>
     <div id="effAnzeige" class="ergebnis"></div>
     <details id="methodenErklaerung" style="margin-top:0.4em">
@@ -277,21 +287,69 @@ document.getElementById('loeserKnopf').onclick = function () {
   tabelleLesen();
   const nr = +document.getElementById('loeserStrom').value;
   const ziel = zahl(document.getElementById('loeserZiel').value) / 100;
-  const neu = ZZR.loeseRatenhoehe(proj, nr, ziel, proj.methode);
-  document.getElementById('effAnzeige').innerHTML = neu === null
-    ? 'Löser ohne Ergebnis (Strom/Eingaben prüfen).'
-    : 'Ratenhöhe Strom ' + nr + ' bei Zielzins ' + deZahl(ziel * 100, 4) + ' %: <b>' + deZahl(neu, 2) + '</b>';
+  const zg = document.getElementById('loeserZielgroesse').value;
+  const schieben = document.getElementById('loeserSchieben').checked;
+  const s = proj.strome[nr - 1];
+  const zielText = deZahl(ziel * 100, 4) + ' %';
+  let text;
+  if (!s) { text = 'Strom-Nr. ungültig.'; }
+  else if (zg === 'ratenhoehe') {
+    const neu = ZZR.loeseRatenhoehe(proj, nr, ziel, proj.methode);
+    if (neu === null) text = 'Löser ohne Ergebnis (Strom/Eingaben prüfen).';
+    else { s.betrag = neu; tabelleZeichnen();
+      text = 'Ratenhöhe Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(neu, 2) + '</b> (eingetragen)'; }
+  } else if (zg === 'ratenanzahl') {
+    const n = ZZR.loeseRatenanzahl(proj, nr, ziel, proj.methode, schieben);
+    if (n === null) text = 'Löser ohne Ergebnis.';
+    else { tabelleZeichnen();
+      text = 'Anzahl der Raten Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(n, 4) + '</b>' +
+        ' <span class="hinweis">gebrochene Zahl — die letzte Rate trägt den Bruchteil' +
+        (schieben ? ' · nachfolgende Ströme mitschoben' : ' · Folge-Ströme unverschoben (Kästchen „mitschieben" setzen, um wie im Original anzugleichen)') + '</span>'; }
+  } else if (zg === 'datum') {
+    const d = ZZR.loeseZahlungsdatum(proj, nr, ziel, proj.methode);
+    if (d === null) text = 'Löser ohne Ergebnis.';
+    else { s.datum = d; tabelleZeichnen();
+      text = 'Zahlungsdatum Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + ZZR.deDate(d) + '</b>' +
+        ' <span class="hinweis">beste Tages-Näherung (ganze Tage), eingetragen</span>'; }
+  } else if (zg === 'abstand') {
+    const m = ZZR.loeseRatenabstand(proj, nr, ziel, proj.methode);
+    if (m === null) text = 'Löser ohne Ergebnis.';
+    else { s.abstand = m; tabelleZeichnen();
+      text = 'Ratenabstand Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + m + ' Monat(e)</b>' +
+        ' <span class="hinweis">beste Monats-Näherung, eingetragen</span>'; }
+  } else if (zg === 'dynamik') {
+    const x = ZZR.loeseDynamik(proj, nr, ziel, proj.methode, 'prozent');
+    if (x === null) text = 'Löser ohne Ergebnis.';
+    else { s.dynamik = x; tabelleZeichnen();
+      text = 'Erforderliche Dynamik Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(x, 4) + ' % je Stufe</b> (eingetragen)'; }
+  } else if (zg === 'zuwachs') {
+    const x = ZZR.loeseDynamik(proj, nr, ziel, proj.methode, 'absolut');
+    if (x === null) text = 'Löser ohne Ergebnis.';
+    else { s.zuwachs = x; tabelleZeichnen();
+      text = 'Erforderlicher Zuwachs Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(x, 2) + ' je Stufe</b> (eingetragen)'; }
+  } else if (zg === 'stufenzahl') {
+    const st = ZZR.loeseStufenzahl(proj, nr, ziel, proj.methode);
+    if (st === null) text = 'Löser ohne Ergebnis.';
+    else { s.stufen = st; tabelleZeichnen();
+      text = 'Anzahl der Stufen Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + st + '</b>' +
+        ' <span class="hinweis">beste Näherung (ganze Stufen), eingetragen</span>'; }
+  }
+  document.getElementById('effAnzeige').innerHTML = text;
 };
 document.getElementById('planKnopf').onclick = function () {
   tabelleLesen();
   const plan = ZZR.zahlungsplan(proj);
   const el = document.getElementById('planAnzeige');
   if (!plan.zeilen.length) { el.innerHTML = '<p>Keine aktiven Zahlungsströme.</p>'; return; }
+  const lzHeute = ZZR.laufzeit(plan.erste, plan.letzte, 2);
   let kumuliert = 0;
   let h = '<p class="ergebnis">Zahlungsplan zu „' + proj.titel + '“ — Erste Zahlung: <b>' + ZZR.deDate(plan.erste) +
-          '</b>, letzte Zahlung: <b>' + ZZR.deDate(plan.letzte) + '</b>, Laufzeit: <b>' +
-          plan.laufzeit.jahre + ' Jahr(en), ' + plan.laufzeit.monate + ' Monat(en), ' + plan.laufzeit.tage + ' Tag(en)</b>' +
-          ' <span class="hinweis">(' + (proj.methode === 0 ? 'echter Kalender, AIBD-Konvention' : '30/360-Kalendarium, PAngV-Konvention') + ')</span></p>';
+          '</b>, letzte Zahlung: <b>' + ZZR.deDate(plan.letzte) + '</b><br>' +
+          'Laufzeit: <b>' + plan.laufzeit.jahre + ' Jahr(en), ' + plan.laufzeit.monate + ' Monat(en), ' +
+          plan.laufzeit.tage + ' Tag(en)</b> <span class="hinweis">(' +
+          (proj.methode === 0 ? 'echter Kalender, AIBD-Konvention' : '30/360-Kalendarium, PAngV-Konvention') +
+          ')</span> · nach heutiger Zählung (PAngV 2011/2026: ganze Monate rückwärts + Resttage): <b>' +
+          lzHeute.jahre + ' Jahr(en), ' + lzHeute.monate + ' Monat(en), ' + lzHeute.tage + ' Tag(en)</b></p>';
   h += '<div class="konto-wrap"><table><tr><th>Nr.</th><th class="l">Valuta</th><th class="l">Beschreibung</th><th>Betrag</th><th>kumuliert</th></tr>';
   plan.zeilen.forEach(function (z) {
     kumuliert += z.betrag;

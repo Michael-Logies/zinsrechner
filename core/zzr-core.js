@@ -587,6 +587,16 @@
    */
   function laufzeit(d1, d2, methode) {
     const a = fromOrdinal(d1), b = fromOrdinal(d2);
+    if (methode === 2) {
+      // PAngV 2011/2026 (Remark C, SWD(2012) 128): ganze Monate rückwärts vom
+      // letzten Zahlungstag, Resttage real (ohne den ersten, einschließlich des
+      // letzten) — dieselbe Monatszählung wie in jahreActAct.
+      let m = (b.y * 12 + (b.m - 1)) - (a.y * 12 + (a.m - 1));
+      let anchor = addMonths(d2, -m);
+      if (anchor < d1) { m -= 1; anchor = addMonths(d2, -m); }
+      const jahre = Math.floor(m / 12);
+      return { jahre: jahre, monate: m - jahre * 12, tage: d2 - anchor };
+    }
     let t1, t2;
     if (methode === 1) {
       t1 = istFebruarEnde(d1) ? 30 : Math.min(a.d, 30);
@@ -619,13 +629,179 @@
     };
   }
 
+  // --------------------------------- Zielgrößen-Löser (Zzr.hlp „Zahlungsstrom berechnen")
+  /*
+   * Das Original löst neben der Ratenhöhe fünf weitere Zielgrößen (Menü
+   * Zahlungsstrom berechnen | …): Ratenanzahl, Zahlungsdatum, Ratenabstand,
+   * Dynamik (absolut/prozentual), Stufenzahl. Zzr.hlp „Zielzins zur Berechnung
+   * eines Zahlungsstroms": bei stetig veränderlicher Größe (Ratenhöhe, Ratenzahl
+   * — GEBROCHEN zulässig! —, Zuwachs, Dynamik) trifft der Löser die Zielvorgabe
+   * exakt; bei ganzzahligen Größen (Stufenzahl, Ratenabstand in Monaten,
+   * Zahlungsdatum in Tagen) wird die bestmögliche Näherung zurückgegeben.
+   * Verifikationsanker aus den Hilfe-Beispielen: BSP_3 Datum → 20.03.2003
+   * (Ziel 3 %, erreicht 2,9997 %), BSP_4 Abstand → 36 Monate (Ziel 5 %),
+   * BSP_6 Dynamik → 6,46 % (Ziel 5 %).
+   */
+  // Gerichtete Zielgrößen-Suche: f ist monoton (steigt/fällt — durch Probe bestimmt),
+  // null = außerhalb des Gültigkeitsbereichs. Wir wandern vom Basiswert in die Richtung,
+  // in der g(x) = gerichtete Distanz zum Ziel (monoton steigend konstruiert) das
+  // Vorzeichen wechselt, und bisektieren dort — kontinuierlich oder ganzzahlig
+  // (bestmögliche Näherung, Zzr.hlp: „bestmögliche Näherung" bei ganzzahligen Größen).
+  function loeseZielgroesse(eff, basis, ziel, schritt0, ganzzahlig, maxSchritte) {
+    let fBasis = eff(basis);
+    if (fBasis === null) return null;
+    const fBasisProbe = eff(basis + (ganzzahlig ? 1 : schritt0 / 8));
+    let steigt;
+    if (fBasisProbe === null) steigt = true; // verlässliche Richtung nicht testbar — Annahme
+    else steigt = fBasisProbe > fBasis;
+    const g = function (x) {
+      const v = eff(x);
+      return v === null ? null : (steigt ? v - ziel : ziel - v);
+    };
+    let gBasis = g(basis);
+    if (gBasis === 0) return basis;
+    const richtung = gBasis > 0 ? -1 : 1;
+    let vor = basis, gVor = gBasis, schritt = schritt0, guard = 0, x = basis, gx = gBasis;
+    while (guard++ < (maxSchritte || 200)) {
+      x = vor + richtung * schritt;
+      gx = g(x);
+      if (gx === null) return null; // Gültigkeitsgrenze ohne Vorzeichenwechsel
+      if ((gVor > 0 && gx <= 0) || (gVor < 0 && gx >= 0)) break;
+      vor = x; gVor = gx;
+      schritt *= ganzzahlig ? 2 : 1.7;
+    }
+    if (guard > (maxSchritte || 200)) return null;
+    let a = Math.min(vor, x), b = Math.max(vor, x);
+    if (ganzzahlig) {
+      while (b - a > 1) {
+        const m = Math.floor((a + b) / 2), gm = g(m);
+        if (gm === null) return null;
+        if (gm < 0) a = m; else b = m;
+      }
+      const ga = g(a), gb = g(b);
+      const da = ga === null ? Infinity : Math.abs(ga);
+      const db = gb === null ? Infinity : Math.abs(gb);
+      return da <= db ? a : b;
+    }
+    for (let it = 0; it < 200; it++) {
+      const m = (a + b) / 2, gm = g(m);
+      if (gm === null) return null;
+      if (gm < 0) a = m; else b = m;
+      if (b - a < 1e-12) break;
+    }
+    return (a + b) / 2;
+  }
+
+  function loeseRatenanzahl(proj, stromNr, zielEff, methode, folgeVerschieben) {
+    const s = proj.strome[stromNr - 1];
+    if (!s) return null;
+    const altRaten = s.raten;
+    const n = loeseZielgroesse(function (x) {
+      if (x <= 0) return null;
+      s.raten = x;
+      const flows = expandiere(proj);
+      let e;
+      if (methode === 0) e = effEG(flows); else e = effPAngV(flows);
+      s.raten = altRaten;
+      return e;
+    }, altRaten, zielEff, Math.max(1, Math.round(altRaten * 0.1)), false, 200);
+    if (n === null) return null;
+    if (folgeVerschieben) {
+      // Nachfolge-Ströme mitschieben, damit ihr Abstand zum Wirkungsende erhalten
+      // bleibt (Zzr.hlp BSP_2: „ob Sie nachfolgende Zahlungsströme so schieben
+      // wollen, da der Abstand … erhalten bleibt")
+      const altEnde = addMonths(s.datum, Math.ceil(altRaten - 1e-6) * (s.abstand || 1));
+      const neuEnde = addMonths(s.datum, Math.ceil(n - 1e-6) * (s.abstand || 1));
+      const deltaMonate = (fromOrdinal(neuEnde).y * 12 + fromOrdinal(neuEnde).m) -
+                          (fromOrdinal(altEnde).y * 12 + fromOrdinal(altEnde).m);
+      s.raten = n;
+      if (deltaMonate !== 0) {
+        for (let i = stromNr; i < proj.strome.length; i++) {
+          proj.strome[i].datum = addMonths(proj.strome[i].datum, deltaMonate);
+        }
+      }
+    }
+    return n;
+  }
+
+  function loeseZahlungsdatum(proj, stromNr, zielEff, methode) {
+    const s = proj.strome[stromNr - 1];
+    if (!s) return null;
+    const altDatum = s.datum;
+    // Vorwärts in ganzen Tagen (BSP_3: 31.01.2000 → 20.03.2003 bei Ziel 3 % —
+    // das Datum wandert nach hinten, der Effektivzins sinkt dabei: f fällt in k)
+    const k = loeseZielgroesse(function (x) {
+      s.datum = altDatum + x;
+      const flows = expandiere(proj);
+      let e;
+      if (methode === 0) e = effEG(flows); else e = effPAngV(flows);
+      s.datum = altDatum;
+      return e;
+    }, 0, zielEff, 32, true, 200);
+    if (k === null) return null;
+    return altDatum + k;
+  }
+
+  function loeseRatenabstand(proj, stromNr, zielEff, methode) {
+    const s = proj.strome[stromNr - 1];
+    if (!s) return null;
+    const altAbstand = s.abstand;
+    // Größerer Abstand schiebt die Raten nach hinten → Effektivzins steigt
+    const m = loeseZielgroesse(function (x) {
+      s.abstand = x;
+      const flows = expandiere(proj);
+      let e;
+      if (methode === 0) e = effEG(flows); else e = effPAngV(flows);
+      s.abstand = altAbstand;
+      return e;
+    }, altAbstand, zielEff, Math.max(1, Math.round(altAbstand / 4)), true, 200);
+    if (m === null) return null;
+    return m;
+  }
+
+  function loeseDynamik(proj, stromNr, zielEff, methode, art) {
+    const s = proj.strome[stromNr - 1];
+    if (!s) return null;
+    const istProzent = (art !== 'absolut');
+    const alt = istProzent ? s.dynamik : s.zuwachs;
+    const x = loeseZielgroesse(function (v) {
+      if (istProzent) { if (v <= -99.9) return null; s.dynamik = v; }
+      else s.zuwachs = v;
+      const flows = expandiere(proj);
+      let e;
+      if (methode === 0) e = effEG(flows); else e = effPAngV(flows);
+      if (istProzent) s.dynamik = alt; else s.zuwachs = alt;
+      return e;
+    }, alt, zielEff, istProzent ? 2 : Math.max(1, Math.abs(s.betrag) / 10), false, 200);
+    if (x === null) return null;
+    return x;
+  }
+
+  function loeseStufenzahl(proj, stromNr, zielEff, methode) {
+    const s = proj.strome[stromNr - 1];
+    if (!s || (s.stufen || 1) < 1) return null;
+    const altStufen = s.stufen;
+    const st = loeseZielgroesse(function (x) {
+      if (x < 1) return null;
+      s.stufen = x;
+      const flows = expandiere(proj);
+      let e;
+      if (methode === 0) e = effEG(flows); else e = effPAngV(flows);
+      s.stufen = altStufen;
+      return e;
+    }, altStufen, zielEff, Math.max(1, Math.round(altStufen / 4)), true, 200);
+    if (st === null) return null;
+    return st;
+  }
+
   const API = {
     fromOrdinal, toOrdinal, addMonths, addYears, deDate, isLeap, daysInMonth,
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
     effEG, effPAngV, kontoSimulation, kontoAIBD,
     loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct,
-    laufzeit, zahlungsplan
+    laufzeit, zahlungsplan,
+    loeseRatenanzahl, loeseZahlungsdatum, loeseRatenabstand, loeseDynamik, loeseStufenzahl
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.ZZR = API;

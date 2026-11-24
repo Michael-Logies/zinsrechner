@@ -273,6 +273,77 @@ const lzA = ZZR.laufzeit(plan.erste, plan.letzte, 0);
 assert.strictEqual(lzA.jahre + '/' + lzA.monate + '/' + lzA.tage, '0/5/30',
   'Laufzeit AIBD (echter Kalender) weicht ab: ' + JSON.stringify(lzA));
 // Gegenprobe der Plan-Zeilen gegen den Original-Konto-Export vk1.txt (Datumfolge)
-console.log('Zahlungsplan + Laufzeit: grün (PAngV 6m/0d, AIBD 5m/30d — am Original verifiziert)');
+// 19) Zielgrößen-Löser des Originals (Zzr.hlp „Zahlungsstrom berechnen | …").
+//     Referenzzahlen aus der Original-Hilfe: BSP_3 Datum → 20.03.2003 (Ziel 3 %,
+//     erreicht 2,9997 %), BSP_4 Abstand → 36 Monate (Ziel 5 %), BSP_6 Dynamik →
+//     6,46 % (Ziel 5 %, Rate Jahr 2 dann 2.129,19). Ratenanzahl löst GEBROCHEN
+//     (Zzr.hlp: „Die Ratenzahl … enthält einen gebrochenen Wert"), Stufenzahl
+//     liefert die bestmögliche ganzzahlige Näherung.
+function stromFeld(datum, betrag, extra) {
+  return Object.assign({ aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:datum, ultimo:0,
+    betrag:betrag, raten:1, abstand:1, notiz:'' }, extra || {});
+}
+const bsp3 = { titel: 'BSP3', methode: 1, euro: 0, beschreibung: '', strome: [
+  stromFeld(ZZR.toOrdinal(1999,12,31), -50000),
+  stromFeld(ZZR.toOrdinal(2000,1,31), 55000) ]};
+const d3 = ZZR.loeseZahlungsdatum(bsp3, 2, 0.03, 1);
+assert.strictEqual(d3, ZZR.toOrdinal(2003,3,20), 'BSP_3: Datum muss 20.03.2003 sein');
+const p3 = { titel: 'BSP3', methode: 1, euro: 0, beschreibung: '', strome: [bsp3.strome[0], { ...bsp3.strome[1], datum: d3 }] };
+const eff3 = ZZR.effPAngV(ZZR.expandiere(p3));
+assert.ok(Math.abs(eff3 * 100 - 2.9997) < 0.0005, 'BSP_3: EFF beim gelösten Datum (2,9997 %): ' + (eff3 * 100).toFixed(6));
+
+const bsp4 = { titel: 'BSP4', methode: 1, euro: 0, beschreibung: '', strome: [
+  stromFeld(ZZR.toOrdinal(1999,12,31), 10000),
+  stromFeld(ZZR.toOrdinal(2000,6,30), -5500, { raten:2 }) ]};
+const m4 = ZZR.loeseRatenabstand(bsp4, 2, 0.05, 1);
+assert.strictEqual(m4, 36, 'BSP_4: Ratenabstand muss 36 Monate sein');
+
+const bsp6 = { titel: 'BSP6', methode: 1, euro: 0, beschreibung: '', strome: [
+  stromFeld(ZZR.toOrdinal(2000,1,1), -250000),
+  stromFeld(ZZR.toOrdinal(2000,1,1), 2000, { raten:12, stufen:10 }) ]};
+const dyn6 = ZZR.loeseDynamik(bsp6, 2, 0.05, 1, 'prozent');
+assert.ok(Math.abs(dyn6 - 6.46) < 0.01, 'BSP_6: Dynamik muss ~6,46 % sein: ' + dyn6);
+const zu6 = ZZR.loeseDynamik(bsp6, 2, 0.05, 1, 'absolut');
+assert.ok(zu6 !== null && Math.abs(zu6) > 0, 'BSP_6: absoluter Zuwachs gelöst');
+const p6 = { titel: 'BSP6', methode: 1, euro: 0, beschreibung: '', strome: [
+  bsp6.strome[0], { ...bsp6.strome[1], zuwachs: zu6 } ]};
+const eff6gel = ZZR.effPAngV(ZZR.expandiere(p6));
+assert.ok(Math.abs(eff6gel - 0.05) < 1e-6, 'BSP_6: absolut gelöster Strom trifft 5 % exakt: ' + eff6gel);
+
+// BSP_2-Muster: Ratenanzahl löst gebrochen; bei folgeVerschieben rücken nachfolgende
+// Ströme den Monat-Delta nach (Hilfe: „Datum des 3. ZS wurde nach hinten geschoben")
+const bsp2 = { titel: 'BSP2', methode: 1, euro: 0, beschreibung: '', strome: [
+  stromFeld(ZZR.toOrdinal(1999,12,30), -200000),
+  stromFeld(ZZR.toOrdinal(2000,1,1), 1375.57, { raten:180 }),
+  stromFeld(ZZR.toOrdinal(2015,1,1), 50000) ]};
+const n2 = ZZR.loeseRatenanzahl(bsp2, 2, 0.0525, 1, false);
+assert.ok(n2 !== null && n2 > 180 && n2 < 186, 'BSP_2: gebrochene Ratenzahl im plausiblem Bereich: ' + n2);
+const p2 = { titel: 'BSP2', methode: 1, euro: 0, beschreibung: '', strome: [
+  bsp2.strome[0], { ...bsp2.strome[1], raten: n2 }, bsp2.strome[2] ]};
+const eff2 = ZZR.effPAngV(ZZR.expandiere(p2));
+assert.ok(Math.abs(eff2 - 0.0525) < 1e-6, 'BSP_2: Zielzins 5,25 % muss exakt getroffen sein: ' + eff2);
+const bsp2b = { titel: 'BSP2b', methode: 1, euro: 0, beschreibung: '', strome: [
+  stromFeld(ZZR.toOrdinal(1999,12,30), -200000),
+  stromFeld(ZZR.toOrdinal(2000,1,1), 1375.57, { raten:180 }),
+  stromFeld(ZZR.toOrdinal(2015,1,1), 50000) ]};
+const n2b = ZZR.loeseRatenanzahl(bsp2b, 2, 0.0525, 1, true);
+assert.strictEqual(n2b, n2, 'Schieben ändert die gelöste Ratenzahl nicht');
+assert.strictEqual(ZZR.deDate(bsp2b.strome[2].datum), '01.07.2015',
+  'Folgestrom muss mitschieben (Hilfe: „nach hinten geschoben")');
+
+// Stufenzahl: Ziel = Effektivzins der 10-Stufen-Variante → Näherung muss 10 liefern
+const bsp6s = { titel: 'BSP6s', methode: 1, euro: 0, beschreibung: '', strome: [
+  stromFeld(ZZR.toOrdinal(2000,1,1), -250000),
+  stromFeld(ZZR.toOrdinal(2000,1,1), 2000, { raten:12, stufen:10, dynamik:6.46 }) ]};
+const eff6s = ZZR.effPAngV(ZZR.expandiere(bsp6s));
+const st6 = ZZR.loeseStufenzahl(bsp6s, 2, eff6s, 1);
+assert.strictEqual(st6, 10, 'Stufenzahl-Näherung muss 10 liefern');
+
+// Laufzeit mit heutiger Methode (PAngV 2011/2026, Remark C): ganze Monate rückwärts
+// (31.10.1999→30.04.2000: 5 ganze Monate ab 30.11.1999-Anker) + Resttage real (152)
+const lz2 = ZZR.laufzeit(ZZR.toOrdinal(1999,10,31), ZZR.toOrdinal(2000,4,30), 2);
+assert.strictEqual(lz2.jahre + '/' + lz2.monate + '/' + lz2.tage, '0/5/152',
+  'Laufzeit PAngV 2011/2026 weicht ab: ' + JSON.stringify(lz2));
+console.log('Zielgrößen-Löser (Datum/Abstand/Dynamik/Ratenanzahl/Stufenzahl) + Laufzeit 2011/2026: grün — BSP_3/4/6 exakt nach Zzr.hlp');
 
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');
