@@ -77,14 +77,25 @@ Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
    Σ D_l(1+X)^(-s_l) mit t in Jahren = Tage/365 (Schaltjahr 366) — act/act. Die
    Vergleichskonto-Methode des ZZR ist seit 2010/2011 aufgehoben; als historische
    Methode im Rechner behalten. **`effPAngVHeu` UMGESETZT 24.11.2026: die heutige
-   Effektivzinsformel als dritte Methode (act/act, kalendergenau 365/366 mit
-   ICMA/ISDA-Attribution, halb-offenes Intervall) — Identitätstests 365/365 und
-   366/366 = exakt 10,000 % grün; Goldmaster −8,812918 % (kein Original-Referenzwert,
-   Methode kam 2007 noch nicht). Fläche zeigt dritten EFF-Wert + Aufklappbox mit
-   Erläuterungen zu allen drei Methoden. OFFEN: Abgleich mit den amtlichen Kommissions-
-   Rechenbeispielen (ABl. C 127/2, 4.5.2012, CELEX 52012XC0504(01) — EUR-Lex lieferte
-   24.11. leere Seite; Erneuerung: URL /DE/TXT/HTML/?uri=CELEX:52012XC0504(01)); evtl.
-   Interpolationszins (BaFin-Merkblatt, mehrere Sollzinssätze).**
+   Effektivzinsformel als dritte Methode (Label „PAngV 2011/2026“). Zeitzählung
+   nach Remark (C) des Kommissions-Leitfadens SWD(2012) 128 final (8.5.2012 — vom
+   Nutzer beschafft, PDF in ~/zzr-analyse/SWD(2012)128_0.pdf; Amtslink in den
+   Quellenfußnoten der Fläche): ganze Monate rückwärts vom Zahlungstag (m/12 —
+   „1 Monat“ = 1/12, unabhängig der tatsächlichen Länge), Resttage (ohne den
+   ersten, einschließlich des letzten) durch die Jahreslänge des Kalenderjahres
+   am Monatsanker (365/366, rückwärts bis zum gleichen Tag des Vorjahres).
+   Amtliches Zeitbeispiel des SWD: 1.12.2012 → 2.2.2013 = 2/12 + 1/366 —
+   jahreActAct trifft es auf 12 Dezimalstellen. Identitätstests 365/365 und
+   366/366 = exakt 10,000 % grün; Goldmaster −8,812916 % (kein Original-
+   Referenzwert, Methode kam 2007 noch nicht). Amtliche Anzeige-Rundung:
+   2 Nachkommastellen (RL 2011/90/EU; die Fläche zeigt 4 zur Kontrolle). Fläche
+   zeigt dritten EFF-Wert + Aufklappbox mit Erläuterungen zu allen drei Methoden
+   + Quellenfußnoten (verifizierte Links). HINWEIS Fundstelle: die verbreitete
+   Angabe „ABl. C 127, 4.5.2012“ ist NICHT haltbar (Heft C 127 v. 1.5.2012 enthält
+   nur 4 andere Beiträge; CELEX 52012XC0504(01) ist ein Beihilfe-Dokument) — der
+   Leitfaden ist das SWD, kein OJ-C-Dokument. OFFEN: evtl. Interpolationszins
+   (BaFin-Merkblatt, mehrere Sollzinssätze); COM(2021)347-CCD2-Anhänge (PDF in
+   ~/zzr-analyse) als Material für ein EU-Standard-Informationsblatt.**
 
 ## Befehle
 
