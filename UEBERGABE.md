@@ -101,6 +101,17 @@ Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
    ~/zzr-analyse) sind als Muster für das Blatt VERBAUT — künftig evtl. vollständiges
    EU-Formular mit allen Pflichtfeldern.**
 
+## Lizenz / Veröffentlichung
+
+- **LICENSE** = AGPL-3.0-or-later (amtlicher Text von gnu.org); **README.md** mit
+  Entstehungs- und Copyright-Angabe (© 2026 Michael Logies, KI-unterstützt:
+  Qwen Code / GLM-5.3-Flash); Lizenz-Fußnote in der Fläche (AGPL § 13:
+  Quellenangebot bei Netzwerknutzung — die Datei IST der vollständige Quellcode).
+- Blatt-Fix (Nutzerbefund „nichts erzeugt“): im Blatt-Handler fehlte die
+  Hilfsfunktion `zeile` (ReferenceError → stummes Scheitern) — ergänzt.
+  effKnopf-Label „beide Methoden“ → „3 Methoden“. Veröffentlichungs-Vorabprüfung:
+  keine lokalen Pfade/IPs/Keys im Dist ✓.
+
 ## Befehle
 
 - Tests: `node ~/zinsrechner/tests/test-core.js`
