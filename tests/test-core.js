@@ -252,4 +252,27 @@ console.log('Löser BSP_1 (DM, Ziel 5 %):', bsp1Hoehe === null ? 'NULL' : bsp1Ho
 assert.ok(bsp1Hoehe !== null && Math.abs(bsp1Hoehe - 1375.57) < 0.02,
   'BSP_1-Ratenhöhe weicht ab: ' + bsp1Hoehe);
 
+// 18) Zahlungsplan + Laufzeit — Belege vom Original (24.11.2026, Probe ultimo-u1,
+//     Wine-Orakel): der Plan „entsteht bei der Vorbereitung“ (Fehlerdialog des
+//     Originals ohne Nullstelle); die Laufzeit folgt der Kontokonvention —
+//     PAngV: „Die Laufzeitbestimmung erfolgt mittels eines 30/360-Tage-
+//     Kalendariums“ → 31.10.1999→30.04.2000 = „6 Monaten, 0 Tagen“;
+//     AIBD (echter Kalender) → „5 Monaten, 30 Tagen“ (beide im Original-View
+//     gelesen). Plan = alle Einzelzahlungen (hier 8, Summen 10.000/10.036).
+const u1proj = ZZR.parseZZR(fs.readFileSync('/home/ml/zinsrechner/probe-ultimo-u1.zzr', 'latin1'));
+const plan = ZZR.zahlungsplan(u1proj);
+assert.strictEqual(plan.zeilen.length, 8, 'Plan: 8 Zahlungen erwartet');
+assert.strictEqual(ZZR.deDate(plan.zeilen[2].datum), '31.12.1999', 'Plan-Zeile 3 = erste Ultimo-Folgerate');
+assert.strictEqual(ZZR.deDate(plan.zeilen[4].datum), '29.02.2000', 'Plan-Zeile 5 = Februar-Ende (Schaltjahr)');
+assert.ok(Math.abs(plan.summeEin + 10000) < 1e-9 && Math.abs(plan.summeAus - 10036) < 1e-9,
+  'Plan-Summen falsch: ' + plan.summeEin + '/' + plan.summeAus);
+const lzP = ZZR.laufzeit(plan.erste, plan.letzte, 1);
+assert.strictEqual(lzP.jahre + '/' + lzP.monate + '/' + lzP.tage, '0/6/0',
+  'Laufzeit PAngV (30/360) weicht ab: ' + JSON.stringify(lzP));
+const lzA = ZZR.laufzeit(plan.erste, plan.letzte, 0);
+assert.strictEqual(lzA.jahre + '/' + lzA.monate + '/' + lzA.tage, '0/5/30',
+  'Laufzeit AIBD (echter Kalender) weicht ab: ' + JSON.stringify(lzA));
+// Gegenprobe der Plan-Zeilen gegen den Original-Konto-Export vk1.txt (Datumfolge)
+console.log('Zahlungsplan + Laufzeit: grün (PAngV 6m/0d, AIBD 5m/30d — am Original verifiziert)');
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');

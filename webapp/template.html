@@ -126,6 +126,13 @@
   </fieldset>
 
   <fieldset>
+    <legend>Zahlungsplan</legend>
+    <button id="planKnopf">Zahlungsplan erzeugen</button>
+    <span class="hinweis">alle Zahlungen der aktiven Ströme einzeln mit Datum und kumulierter Summe — so wie das Original sie „bei der Vorbereitung“ der Ergebnisse aufstellt (inkl. Ultimo-Folgeraten und gebrochener Schlußrate); Laufzeit je nach Kontoart im 30/360- bzw. echten Kalender</span>
+    <div id="planAnzeige"></div>
+  </fieldset>
+
+  <fieldset>
     <legend>Verbraucherinformationsblatt (EU-Muster)</legend>
     <button id="vibKnopf">Blatt erzeugen</button>
     <span class="hinweis">füllt das EU-Standardmuster (Anhang I zu COM(2021) 347, CCD2-Vorschlag) mit den Werten dieser Berechnung</span>
@@ -274,6 +281,26 @@ document.getElementById('loeserKnopf').onclick = function () {
   document.getElementById('effAnzeige').innerHTML = neu === null
     ? 'Löser ohne Ergebnis (Strom/Eingaben prüfen).'
     : 'Ratenhöhe Strom ' + nr + ' bei Zielzins ' + deZahl(ziel * 100, 4) + ' %: <b>' + deZahl(neu, 2) + '</b>';
+};
+document.getElementById('planKnopf').onclick = function () {
+  tabelleLesen();
+  const plan = ZZR.zahlungsplan(proj);
+  const el = document.getElementById('planAnzeige');
+  if (!plan.zeilen.length) { el.innerHTML = '<p>Keine aktiven Zahlungsströme.</p>'; return; }
+  let kumuliert = 0;
+  let h = '<p class="ergebnis">Zahlungsplan zu „' + proj.titel + '“ — Erste Zahlung: <b>' + ZZR.deDate(plan.erste) +
+          '</b>, letzte Zahlung: <b>' + ZZR.deDate(plan.letzte) + '</b>, Laufzeit: <b>' +
+          plan.laufzeit.jahre + ' Jahr(en), ' + plan.laufzeit.monate + ' Monat(en), ' + plan.laufzeit.tage + ' Tag(en)</b>' +
+          ' <span class="hinweis">(' + (proj.methode === 0 ? 'echter Kalender, AIBD-Konvention' : '30/360-Kalendarium, PAngV-Konvention') + ')</span></p>';
+  h += '<div class="konto-wrap"><table><tr><th>Nr.</th><th class="l">Valuta</th><th class="l">Beschreibung</th><th>Betrag</th><th>kumuliert</th></tr>';
+  plan.zeilen.forEach(function (z) {
+    kumuliert += z.betrag;
+    h += '<tr><td>' + z.nr + '</td><td class="l">' + ZZR.deDate(z.datum) + '</td><td class="l">' +
+         (z.notiz || ('Strom ' + z.strom)) + '</td><td>' + deZahl(z.betrag, 2) + '</td><td>' + deZahl(kumuliert, 2) + '</td></tr>';
+  });
+  h += '</table></div>';
+  h += '<p class="ergebnis">Summe Ihrer Einzahlungen: <b>' + deZahl(plan.summeEin, 2) + '</b> &nbsp;·&nbsp; Summe der Auszahlungen an Sie: <b>' + deZahl(plan.summeAus, 2) + '</b></p>';
+  el.innerHTML = h;
 };
 document.getElementById('endwertKnopf').onclick = function () {
   tabelleLesen();

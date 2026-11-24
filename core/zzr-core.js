@@ -574,12 +574,58 @@
     return s;
   }
 
+  // ------------------------------------------------ Zahlungsplan (ZZR-„Vorbereitung")
+  /*
+   * Das Original erzeugt bei der Vorbereitung der Ergebnisse einen Zahlungsplan —
+   * die vollständige Aufstellung aller Einzelzahlungen (Fehlerdialog „Es kann kein
+   * Zahlungsplan erstellt werden…“, wenn keine Nullstelle existiert). Die
+   * Laufzeitangabe folgt der Kontokonvention: PAngV rechnet sie mit dem
+   * 30/360-Kalendarium (ZA-Bericht: „Die Laufzeitbestimmung erfolgt mittels eines
+   * 30/360-Tage-Kalendariums“ — 31.10.1999→30.04.2000 = „6 Monaten, 0 Tagen“),
+   * das AIBD-Konto mit echtem Kalender („5 Monaten, 30 Tagen“). Beide Werte am
+   * Original-View verifiziert (24.11.2026, Probe ultimo-u1).
+   */
+  function laufzeit(d1, d2, methode) {
+    const a = fromOrdinal(d1), b = fromOrdinal(d2);
+    let t1, t2;
+    if (methode === 1) {
+      t1 = istFebruarEnde(d1) ? 30 : Math.min(a.d, 30);
+      t2 = istFebruarEnde(d2) ? 30 : Math.min(b.d, 30);
+    } else { t1 = a.d; t2 = b.d; }
+    let monate = (b.y * 12 + (b.m - 1)) - (a.y * 12 + (a.m - 1));
+    let tage = t2 - t1;
+    if (tage < 0) {
+      monate -= 1;
+      const vy = b.m === 1 ? b.y - 1 : b.y, vm = b.m === 1 ? 12 : b.m - 1;
+      tage += (methode === 1) ? 30 : daysInMonth(vy, vm);
+    }
+    const jahre = Math.floor(monate / 12);
+    return { jahre: jahre, monate: monate - jahre * 12, tage: tage };
+  }
+  function zahlungsplan(proj) {
+    const flows = expandiere(proj);
+    const zeilen = flows.map(function (f, i) {
+      return { nr: i + 1, datum: f.datum, betrag: f.betrag, strom: f.strom, notiz: f.notiz };
+    });
+    let summeEin = 0, summeAus = 0;
+    flows.forEach(function (f) { if (f.betrag < 0) summeEin += f.betrag; else summeAus += f.betrag; });
+    return {
+      zeilen: zeilen,
+      summeEin: summeEin,  // Zahlungen des Nutzers (negativ)
+      summeAus: summeAus,  // Auszahlungen an den Nutzer (positiv)
+      erste: flows.length ? flows[0].datum : null,
+      letzte: flows.length ? flows[flows.length - 1].datum : null,
+      laufzeit: flows.length ? laufzeit(flows[0].datum, flows[flows.length - 1].datum, proj.methode) : null
+    };
+  }
+
   const API = {
     fromOrdinal, toOrdinal, addMonths, addYears, deDate, isLeap, daysInMonth,
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
     effEG, effPAngV, kontoSimulation, kontoAIBD,
-    loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct
+    loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct,
+    laufzeit, zahlungsplan
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.ZZR = API;

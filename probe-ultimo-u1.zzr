@@ -1,0 +1,44 @@
+[Information]
+Typ=ZZR-Datei
+Version=1
+Erzeuger=Zuckers Zins Rechner (Nachbau)
+Titel=ultimo-u1
+EZ-Methode=1
+Euro=1
+Zahlungsstroeme=3
+
+[Zahlungsstrom1]
+Aktiv=1
+Stufen=1
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 0.00000000000000E+0000
+Realdatum=730058
+Ultimo=0
+Betrag=-1.00000000000000E+0004
+Raten= 1.00000000000000E+0000
+Abstand=1
+Notiz=Anlage
+
+[Zahlungsstrom2]
+Aktiv=1
+Stufen=1
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 0.00000000000000E+0000
+Realdatum=730088
+Ultimo=1
+Betrag= 1.06000000000000E+0002
+Raten= 6.00000000000000E+0000
+Abstand=1
+Notiz=Rate ultima
+
+[Zahlungsstrom3]
+Aktiv=1
+Stufen=1
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 0.00000000000000E+0000
+Realdatum=730240
+Ultimo=0
+Betrag= 9.40000000000000E+0003
+Raten= 1.00000000000000E+0000
+Abstand=1
+Notiz=Schlussguthaben
