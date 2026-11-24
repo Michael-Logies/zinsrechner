@@ -93,7 +93,10 @@ Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
    + Quellenfußnoten (verifizierte Links) + VERBRAUCHERINFORMATIONSBLATT (EU-
    Muster nach Anhang I zu COM(2021) 347/CCD2 — „Blatt erzeugen“-Knopf unter dem
    Vergleichskonto; rendert nur bei Zahlungen in beiden Richtungen; Skript-Syntax
-   via node --check geprüft). HINWEIS Fundstelle: die verbreitete
+   via node --check geprüft). WURZELSUCHE VEREINHEITLICHT: alle drei EFF-Methoden
+   nutzen das gemeinsame Raster-Verfahren (alle Kontorichtungen, mehrere Wurzeln,
+   EU-Konvention kleinster positiver Zins) — beliebige Zahlungsformen (Ansparen,
+   Kredite, Mischformen) abgedeckt. HINWEIS Fundstelle: die verbreitete
    Angabe „ABl. C 127, 4.5.2012“ ist NICHT haltbar (Heft C 127 v. 1.5.2012 enthält
    nur 4 andere Beiträge; CELEX 52012XC0504(01) ist ein Beihilfe-Dokument) — der
    Leitfaden ist das SWD, kein OJ-C-Dokument. OFFEN: evtl. Interpolationszins
