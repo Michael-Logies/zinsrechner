@@ -503,10 +503,14 @@
    *  - Endwert(Stichtag 01.01.2015, 55 %) = 73.303.508,71 € = Endsaldo des
    *    PAngV-Vergleichskontos (kontoSimulation) mit dem frei gewählten Zins —
    *    exakt (Δ 0,00 €).
-   *  - Barwert(Stichtag 01.01.2000, 55 %) = 102.208,33 € = vergangene Zahlungen
-   *    zum Nennwert + künftige Zahlungen abgezinst mit
-   *    (1+r)^(-Tage30/360/360) — Passung Δ 0,15 € (Restunsicherheit in der
-   *    Tageszählung der Zukunftszahlungen; zweiter Messpunkt ausstehend).
+   *  - Barwert(Stichtag 01.01.2000, 55 %) = 102.208,33 € und Zweitmessung
+   *    (01.01.2000, 10 %) = 96.091,06 € = vergangene Zahlungen zum Nennwert +
+   *    künftige Zahlungen abgezinst mit (1+r)^(-Tage30/360/360). Passung:
+   *    55 % Δ +0,15 € / 10 % Δ −1,67 € — Struktur bei beiden Zinssätzen
+   *    bestätigt; Residual = programminterne Cent-Rundung (180 Einzelwerte).
+   *    30/360 bleibt beste Deutung (Konsistenz mit der PAngV-Konto-Familie);
+   *    act/365.25 liegt praktisch gleichauf, act/365 und act/360 sind
+   *    ausgeschlossen (Δ 4,73 / 125,38 bei 10 %).
    */
   function endwert(flows, rate, stichtag) {
     if (flows.length === 0) return null;
