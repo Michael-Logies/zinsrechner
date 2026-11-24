@@ -182,7 +182,7 @@ function tabelleZeichnen() {
     h += '<tr data-zeile="' + i + '">';
     for (const [k] of SPALTEN) {
       const klasse = (k === 'notiz') ? ' class="l"' : '';
-      if (k === 'ultimo') h += '<td><input type="checkbox" data-feld="ultimo"' + (s.ultimo ? ' checked' : '') + '></td>';
+      if (k === 'ultimo' || k === 'aktiv') h += '<td><input type="checkbox" data-feld="' + k + '"' + (s[k] ? ' checked' : '') + '></td>';
       else if (k === 'datum') h += '<td' + klasse + '><input data-feld="datum" value="' + datumText(s.datum) + '"></td>';
       else h += '<td' + klasse + '><input data-feld="' + k + '" value="' + s[k] + '"></td>';
     }
