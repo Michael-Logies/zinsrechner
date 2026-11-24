@@ -49,7 +49,7 @@
 
   <fieldset class="filter">
     <legend>Berechnung</legend>
-    <button id="effKnopf">Effektivzins berechnen (beide Methoden)</button>
+    <button id="effKnopf">Effektivzins berechnen (3 Methoden)</button>
     <button id="kontoKnopf">Vergleichskonto erstellen</button>
     <button id="druckKnopf">Drucken</button>
     <span style="float:right">
@@ -138,6 +138,8 @@
     <button id="speichernKnopf">Speichern unter …</button>
     <span id="dateiName" class="hinweis"></span>
   </fieldset>
+
+  <p style="margin:1.2em 0 0;font-size:0.85em" class="hinweis">Zinsrechner — Quelloffen unter der GNU Affero General Public License v3 oder später (AGPL-3.0-or-later) · Copyright © 2026 Michael Logies · Diese Datei enthält den vollständigen Quellcode (Rechenkern eingebettet).</p>
 </main>
 
 <script>
@@ -312,6 +314,12 @@ document.getElementById('vibKnopf').onclick = function () {
   const erste = ZZR.deDate(flows[0].datum);
   const letzte = ZZR.deDate(flows[flows.length - 1].datum);
   let h = '<div style="border:1px solid #999;padding:0.8em;background:#fff">';
+  function zeile(label, wert) {
+    return '<tr>'
+         + '<td style="padding:0.25em 0.6em;vertical-align:top;width:46%;border-bottom:1px solid #ddd">' + label + '</td>'
+         + '<td style="padding:0.25em 0.6em;vertical-align:top;border-bottom:1px solid #ddd">' + wert + '</td>'
+         + '</tr>';
+  }
   h += '<h4 style="margin:0.2em 0">Europäische Standardinformationen über Verbraucherkredite</h4>';
   h += '<p class="hinweis" style="margin:0.3em 0">Muster nach Anhang I zu COM(2021) 347 (Vorschlag „CCD2“, 30.6.2021) — keine rechtsverbindliche Pflichtinformation; bei echten Kreditverträgen gelten §§ 492, 507 BGB i. V. m. PAngV. Werte: Berechnung vom ' + new Date().toLocaleDateString('de-DE') + ', Titel „' + proj.titel + '“.</p>';
   h += '<p><b>1 Kreditgeber / Kreditvermittler</b><br>— (nicht Teil dieser Berechnung; bitte beim Kreditgeber erfragen)</p>';
