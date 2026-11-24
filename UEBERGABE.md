@@ -90,12 +90,16 @@ Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
    Referenzwert, Methode kam 2007 noch nicht). Amtliche Anzeige-Rundung:
    2 Nachkommastellen (RL 2011/90/EU; die Fläche zeigt 4 zur Kontrolle). Fläche
    zeigt dritten EFF-Wert + Aufklappbox mit Erläuterungen zu allen drei Methoden
-   + Quellenfußnoten (verifizierte Links). HINWEIS Fundstelle: die verbreitete
+   + Quellenfußnoten (verifizierte Links) + VERBRAUCHERINFORMATIONSBLATT (EU-
+   Muster nach Anhang I zu COM(2021) 347/CCD2 — „Blatt erzeugen“-Knopf unter dem
+   Vergleichskonto; rendert nur bei Zahlungen in beiden Richtungen; Skript-Syntax
+   via node --check geprüft). HINWEIS Fundstelle: die verbreitete
    Angabe „ABl. C 127, 4.5.2012“ ist NICHT haltbar (Heft C 127 v. 1.5.2012 enthält
    nur 4 andere Beiträge; CELEX 52012XC0504(01) ist ein Beihilfe-Dokument) — der
    Leitfaden ist das SWD, kein OJ-C-Dokument. OFFEN: evtl. Interpolationszins
    (BaFin-Merkblatt, mehrere Sollzinssätze); COM(2021)347-CCD2-Anhänge (PDF in
-   ~/zzr-analyse) als Material für ein EU-Standard-Informationsblatt.**
+   ~/zzr-analyse) sind als Muster für das Blatt VERBAUT — künftig evtl. vollständiges
+   EU-Formular mit allen Pflichtfeldern.**
 
 ## Befehle
 
