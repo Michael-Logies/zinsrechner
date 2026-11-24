@@ -415,35 +415,37 @@
     if (flows.length === 0) return null;
     const hatW = flows.some(f => f.betrag > 0) && flows.some(f => f.betrag < 0);
     if (!hatW) return null;
-    // Ziel: Restsaldo des Vergleichskontos = 0. S(eff) wächst streng monoton mit eff.
+    // Ziel: Restsaldo des Vergleichskontos = 0. Die Kontogleichung kann mehrere
+    // Wurzeln haben (z. B. eine absurde negative Lösung neben der sinnvollen
+    // positiven bei Krediten) — EU-Konvention: der kleinste positive
+    // effektive Jahreszins, sonst die dem Nullpunkt nächste Lösung.
     function rest(eff) {
       const k = kontoSimulation(flows, eff);
       return k ? k.restsald : NaN;
     }
-    let lo = -0.9999, hi = 10, flo = rest(lo), fhi = rest(hi);
-    if (!(flo < 0 && fhi > 0)) {
-      // FALLende Richtung (Kredit): Restsaldo positiv am unteren Rand, negativ
-      // am oberen — der Konto-Saldo ist eine Schuld, die mit steigendem Zins
-      // wächst. Bisektion mit umgekehrter Richtung:
-      if (flo > 0 && fhi < 0) {
-        for (let it = 0; it < 200; it++) {
-          const mid = (lo + hi) / 2, fm = rest(mid);
-          if (fm > 0) { lo = mid; } else { hi = mid; }
-          if (hi - lo < 1e-14) break;
+    // Raster über eff: Vorzeichenwechsel finden, je Bereich bisektieren
+    const wurzeln = [];
+    let ePrev = -0.99, sPrev = rest(ePrev);
+    if (isFinite(sPrev)) {
+      for (let e = -0.98; e <= 10.0001; e += 0.01) {
+        const sCur = rest(e);
+        if (isFinite(sCur) && sPrev * sCur < 0) {
+          let a = ePrev, b = e, sa = sPrev;
+          for (let it = 0; it < 80; it++) {
+            const mid = (a + b) / 2, sm = rest(mid);
+            if (sa * sm <= 0) { b = mid; } else { a = mid; sa = sm; }
+            if (b - a < 1e-14) break;
+          }
+          wurzeln.push((a + b) / 2);
         }
-        return (lo + hi) / 2;
+        ePrev = e;
+        sPrev = sCur;
       }
-      // steigende Richtung, aber Saldo wächst auch bei hi noch nicht über 0:
-      let ok = false;
-      for (let h = 10; h <= 1e6; h *= 10) { fhi = rest(h); hi = h; if (fhi > 0) { ok = true; break; } }
-      if (!ok) return null;
     }
-    for (let it = 0; it < 200; it++) {
-      const mid = (lo + hi) / 2, fm = rest(mid);
-      if (fm < 0) { lo = mid; flo = fm; } else { hi = mid; fhi = fm; }
-      if (hi - lo < 1e-14) break;
-    }
-    return (lo + hi) / 2;
+    if (!wurzeln.length) return null;
+    const positiv = wurzeln.filter(w => w > 0);
+    if (positiv.length) return Math.min(...positiv);
+    return wurzeln.slice().sort((x, y) => Math.abs(x) - Math.abs(y))[0];
   }
 
   // ------------------------------------------------------------- Löser (Ratenhöhe)

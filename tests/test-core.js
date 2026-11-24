@@ -161,15 +161,19 @@ const tSWD = ZZR.jahreActAct(ZZR.toOrdinal(2012, 12, 1), ZZR.toOrdinal(2013, 2, 
 console.log('Zeit 1.12.2012→2.2.2013:', tSWD.toFixed(12), '| amtlich: 2/12+1/366 =', (2 / 12 + 1 / 366).toFixed(12));
 assert.ok(Math.abs(tSWD - (2 / 12 + 1 / 366)) < 1e-12, 'Remark-(C)-Zeitbeispiel weicht ab: ' + tSWD);
 
-// 14) Kredit-Richtung für PAngV (alt): Nutzerwedel +12000, −1050×12 (Fallende
-//     Restsaldo-Richtung — Bisektion mit umgekehrtem Vorzeichen nötig)
-const kreditFlows = [
-  { datum: ZZR.toOrdinal(2026, 1, 1), betrag: 12000, notiz: 'Auszahlung' },
-  { datum: ZZR.toOrdinal(2026, 12, 31), betrag: -1050, notiz: '' }
-];
+// 14) Kredit-Richtung für PAngV (alt): der Nutzer-Fall +12000 Auszahlung,
+//     −1050×12 ab 31.12.2026 (fallende Restsaldo-Richtung — das Raster-
+//     Verfahren findet die sinnvolle positive Wurzel statt der absurden
+//     negativen)
+const kreditProj = { titel: 'Kredit-Test', methode: 1, euro: 1, beschreibung: '', strome: [
+  { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:ZZR.toOrdinal(2026, 1, 1), ultimo:0, betrag:12000, raten:1, abstand:1, notiz:'Auszahlung' },
+  { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:ZZR.toOrdinal(2026, 12, 31), ultimo:0, betrag:-1050, raten:12, abstand:1, notiz:'' }
+]};
+const kreditFlows = ZZR.expandiere(kreditProj);
 const pahKredit = ZZR.effPAngV(kreditFlows);
 console.log('EFF PAngV (Kredit-Fall):', pahKredit === null ? 'NULL' : (pahKredit * 100).toFixed(6), '% p.a.');
 assert.ok(pahKredit !== null, 'Kredit-Fall liefert null');
+assert.ok(pahKredit > 0 && pahKredit < 1, 'Kredit-Fall außerhalb des plausiblen Bereichs: ' + pahKredit);
 const restKredit = ZZR.kontoSimulation(kreditFlows, pahKredit).restsald;
 assert.ok(Math.abs(restKredit) < 0.01, 'Konto geht beim PAngV-Ergebnis nicht auf 0: ' + restKredit.toFixed(2));
 
