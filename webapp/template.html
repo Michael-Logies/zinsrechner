@@ -125,6 +125,13 @@
     <div id="kontoAnzeige"></div>
   </fieldset>
 
+  <fieldset>
+    <legend>Verbraucherinformationsblatt (EU-Muster)</legend>
+    <button id="vibKnopf">Blatt erzeugen</button>
+    <span class="hinweis">füllt das EU-Standardmuster (Anhang I zu COM(2021) 347, CCD2-Vorschlag) mit den Werten dieser Berechnung</span>
+    <div id="vibAnzeige"></div>
+  </fieldset>
+
   <fieldset class="filter">
     <legend>Datei (.zzr — kompatibel zum Originalprogramm)</legend>
     <label>Öffnen: <input id="dateiLaden" type="file" accept=".zzr,.ZZR"></label>
@@ -287,6 +294,45 @@ document.getElementById('barwertKnopf').onclick = function () {
   document.getElementById('ewAnzeige').innerHTML = (v === null)
     ? 'Barwert ohne Ergebnis (Ströme prüfen).'
     : 'Barwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a. (' + (proj.methode === 0 ? 'AIBD' : 'PAngV') + '-Abzinsung): <b>' + deZahl(v, 2) + '</b>';
+};
+document.getElementById('vibKnopf').onclick = function () {
+  tabelleLesen();
+  const flows = ZZR.expandiere(proj);
+  const C = flows.filter(function (f) { return f.betrag > 0; }); // Auszahlungen an Sie
+  const D = flows.filter(function (f) { return f.betrag < 0; }); // Ihre Zahlungen
+  const el = document.getElementById('vibAnzeige');
+  if (C.length === 0 || D.length === 0) {
+    el.innerHTML = '<p>Das Blatt braucht Zahlungen in beiden Richtungen — Auszahlungen an Sie (+) und Ihre Zahlungen (−).</p>';
+    return;
+  }
+  const gesamtKredit = C.reduce(function (s, f) { return s + f.betrag; }, 0);
+  const gesamtZahl = Math.abs(D.reduce(function (s, f) { return s + f.betrag; }, 0));
+  const eff = ZZR.effPAngVHeu(flows);
+  const effText = eff === null ? '—' : deZahl(eff * 100, 2) + ' % p.a.';
+  const erste = ZZR.deDate(flows[0].datum);
+  const letzte = ZZR.deDate(flows[flows.length - 1].datum);
+  let h = '<div style="border:1px solid #999;padding:0.8em;background:#fff">';
+  h += '<h4 style="margin:0.2em 0">Europäische Standardinformationen über Verbraucherkredite</h4>';
+  h += '<p class="hinweis" style="margin:0.3em 0">Muster nach Anhang I zu COM(2021) 347 (Vorschlag „CCD2“, 30.6.2021) — keine rechtsverbindliche Pflichtinformation; bei echten Kreditverträgen gelten §§ 492, 507 BGB i. V. m. PAngV. Werte: Berechnung vom ' + new Date().toLocaleDateString('de-DE') + ', Titel „' + proj.titel + '“.</p>';
+  h += '<p><b>1 Kreditgeber / Kreditvermittler</b><br>— (nicht Teil dieser Berechnung; bitte beim Kreditgeber erfragen)</p>';
+  h += '<p><b>2 Wesentliche Merkmale des Kreditprodukts</b></p>';
+  h += '<table style="width:100%;border-collapse:collapse">';
+  h += zeile('Kreditart', '— (allgemeiner Zahlungsstrom)');
+  h += zeile('Gesamtkreditbetrag (Auszahlungen an Sie)', deZahl(gesamtKredit, 2) + ' € in ' + C.length + ' Teilauszahlung(en), erste am ' + ZZR.deDate(C[0].datum));
+  h += zeile('Bedingungen für die Inanspruchnahme', 'laut Zahlungsstrom-Tabelle; Zahlungen zwischen ' + erste + ' und ' + letzte);
+  h += zeile('Raten (Betrag, Anzahl, Periodizität)', D.length + ' Zahlung(en) insgesamt; Einzelbeträge siehe Zahlungsstrom');
+  h += zeile('Gesamtbetrag, den Sie zu zahlen haben', deZahl(gesamtZahl, 2) + ' € (Kapital zuzüglich Zinsen und etwaiger Kosten)');
+  h += zeile('Sollzinssatz', '— (in einem allgemeinen Zahlungsstrom nicht gesondert ausgewiesen)');
+  h += zeile('<b>Effektiver Jahreszins</b>', '<b>' + effText + '</b> — Berechnung nach der Anlage zu § 16 PAngV (Methode „PAngV 2011/2026“); [Repräsentatives Beispiel: sämtliche Annahmen = die hier erfassten Zahlungen]');
+  h += zeile('Zahlungsverzug', 'Bei Zahlungsverzug werden Verzugskosten berechnet. Ausbleibende Zahlungen können schwerwiegende Folgen für Sie haben (z. B. Zwangsverkauf) und es Ihnen erschweren, in Zukunft Kredite zu erlangen.');
+  h += '</table>';
+  h += '<p><b>4 Andere wichtige rechtliche Aspekte</b><br>Widerrufsrecht: Sie haben das Recht, innerhalb von 14 Kalendertagen den Kreditvertrag zu widerrufen.<br>'
+     + 'Vorzeitige Rückzahlung: Sie haben das Recht, den Kredit jederzeit ganz oder teilweise vorzeitig zurückzuzahlen.<br>'
+     + 'Datenbankabfrage: Wird ein Kreditantrag aufgrund einer Datenbankabfrage abgelehnt, werden Sie unverzüglich und unentgeltlich über das Ergebnis unterrichtet.<br>'
+     + 'Kreditvertragsentwurf: Sie haben auf Verlangen Anspruch auf eine Kopie des Vertragsentwurfs.</p>';
+  h += '<p><b>5 Fernabsatz</b><br>— (nur bei Fernabsatzverträgen; hier nicht dargestellt)</p>';
+  h += '</div>';
+  el.innerHTML = h;
 };
 document.getElementById('druckKnopf').onclick = function () { window.print(); };
 document.getElementById('dateiLaden').onchange = function (ev) {
