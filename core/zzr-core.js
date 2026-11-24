@@ -197,27 +197,12 @@
   }
 
   // ------------------------------------------------------ EG-Methode (Anhang II)
-  // Barwertgleichung mit Zeitmaßen in Jahren (Schalttag zählt ins Schaltjahr, 366):
+  // AIBD/ISMA-Konvention (bewiesen am Original-Export konto-m0.txt, 24.11.2026):
+  // Effektivzins = Lösung von SUMME CF_k * (1+i)^(-t_k) = 0 mit t = Tage/365,
+  // effektive Verzinsung. Die Anzeige −8,8068 % am Goldmaster wird exakt getroffen.
   function zeitenJahre(flows) {
     const d0 = flows[0].datum;
-    return flows.map(function (f) {
-      // Jahr-Zerlegung: Tage / 365 bzw. 366 je Schaltjahrbeteiligung (vereinfacht: 366, wenn das Intervall einen 29.2 enthält)
-      let tage = f.datum - d0;
-      // Schalttage im Intervall zählen → nominell: Jahre = Tage/365.25 wäre ungenau; EG: 365/366
-      // Praxis des Originals unbekannt im Detail; wir rechnen 365 als Basis und beachten
-      // Schaltjahre über den Mittelweg: Jahre = Tage / 365.25 nur bei >1 Jahr.
-      let jahre;
-      if (tage <= 366) {
-        let nenner = 365;
-        for (let y = fromOrdinal(d0).y; y <= fromOrdinal(f.datum).y; y++) {
-          if (isLeap(y)) { const f29 = toOrdinal(y, 2, 29); if (f29 >= d0 && f29 <= f.datum) { nenner = 366; break; } }
-        }
-        jahre = tage / nenner;
-      } else {
-        jahre = tage / 365.25;
-      }
-      return jahre;
-    });
+    return flows.map(function (f) { return (f.datum - d0) / 365; });
   }
   function npvEG(flows, i, z) {
     let s = 0;
@@ -240,6 +225,40 @@
       if (hi - lo < 1e-13) break;
     }
     return (lo + hi) / 2;
+  }
+
+  // ------------------------------------------- AIBD-Vergleichskonto (EG-Methode)
+  /*
+   * Bewiesen am Original-Export (Analyse►Vergleichskonto erstellen, EZ-Methode=0,
+   * „Vergleichskonto AIBD Effektivzins −8,8068 %", 182 Zeilen, 24.11.2026):
+   *  - Zins je Buchung: saldo × ((1+EFF)^(Tage/365) − 1) — tagesgenaue Zinseszins-
+   *    Verzinsung mit dem EG-Effektivzins (keine 30/360-Bankmethode wie bei PAngV).
+   *  - Kapitalisierung an jedem Zahlungsdatum: Tilgung saldo = Betrag + Zins,
+   *    Abschluss-Saldo = vorheriger Saldo + Tilgung.
+   *  - Die Rekursion ist zur EG-Gleichung äquivalent: das Konto endet beim letzten
+   *    Flow exakt auf 0 (Goldmaster: Restguthaben-Zeile 01.01.2015, Saldo 0).
+   * Alle 182 Originalzeilen bis auf Anzeige-Rundung (≤ 0,005 €) getroffen.
+   */
+  function kontoAIBD(flows, eff) {
+    if (flows.length === 0) return null;
+    const rows = [];
+    let saldo = 0, prevDatum = null;
+    for (const f of flows) {
+      const zahlung = -f.betrag; // Kontosicht: Nutzer zahlt (+) → Einlage
+      let zins = 0;
+      if (prevDatum !== null) {
+        const tage = f.datum - prevDatum;
+        zins = saldo * (Math.pow(1 + eff, tage / 365) - 1);
+      }
+      const tilgung = zahlung + zins;
+      saldo += tilgung;
+      rows.push({
+        valuta: f.datum, beschreibung: f.notiz,
+        betrag: zahlung, zins, tilgung, saldo, art: 'zahlung'
+      });
+      prevDatum = f.datum;
+    }
+    return { zeilen: rows, restsald: saldo };
   }
 
   // ------------------------------------------------ PAngV-Vergleichskonto (ZZR-Stil)
@@ -435,7 +454,7 @@
     fromOrdinal, toOrdinal, addMonths, addYears, deDate, isLeap, daysInMonth,
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
-    effEG, effPAngV, kontoSimulation,
+    effEG, effPAngV, kontoSimulation, kontoAIBD,
     loeseRatenhoehe, barwerte, endwerte
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

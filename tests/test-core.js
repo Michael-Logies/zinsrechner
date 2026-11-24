@@ -74,4 +74,43 @@ const zuwFlows = ZZR.expandiere(ZZR.parseZZR(fs.readFileSync('/home/ml/zinsrechn
 assert.strictEqual(zuwFlows.length, 24);
 assert.ok(Math.abs(zuwFlows[12].betrag + 50) < 1e-9, 'Stufe 2 = -50 (Zuwachs +50 additiv)');
 
-console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original.');
+// 9) EG-Methode (AIBD) — Original-Anzeige −8,8068 % (konto-m0-Export, 24.11.2026;
+//    ACHTUNG: die alte Übergabe notierte fälschlich −8,0608 — Übertragungsfehler)
+const probeM0 = ZZR.parseZZR(fs.readFileSync('/home/ml/zinsrechner/probe-methode0.zzr', 'latin1'));
+const flowsM0 = ZZR.expandiere(probeM0);
+const effEGWert = ZZR.effEG(flowsM0);
+console.log('EFF EG/AIBD (berechnet):', (effEGWert * 100).toFixed(6), '%  | Original-Anzeige: -8,8068 %');
+assert.ok(Math.abs(effEGWert * 100 + 8.8068) <= 0.0005,
+  'EFF EG weicht ab: ' + (effEGWert * 100).toFixed(6) + ' vs -8.8068');
+
+// 10) AIBD-Vergleichskonto Zeile für Zeile gegen den Original-Export (182 Zeilen)
+const aibdText = fs.readFileSync(path.join(__dirname, 'goldmaster-konto-m0.txt'), 'latin1');
+const goldAibd = [];
+const reAibd = /^(\d{2}\.\d{2}\.\d{4})\s+(.+?)\s{2,}(-?[\d.]+,\d{2})\s+(-?[\d.]+,\d{2})\s+(-?[\d.]+,\d{2})\s+(-?[\d.]+,\d{2})\s*$/;
+for (const z of aibdText.split(/\r?\n/)) {
+  const m = z.match(reAibd);
+  if (m) {
+    const num = s => parseFloat(s.replace(/\./g, '').replace(',', '.'));
+    goldAibd.push({ valuta: m[1], betrag: num(m[3]), zins: num(m[4]), tilgung: num(m[5]), saldo: num(m[6]) });
+  }
+}
+assert.strictEqual(goldAibd.length, 182, 'AIBD-Goldmaster: 182 Zeilen erwartet');
+const kontoAibd = ZZR.kontoAIBD(flowsM0, effEGWert);
+assert.strictEqual(kontoAibd.zeilen.length, goldAibd.length,
+  'AIBD-Zeilenzahl ' + kontoAibd.zeilen.length + ' vs ' + goldAibd.length);
+
+let maxAibd = 0;
+for (let i = 0; i < goldAibd.length; i++) {
+  const g = goldAibd[i], m = kontoAibd.zeilen[i];
+  assert.strictEqual(ZZR.deDate(m.valuta), g.valuta, 'AIBD Zeile ' + i + ' Datum');
+  for (const [mein, ziel] of [['zins', 'zins'], ['tilgung', 'tilgung'], ['saldo', 'saldo']]) {
+    const d = Math.abs(m[mein] - g[ziel]);
+    if (d > maxAibd) maxAibd = d;
+    assert.ok(d <= 0.011, 'AIBD Zeile ' + i + ' ' + g.valuta + ' ' + mein +
+      ': ' + m[mein].toFixed(2) + ' vs ' + g[ziel].toFixed(2));
+  }
+}
+console.log('AIBD-Konto: maximale Abweichung über alle Zeilen:', maxAibd.toFixed(4), 'EUR');
+assert.ok(Math.abs(kontoAibd.restsald) < 0.01, 'AIBD Restsaldo ' + kontoAibd.restsald);
+
+console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD).');
