@@ -1,140 +1,148 @@
-# Übergabe ZZR-Neubau (Stand 24.11.2026, ~17:30)
+# Übergabe ZZR-Neubau (Stand 24.11.2026, ~21:00)
 
-**Kurzstand für den nächsten Kontext:** Alle Kernfunktionen Goldmaster-GRÜN (7 Prüfpunkte
+**Kurzstand für den nächsten Kontext:** Alle Kernfunktionen Goldmaster-GRÜN (18 Testblöcke
 in tests/test-core.js) — PAngV-alt, EG/AIBD, effPAngVHeu (heutige Rechtslage), End-/Barwert
-(beide Methoden), Aktiv-Häkchen-Fix, vereinheitlichte Raster-Wurzelsuche für alle
-Kontorichtungen, EU-Verbraucherinformationsblatt, AGPL + README. Repo sauber, nichts
-Blockierendes. **Fortsetzungsbefehl: „Lies /home/ml/zinsrechner/UEBERGABE.md und setze
-die Arbeit am ZZR-Neubau fort."** Voller Wissensstand: Memory-MCP #1467.
+(beide Methoden), Aktiv-Häkchen-Fix, Raster-Wurzelsuche für alle Kontorichtungen,
+EU-Verbraucherinformationsblatt, AGPL + README. **NEU 24.11. abends: Ultimo-Semantik
+bewiesen und implementiert, gebrochene Raten, 30/360-Februarregel, Kalender-Bugfix
+(Februar = 28 Tage), Löser-BSP_1-Referenzpunkt 1.375,57 DM, Zahlungsplan-Ansicht +
+Laufzeit.** Orakel-Gegenprobe auf Dateiebene bestanden (tests/vk1-ultimo-u1.txt, 8 Zeilen
+≤ 0,0046 €). Repo sauber, nichts Blockierendes. **Fortsetzungsbefehl: „Lies
+/home/ml/zinsrechner/UEBERGABE.md und setze die Arbeit am ZZR-Neubau fort."** Voller
+Wissensstand: Memory-MCP #1467 + neue Notiz „ZZR-Orakel 24.11 abends" (Tags zzr).
 
-## Was steht (alles committet in ~/zinsrechner, lokal, kein Remote)
+## Was steht (alles committet in ~/zinsrechner, lokal, kein Push)
 
 1. **Rechenkern** `core/zzr-core.js` — Goldmaster-GRÜN für BEIDE Methoden:
    - PAngV: EFF −8,814493 % vs. ZZR-Original-Export −8,8145 %; alle 198 Konto-Zeilen ≤ 0,04 €
-   - EG/AIBD: EFF −8,806778 % vs. Original-Anzeige −8,8068 % (konto-m0-Export,
-     24.11.2026 unter Wine neu geholt — die frühere Notiz „−8,0608/ABD/EFH" war ein
-     Übertragungsfehler; richtig: **AIBD = Anhang II EG-Konsumentenkredit, −8,8068 %**)
-   - **EG-Methode geklärt & bewiesen** (182/182 Original-Zeilen ≤ 0,005 €):
-     * Effektivzins = SUMME CF_k·(1+i)^(-t_k) = 0 mit t = Tage/365, effektive Verzinsung
-     * Vergleichskonto „AIBD": Zins je Buchung = saldo·((1+EFF)^(Tage/365)−1),
-       Kapitalisierung an jedem Zahlungsdatum, Tilgung saldo = Betrag + Zins,
-       Restsaldo endet exakt 0 (Rekursion ≡ EG-Gleichung)
-   - .zzr-Format lesen/schreiben (CP1252, CRLF, Delphi-Floats, Tagesnummern ab 1.1.0001)
-   - Stufen-Semantik (live unter Wine vermessen): Raten = Anzahl PRO Stufe;
-     Stufe s = Betrag×(1+Dynamik/100)^s bzw. Betrag + s×Zuwachs (Dynamik-Feld = PROZENT-Zahl,
-     Zuwachs = absolut mit Vorzeichen)
-   - Löser: Ratenhöhe bei Zielzins (geometrische Bisektion)
+   - EG/AIBD: EFF −8,806778 % vs. Original-Anzeige −8,8068 % (182 Zeilen ≤ 0,005 €)
+   - EG-Methode = Σ CF_k·(1+i)^(-Tage/365) = 0; Vergleichskonto „AIBD": taggenaue
+     Zinseszinsrechnung, Kapitalisierung an jedem Zahlungsdatum
+   - .zzr-Format (CP1252, CRLF, Delphi-Floats, Tagesnummern ab 1.1.0001)
+   - Stufen-Semantik: Raten = Anzahl PRO Stufe; Stufe s = Betrag×(1+Dynamik/100)^s bzw.
+     Betrag + s×Zuwachs
+   - **ULTIMO (24.11. bewiesen am vk1-Export): erste Zahlung behält ihr Datum; Folgeraten
+     mit Ultimo=1 auf den LETZTEN Kalendertag ihres Monats (Ankermonat + n·Abstand),
+     mit Ultimo=0 auf den Ankertag (an kurzen Monaten gekappt).** Beleg: Zzr.hlp
+     („…erfolgen die weiteren Ratenzahlungen zum 31.3., 30.4., usw. … im anderen Fall
+     mit dem 28. des Monats") + Original-Konto-Export vk1.txt (30.11. bleibt; 31.12.,
+     31.01., 29.02., 31.03., 30.04.)
+   - **GEBROCHENE Raten** (Zzr.hlp: „2,5 mal DM 100 → beim dritten mal nur DM 50"):
+     Schlußrate trägt den Bruchteil; parseZZR rundet nicht mehr
+   - **30/360-Februar-Regel** (Zzr.hlp: „bei Vergleichskonto PAngV oder AIBD360 würde
+     mit dem 30.2. usw. gerechnet"): Februar-Ende (28./29.) zählt als 30. Die
+     Zweitgrenzen-Seite (d2) ist über die Hilfestellung mit abgedeckt, aber nur am
+     Hilfetext (nicht am Konto-Orakel) belegt — siehe Offene Punkte
+   - **Kalender-Bugfix**: daysInMonth lieferte Gemeinjahr-Februar = 31 → addMonths
+     erzeugte „31.2.", das still als 3.3. weiterlief. Nutzer-Kredit-Fall dadurch
+     korrigiert: 3,415658 % (war 3,413993 % mit Überlauf-Datum; jetzt dicht an AIBD)
+   - **Löser**: Ratenhöhe bei Zielzins; Bracket wird geometrisch erweitert (BSP_1:
+     Nennbetrag 1 DM, Lösung ≈ 1375). **Neuer Referenzpunkt aus der Original-Hilfe:
+     BSP_1-DM-Variante (−200.000 DM, 180×1 DM, +50.000 DM, Ziel 5 %, PAngV) →
+     Original „DM 1.375,57", Kern 1375,57** — exakt
+   - **zahlungsplan(proj)**: alle Einzelzahlungen (Nr., Datum, Betrag, Strom, Notiz) +
+     Summen + erste/letzte Zahlung — das, was das Original „bei der Vorbereitung"
+     aufstellt (Fehlerdialog „Es kann kein Zahlungsplan erstellt werden…", wenn keine
+     Nullstelle existiert)
+   - **laufzeit(d1, d2, methode)**: PAngV im 30/360-Kalendarium („Die Laufzeitbestimmung
+     erfolgt mittels eines 30/360-Tage-Kalendariums" — ZA-Bericht), AIBD im echten
+     Kalender. Am Original verifiziert: 31.10.1999→30.04.2000 = PAngV „6 Monaten,
+     0 Tagen" / AIBD „5 Monaten, 30 Tagen"
 2. **HTML-Bedienerfläche** `dist/zinsrechner.html` (Einzeldatei, offline, druckbar):
-   Zahlungsstrom-Tabelle editierbar, EFF beide Methoden, Vergleichskonto (PAngV- UND
-   AIBD-Ansicht je nach EZ-Methode), Zielzins-Löser, .zzr Laden/Speichern, Drucken.
-   Bau: `node webapp/build.js` (bettet core ein — core/zzr-core.js bleibt EINZIGE
-   Quelle der Wahrheit).
-3. **Tests** `tests/test-core.js` + Goldmaster-Referenzen (`goldmaster-konto.json`
-   198 PAngV-Zeilen, `goldmaster-konto-m0.txt` 182 AIBD-Zeilen). Laufen mit:
-   `node tests/test-core.js`
+   Zahlungsstrom-Tabelle, EFF (3 Methoden), Vergleichskonto (AIBD- UND PAngV-Ansicht),
+   **Zahlungsplan-Sektion (NEU)**: alle Zahlungen einzeln mit Datum, kumulierter Summe,
+   Summenzeile Ein-/Auszahlungen, Laufzeitleiste — druckfähig. Zielzins-Löser,
+   End-/Barwert-Feld, .zzr Laden/Speichern, Drucken, Verbraucherinformationsblatt,
+   Methoden-Erklärbox mit Quellenfußnoten. Bau: `node webapp/build.js`
+3. **Tests** `tests/test-core.js` — 18 Blöcke grün. Referenzen: `tests/goldmaster-konto.json`
+   (198 PAngV-Zeilen), `tests/goldmaster-konto-m0.txt` (182 AIBD-Zeilen),
+   **`tests/vk1-ultimo-u1.txt` (NEU: Original-AIBD-Konto der Ultimo-Probe, 8 Zeilen,
+   EFF 0,7430 % = Kern exakt, max Δ 0,0046 €)**. Lauf: `node tests/test-core.js`
+
+## Orakel-Erkenntnisse 24.11. abends (Nutzer gab den :10-Desktop frei)
+
+- **Probe ultimo-u1** (−10.000 @31.10.1999; +106×6 @30.11.1999 Ultimo=1; +9.400 @30.04.2000):
+  - PAngV-Ansicht des Originals: Rendite **0,7356 %** angezeigt, eigener ZA-Bericht
+    **0,7396 %** = Kern exakt. Die ERGEBNIS-Ansicht zeigt offenbar einen iterativ
+    gerundeten Wert — maßgeblich sind ZA-Bericht (0,7396) und Konto-Header (0,7430),
+    beide = Kern exakt
+  - **PAngV-View zeigt Daten durch die 30/360-Linse: 31.10.1999 erscheint als
+    „30.10.1999"** — kein Datums-Bug des Nachbaus, sondern Anzeige-Normalisierung
+    (Tag 31 → 30), gleiches Prinzip wie „mit dem 30.2. gerechnet"
+  - AIBD-Ansicht: **0,7420 %** angezeigt, AIBD-Konto-Header **0,7430 %** = Kern exakt
+  - **Vergleichskonto AIBD exportiert als tests/vk1-ultimo-u1.txt** — Valuta-Daten
+    beweisen die Ultimo-Kette Zeile für Zeile
+  - Dropdown „Vergleichskonto" kennt **4 Varianten: PAngV (alt), AIBD (ISMA), AIBD 360,
+    PAngV 2000** — die letzten beiden sind im Nachbau NICHT implementiert
+- **barwerte.txt / endwerte.txt** (im Repo-Verzeichnis erschienen, 20:39, je 8,3 KB,
+  identische Größe): vom Original automatisch geschriebene Wertetabellen — x = −50…+50
+  (101 Zeilen), y glatt −9.240,3 … −9.455,0 (Delphi-Floats). Deutung offen (Verdacht:
+  Sensitivitätstabelle der Ergebnis-Vorbereitung). Dateien liegen untracked im Repo —
+  identifizieren, dann als Referenz committen oder verwerfen
+- **Zwischenablage-Route**: Knopf „Analyse in ZA kopieren" legt den vollständigen
+  Analysebericht als Text in die Zwischenablage (xclip -display :10 auslesbar) —
+  praktische Orakel-Route ohne Datei-Dialog
+- „Analyse ausdrucken" druckt SOFORT an den Standarddrucker (kein Vorschau-Dialog!) —
+  bei Orakel-Läufen NICHT anklicken oder vorher den Drucker abwählen
 
 ## Wissen (NICHT nochmal ableiten!)
 
-Memory-MCP **#1467** (Tags zzr,zinsrechner,wine,...) hat ALLES: Dateiformat, Semantik,
-Methoden-Mapping (EZ-Methode 1 = „PAngV (alt)", 0 = „AIBD" = EG-Anhang II/ISMA),
-beide EFF-Rezepte, Wine-Orakel-Route, xdriver/Keysym-Fallen. RE-Artefakte:
-~/zzr-analyse (chmod 700, NIE committen; dort auch konto-m0.txt = Original-Export
-der Methode 0). HINWEIS xdriver: AltGr-Backslash kommt unter Wine als „ß" an — im
-Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
+Memory-MCP **#1467** + neue Notiz (Tags zzr, zinsrechner): Dateiformat, Semantik,
+Methoden-Mapping (EZ-Methode 1 = „PAngV (alt)", 0 = „AIBD"), EFF-Rezepte, Wine-Orakel-
+Route, xdriver/Keysym-Fallen. **NEU**: Zzr.hlp des Originals ist lesbar via
+`strings ~/zzr-analyse/ZZR/Zzr.hlp > ~/zzr-analyse/hlp-strings.txt` (3393 Zeilen, der
+Löser-/Dialog-/Beispiel-Stoff liegt dort fast vollständig im Klartext); Original-Beispiele
+bsp_1–11.zzr in ~/zzr-analyse/ZZR/. RE-Artefakte: ~/zzr-analyse (chmod 700, NIE
+committen). HINWEIS xdriver: AltGr-Backslash kommt unter Wine als „ß" an — kurze NAMEN
+im Speichern-Dialog tippen (Dialog steht im Home). Wine-Fenster springen beim Fokus-
+Erhalt zur INI-Position (Zzr.ini [Lage]); nach jedem verschiebe FOTO kontrollieren.
+Menü-Popups sind eigene X-Fenster → Vollbild-Schnapp (`import -window root`) statt
+fensterfoto. MDI-Struktur: Hauptfenster „Zuckers Zins Rechner" + Kinder
+(Beschreibung „ultimo-u1", „Vergleichskonto: …"); Fenster-Menü wechselt zwischen ihnen.
 
 ## Offene Punkte
 
-1. ~~EG-Methode kalibrieren~~ **ERLEDIGT 24.11.2026** (siehe oben; AIBD-Export
-   unter Wine über Datei►Speichern unter… geholt).
-2. **Ultimo-Detail**: Feld vorhanden, Semantik nur für Löser relevant — unaufgeklärt.
-3. ~~**Barwerte/Endwerte-Blätter**~~ **GEMESSEN UND IMPLEMENTIERT 24.11.2026** (Original-Dialoglogik:
-   Analyse►Endwert-/Barwertberechnung►der Ein- & Auszahlungen → Stichtag-Dialog → Zinssatz-Dialog → Info-Box):
-   - **Endwert(Stichtag 01.01.2015, 55 %) = 73.303.508,71 € = Endsaldo des PAngV-Vergleichskontos
-     mit dem frei gewählten Zins** — Kern `endwert()` EXAKT (Δ 0,00 €).
-   - **Barwert(Stichtag 01.01.2000, 55 %) = 102.208,33 €** = vergangene Zahlungen zum Nennwert +
-     künftige abgezinst mit (1+r)^(−Tage30/360/360) — Kern `barwert()` Δ 0,15 €.
-   - **ZWEITMESSUNG 24.11. (Zins 10 %): Barwert = 96.091,06 €** — Kern 30/360 Δ −1,67 €;
-     act/365.25 praktisch gleichauf (−1,28 €); act/365 (+4,73 €) und act/360 (+125 €) AUSGESCHLOSSEN.
-     Struktur bei beiden Zinssätzen bestätigt; Residual < 0,002 % = programminterne Cent-Rundung.
-     Beide Messpunkte im Test verankert (Toleranz 0,5/2 €).
-   - HTML-Fläche: Feld Stichtag/Zins + Endwert-/Barwert-Knopf (Berechnung-Gruppe).
-   - HINWEIS Orakel: Zinssatz-Dialog ist mit „5“ vorbelegt — Eingaben APPENDEN (unser „5“→„55“-
-     Vorfall); Feld vor dem Tippen leeren (End+Backspace). Nach Stichtag-OK fragt ein ZWEITER
-     Dialog (Verzinsung) nach dem Zins — nicht wundern. Ergebnis = Info-Box (Fenster läuft
-     aus dem Bild, per xdriver holen).
-4. **Feinschliff Rundung**: Live-Wine-Konto akkumuliert ab Jahr 2 mit Monatsrhythmus
-   statt Tageszählung (vs. Goldmaster) — ±0,04 € Rauschen in PAngV-Tests akzeptiert;
-   wer Pixelparität will, muss die Original-Kumulierung nochmal verifizieren.
-   (AIBD-Konto: keine Abweichung — max 0,005 € = reine Anzeigerundung.)
-5. **AIBD-Abhängigkeit von End-/Barwert — GEMESSEN UND IMPLEMENTIERT 24.11.2026**:
-   Das Original rechnet End-/Barwert MIT der EZ-Methode der Datei:
-   - Methode 1 (PAngV): Endwert = PAngV-Konto-Endsaldo (73.303.508,71 € @55 %);
-     Barwert = 30/360-Abzinsung (102.208,33 € @55 %)
-   - Methode 0 (AIBD): Endwert = AIBD-Tageskonto-Endsaldo (**73.721.200,13 € @55 % —
-     Kern kontoAIBD EXAKT, Δ 0,00**); Barwert = act/365-Abzinsung (102.208,70 € @55 %;
-     Kern 102.208,66, Δ 0,04)
-   - Kern: `endwert`/`barwert` nehmen Methode-Parameter; HTML übergibt `proj.methode`.
-6. **Rechtsstand-Recherche 24.11.2026 (Nutzerfrage)**: Die vom ZZR zitierten Vorgaben
-   sind veraltet — die EG-Richtlinie (ABl. C155/9 v. 23.06.1989) lief über 98/7/EG und
-   2008/48/EG (Verbraucherkreditrichtlinie; neue Gesamtkreditkosten-Formel, Deutschland
-   PAngV 2010/2011, internem Zinsfuß schon seit ~2000) zur Richtlinie (EU) 2023/2225
-   (CCD2, anwendbar seit 20.11.2026); die deutsche PAngV: Neufassung 12.11.2021 (Kraft
-   28.05.2022), letzte Änderung Art. 8 G v. 12.5.2026 (Kraft 20.11.2026 = CCD2-
-   Anwendungsdatum). Aktuelle Formel (Anlage zu § 16 PAngV): Σ C_k(1+X)^(-t_k) =
-   Σ D_l(1+X)^(-s_l) mit t in Jahren = Tage/365 (Schaltjahr 366) — act/act. Die
-   Vergleichskonto-Methode des ZZR ist seit 2010/2011 aufgehoben; als historische
-   Methode im Rechner behalten. **`effPAngVHeu` UMGESETZT 24.11.2026: die heutige
-   Effektivzinsformel als dritte Methode (Label „PAngV 2011/2026“). Zeitzählung
-   nach Remark (C) des Kommissions-Leitfadens SWD(2012) 128 final (8.5.2012 — vom
-   Nutzer beschafft, PDF in ~/zzr-analyse/SWD(2012)128_0.pdf; Amtslink in den
-   Quellenfußnoten der Fläche): ganze Monate rückwärts vom Zahlungstag (m/12 —
-   „1 Monat“ = 1/12, unabhängig der tatsächlichen Länge), Resttage (ohne den
-   ersten, einschließlich des letzten) durch die Jahreslänge des Kalenderjahres
-   am Monatsanker (365/366, rückwärts bis zum gleichen Tag des Vorjahres).
-   Amtliches Zeitbeispiel des SWD: 1.12.2012 → 2.2.2013 = 2/12 + 1/366 —
-   jahreActAct trifft es auf 12 Dezimalstellen. Identitätstests 365/365 und
-   366/366 = exakt 10,000 % grün; Goldmaster −8,812916 % (kein Original-
-   Referenzwert, Methode kam 2007 noch nicht). Amtliche Anzeige-Rundung:
-   2 Nachkommastellen (RL 2011/90/EU; die Fläche zeigt 4 zur Kontrolle). Fläche
-   zeigt dritten EFF-Wert + Aufklappbox mit Erläuterungen zu allen drei Methoden
-   + Quellenfußnoten (verifizierte Links) + VERBRAUCHERINFORMATIONSBLATT (EU-
-   Muster nach Anhang I zu COM(2021) 347/CCD2 — „Blatt erzeugen“-Knopf unter dem
-   Vergleichskonto; rendert nur bei Zahlungen in beiden Richtungen; Skript-Syntax
-   via node --check geprüft). WURZELSUCHE VEREINHEITLICHT: alle drei EFF-Methoden
-   nutzen das gemeinsame Raster-Verfahren (alle Kontorichtungen, mehrere Wurzeln,
-   EU-Konvention kleinster positiver Zins) — beliebige Zahlungsformen (Ansparen,
-   Kredite, Mischformen) abgedeckt. HINWEIS Fundstelle: die verbreitete
-   Angabe „ABl. C 127, 4.5.2012“ ist NICHT haltbar (Heft C 127 v. 1.5.2012 enthält
-   nur 4 andere Beiträge; CELEX 52012XC0504(01) ist ein Beihilfe-Dokument) — der
-   Leitfaden ist das SWD, kein OJ-C-Dokument. OFFEN: evtl. Interpolationszins
-   (BaFin-Merkblatt, mehrere Sollzinssätze); COM(2021)347-CCD2-Anhänge (PDF in
-   ~/zzr-analyse) sind als Muster für das Blatt VERBAUT — künftig evtl. vollständiges
-   EU-Formular mit allen Pflichtfeldern.**
+1. ~~Ultimo-Detail~~ **ERLEDIGT 24.11. abends** (bewiesen + implementiert + Orakel-Gegenprobe)
+2. **Barwerte/endwerte-Tabellen deuten** (siehe oben; Dateien liegen untracked im Repo)
+3. **Ergebnis-View vs. Konto-EFF**: Original zeigt in der Ansicht 0,7356/0,7420, im
+   ZA-Bericht/Konto 0,7396/0,7430 (= Kern). Ursache der Ansicht-Abweichung ungeklärt
+   (Verdacht: iterative Rundung) — für den Nachbau irrelevant, aber dokumentierenswert
+4. **AIBD 360 und PAngV 2000** (die anderen zwei Konto-Varianten des Originals) nicht
+   implementiert — Rezepte unbekannt (AIBD360 vermutlich act/360-Tageskonto; PAngV 2000
+   vermutlich die Novelle-2000-Vorschriften); per Orakel messbar, wenn gewünscht
+5. **30/360-Februar-Regel, Zweitgrenzen-Seite**: die Hilfe belegt den Fall „Datum ist
+   Februar-Ende" (d1→30); dass auch eine Zweitgrenze am Februar-Ende als 30 rechnet,
+   folgt aus derselben Formulierung, ist aber nicht separat orakelt (Probe mit
+   31.01.→29.02.-Zinszeile wäre der Beweis)
+6. **Ultimo=0-Zweig und gebrochene Raten**: im Hilfetext eindeutig dokumentiert und
+   implementiert, aber nicht separat per Orakel gefahren (Proben probe-ultimo-u3 /
+   probe-bruch-u2 liegen bereit; Ablauf wie bei u1)
+7. **5 weitere Löser des Originals** (aus Zzr.hlp belegt): Ratenanzahl (exakt, kann
+   gebrochen zurückgeben!), Zahlungsdatum (Tage-Näherung), Ratenabstand (Monats-Näherung),
+   Dynamik absolut/prozentual (exakt), Stufenzahl (Näherung). Plus: Folge-Ströme
+   verschieben-Nachfrage, Schlußraten über gebrochene Ratenzahl, „Fenster"-Verwaltung.
+   BSP-Referenzpunkte aus der Hilfe: BSP_3 Datum→20.03.2003 @3 %, BSP_4 Abstand→36
+   Monate @5 %, BSP_6 Dynamik→6,46 % @5 % (alle DM-Zahlen in der Hilfe!)
+8. **Interpolationszins** (BaFin-Merkblatt, mehrere Sollzinssätze) — offen wie gehabt
+9. **Vollständiges EU-Formular** (Anhang I der finalen CCD2 statt COM(2021)347-Entwurf) — offen
+10. **Feinschliff Rundung**: ±0,04 € PAngV-Rauschen (Monatsrhythmus ab Jahr 2) — akzeptiert
 
 ## Lizenz / Veröffentlichung
 
-- **LICENSE** = AGPL-3.0-or-later (amtlicher Text von gnu.org); **README.md** mit
-  Entstehungs- und Copyright-Angabe (© 2026 Michael Logies, KI-unterstützt:
-  Qwen Code / GLM-5.3-Flash); Lizenz-Fußnote in der Fläche (AGPL § 13:
-  Quellenangebot bei Netzwerknutzung — die Datei IST der vollständige Quellcode).
-- Blatt-Fix (Nutzerbefund „nichts erzeugt“): im Blatt-Handler fehlte die
-  Hilfsfunktion `zeile` (ReferenceError → stummes Scheitern) — ergänzt.
-  effKnopf-Label „beide Methoden“ → „3 Methoden“. Veröffentlichungs-Vorabprüfung:
-  keine lokalen Pfade/IPs/Keys im Dist ✓.
-- **Aktiv-Fix (Nutzerbefund „funktioniert nicht“)**: die Akt.-Spalte war ein
-  Zahlenfeld, wurde aber als Häkchen gelesen (inp.checked auf Textfeld = immer
-  unwahr) → bei JEDER Aktion wurden alle Zeilen still inaktiv gesetzt (alle
-  Methoden „—“, Blatt leer). Jetzt Häkchen-Spalte wie Ultimo. Nutzer-Beispiel
-  als ~/Downloads/nutzer-beispiel.zzr bereitgestellt (beide Zeilen aktiv;
-  EFF PAngV 2011/2026 = 7,7982 % p.a.).
+- **LICENSE** = AGPL-3.0-or-later; **README.md** (© 2026 Michael Logies, KI-unterstützt:
+  Qwen Code / GLM-5.3-Flash); Lizenz-Fußnote in der Fläche. Veröffentlichung freigegeben
+  (Urheberrecht gut vertretbar, Clean-Room; s. auto-memory zzr-veroeffentlichung).
+  Veröffentlichungs-Vorabprüfung: keine lokalen Pfade/IPs/Keys im Dist ✓ — nach jedem
+  Rebuild erneut prüfen
 
 ## Befehle
 
 - Tests: `node ~/zinsrechner/tests/test-core.js`
-- HTML bauen: `node ~/zinsrechner/webapp/build.js`  → `~/zinsrechner/dist/zinsrechner.html`
-- Wine-Orakel (falls Original needed):
+- HTML bauen: `node ~/zinsrechner/webapp/build.js` → `~/zinsrechner/dist/zinsrechner.html`
+  (danach eingebettete Skripte per node --check bzw. vm.Script prüfen!)
+- Wine-Orakel:
   `DISPLAY=:10.0 WINEPREFIX=$HOME/.wine-zzr ~/opt/wine-10.0-amd64-wow64/bin/wine 'C:\Program Files (x86)\ZZR\Zzr.exe' 'Z:\home\ml\zinsrechner\<datei>.zzr'`
-  (lizenziert; Fenster per ~/zzr-analyse/xdriver.py `liste`/`verschiebe` holen —
-  Positionen laufen aus dem Bildschirm; Konto-Export: Analyse►Vergleichskonto erstellen,
-  dann Datei►Speichern unter… im Konto-Fenster)
+  (lizenziert; xdriver.py liste/klick/tippe/taste/verschiebe/fensterfoto; Fenster-
+  Sprung zur INI-Position beachten; Analysekette: Ergebnisse-Lasche → Vergleichskonto
+  erstellen → Datei►Speichern unter → kurzer Name → landet in Z:\home\ml)
 - Desktop-Starter: ~/Schreibtisch/zinsrechner.desktop
