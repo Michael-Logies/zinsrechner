@@ -76,10 +76,15 @@ Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
    Anwendungsdatum). Aktuelle Formel (Anlage zu § 16 PAngV): Σ C_k(1+X)^(-t_k) =
    Σ D_l(1+X)^(-s_l) mit t in Jahren = Tage/365 (Schaltjahr 366) — act/act. Die
    Vergleichskonto-Methode des ZZR ist seit 2010/2011 aufgehoben; als historische
-   Methode im Rechner behalten. **Nicht umgesetzt (Vorschlag): `effPAngVHeu` — die
-   heutige Effektivzinsformel als dritte Methode (act/act-Variante von effEG);
-   Verifizierung gegen die amtlichen Kommissions-Rechenbeispiele (ABl. C 127/2,
-   4.5.2012) und evtl. Interpolationszins (BaFin-Merkblatt, mehrere Sollzinssätze).**
+   Methode im Rechner behalten. **`effPAngVHeu` UMGESETZT 24.11.2026: die heutige
+   Effektivzinsformel als dritte Methode (act/act, kalendergenau 365/366 mit
+   ICMA/ISDA-Attribution, halb-offenes Intervall) — Identitätstests 365/365 und
+   366/366 = exakt 10,000 % grün; Goldmaster −8,812918 % (kein Original-Referenzwert,
+   Methode kam 2007 noch nicht). Fläche zeigt dritten EFF-Wert + Aufklappbox mit
+   Erläuterungen zu allen drei Methoden. OFFEN: Abgleich mit den amtlichen Kommissions-
+   Rechenbeispielen (ABl. C 127/2, 4.5.2012, CELEX 52012XC0504(01) — EUR-Lex lieferte
+   24.11. leere Seite; Erneuerung: URL /DE/TXT/HTML/?uri=CELEX:52012XC0504(01)); evtl.
+   Interpolationszins (BaFin-Merkblatt, mehrere Sollzinssätze).**
 
 ## Befehle
 

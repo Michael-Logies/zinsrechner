@@ -74,18 +74,39 @@
         Anleihemärkte (Association of International Bond Dealers, heute ISMA/ICMA). Das
         Originalprogramm berechnet damit auch sein Vergleichskonto (taggenaue Zinsen statt
         30/360).</p>
-        <p><b>PAngV 2011/heute — Gesamtkreditkosten.</b> Die heute gültige Methode (Anlage zu
-        § 16 PAngV, aus der Verbraucherkreditrichtlinie 2008/48/EG, fortgeführt durch die
-        Richtlinie (EU) 2023/2225, anwendbar seit 20.11.2026): Barwert der Auszahlungen =
-        Barwert aller Rückzahlungen (Tilgung, Zinsen, Kosten). Zeiten in Jahren mit
-        kalendergenauen Zinstagen — 365, im Schaltjahr 366 („act/act“). Der Original-ZZR
-        (2007) kannte diese Methode noch nicht; sie ist hier als Ergänzung für heutige
-        Vergleichswerte enthalten. Für ein echtes Darlehen (eine Auszahlung B, Rückzahlungen
-        A<sub>k</sub>) lautet die amtliche Gleichung Σ A<sub>k</sub>·(1+X)<sup>−t<sub>k</sub></sup> = B;
-        bei allgemeinen Zahlungsmixen entspricht sie der obigen Barwert-Gleichung.</p>
+        <p><b>PAngV 2011/2026 — Gesamtkreditkosten (heutiges Recht).</b> Anlage zu § 16 PAngV
+        (aus der Verbraucherkreditrichtlinie 2008/48/EG, fortgeführt durch die Richtlinie
+        (EU) 2023/2225, anwendbar seit 20.11.2026): Barwert der Auszahlungen = Barwert aller
+        Rückzahlungen (Tilgung, Zinsen, Kosten). Die Zeiten in Jahren rechnen mit
+        kalendergenauen Zinstagen — amtlich: „365 Tage (beziehungsweise für ein Schaltjahr
+        366 Tage)“; jeder Tag gehört zu dem Kalenderjahr, in dem er liegt, und wird durch
+        dessen Jahreslänge geteilt (Beginn des Zeitraums zählt, Ende nicht). Für ein echtes
+        Darlehen (eine Auszahlung B, Rückzahlungen A<sub>k</sub>) lautet die amtliche Gleichung
+        Σ A<sub>k</sub>·(1+X)<sup>−t<sub>k</sub></sup> = B; bei allgemeinen Zahlungsmixen entspricht
+        sie der obigen Barwert-Gleichung. Amtliche Anzeige-Rundung: zwei Nachkommastellen —
+        diese Fläche zeigt vier Stellen zur Genauigkeitskontrolle. Der Original-ZZR (2007)
+        kannte diese Methode noch nicht; sie ist als Ergänzung für heutige Vergleichswerte
+        enthalten.</p>
         <p>End-/Barwert-Messungen mit freiem Zins nutzen je nach EZ-Methode der Datei dieselben
         Kontomechaniken: PAngV-Konto (30/360) bei „PAngV (alt)“, AIBD-Tageskonto bei
         „AIBD/ISMA“.</p>
+        <p style="font-size:0.85em"><b>Quellen:</b>
+        PAngV-Text und Anlage (zu § 16) mit Formel und Anmerkungen:
+        <a href="https://www.gesetze-im-internet.de/pangv_2022/">gesetze-im-internet.de/pangv_2022</a> ·
+        <a href="https://www.buzer.de/s1.htm?g=PAngV&amp;a=Anlage">buzer.de — Anlage (zu § 16)</a> ·
+        RL 2008/48/EG (Verbraucherkreditrichtlinie):
+        <a href="https://eur-lex.europa.eu/eli/dir/2008/48/oj">eur-lex.europa.eu/eli/dir/2008/48/oj</a> ·
+        RL 2011/90/EU (Rundung):
+        <a href="https://eur-lex.europa.eu/eli/dir/2011/90/oj">eur-lex.europa.eu/eli/dir/2011/90/oj</a> ·
+        RL (EU) 2023/2225 „CCD2“:
+        <a href="https://eur-lex.europa.eu/eli/dir/2023/2225/oj">eur-lex.europa.eu/eli/dir/2023/2225/oj</a> ·
+        PAngV-Fassungen und Änderung 12.5.2026 (BGBl. 2026 I Nr. 139, Kraft 20.11.2026):
+        <a href="https://www.buzer.de/s1.htm?g=PAngV&amp;f=1">buzer.de — PAngV-Übersicht</a>.
+        Kommissions-Rechenbeispiele (Mitteilung nach RL 2008/48/EG): Amtliches
+        Beispieldokument — EUR-Lex-Fundstelle noch nicht verifiziert (Abruf am 24.11.2026
+        durch Zugriffsprüfung blockiert; die verbreitete Fundstellen-Angabe „ABl. C 127,
+        4.5.2012“ konnte nicht bestätigt werden — Heft C 127 v. 1.5.2012 enthält die
+        Mitteilung nicht).</p>
       </div>
     </details>
     <div style="margin-top:0.5em">
@@ -340,7 +361,7 @@
     return (lo + hi) / 2;
   }
 
-  // -------------------------------- PAngV 2011/heute (Gesamtkreditkosten-Formel)
+  // ---------------------------- PAngV 2011/2026 (Gesamtkreditkosten-Formel)
   /*
    * Heutige Rechtslage (Anlage zu § 16 PAngV, Umsetzung der Verbraucherkredit-
    * richtlinie 2008/48/EG; fortgeführt durch RL (EU) 2023/2225 „CCD2", seit
@@ -740,7 +761,7 @@ document.getElementById('effKnopf').onclick = function () {
   const e = beideEffektivzins(flows);
   const f = function (x) { return x === null ? '—' : deZahl(x * 100, 4) + ' % p.a.'; };
   document.getElementById('effAnzeige').innerHTML =
-    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD): <b>' + f(e.eg) + '</b> &nbsp;·&nbsp; PAngV 2011/heute: <b>' + f(e.heu) + '</b>';
+    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD): <b>' + f(e.eg) + '</b> &nbsp;·&nbsp; PAngV 2011/2026: <b>' + f(e.heu) + '</b>';
 };
 document.getElementById('kontoKnopf').onclick = function () {
   tabelleLesen();

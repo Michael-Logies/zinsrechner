@@ -152,6 +152,6 @@ const pah366 = ZZR.effPAngVHeu([
 ]);
 assert.ok(Math.abs(pah366 - 0.10) < 1e-9, 'PAngV-heute 366/366 nicht exakt 10 %: ' + pah366);
 const pahGold = ZZR.effPAngVHeu(flows);
-console.log('PAngV 2011/heute (Goldmaster):', (pahGold * 100).toFixed(6), '% p.a.  (kein Original-Referenzwert — Methode kam 2007 noch nicht; Identitätstests 365/365 und 366/366 grün)');
+console.log('PAngV 2011/2026 (Goldmaster):', (pahGold * 100).toFixed(6), '% p.a.  (kein Original-Referenzwert — Methode kam 2007 noch nicht; Identitätstests 365/365 und 366/366 grün)');
 
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');

@@ -227,7 +227,7 @@
     return (lo + hi) / 2;
   }
 
-  // -------------------------------- PAngV 2011/heute (Gesamtkreditkosten-Formel)
+  // ---------------------------- PAngV 2011/2026 (Gesamtkreditkosten-Formel)
   /*
    * Heutige Rechtslage (Anlage zu § 16 PAngV, Umsetzung der Verbraucherkredit-
    * richtlinie 2008/48/EG; fortgeführt durch RL (EU) 2023/2225 „CCD2", seit
