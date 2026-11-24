@@ -123,5 +123,9 @@ assert.ok(Math.abs(ewWert - 73303508.71) <= 0.01, 'Endwert weicht ab: ' + ewWert
 const bwWert = ZZR.barwert(flows, 0.55, flows[1].datum);
 console.log('Barwert (55 %, 01.01.2000):', bwWert.toFixed(2), 'EUR  | Original: 102208.33');
 assert.ok(Math.abs(bwWert - 102208.33) <= 0.5, 'Barwert weicht ab: ' + bwWert.toFixed(2));
+// Zweitmessung 10 % (24.11.2026): Struktur bestätigt, Residual = interne Rundung
+const bw10 = ZZR.barwert(flows, 0.10, flows[1].datum);
+console.log('Barwert (10 %, 01.01.2000):', bw10.toFixed(2), 'EUR  | Original: 96091.06');
+assert.ok(Math.abs(bw10 - 96091.06) <= 2.0, 'Barwert 10 % weicht ab: ' + bw10.toFixed(2));
 
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');
