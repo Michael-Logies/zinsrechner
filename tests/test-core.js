@@ -161,4 +161,16 @@ const tSWD = ZZR.jahreActAct(ZZR.toOrdinal(2012, 12, 1), ZZR.toOrdinal(2013, 2, 
 console.log('Zeit 1.12.2012→2.2.2013:', tSWD.toFixed(12), '| amtlich: 2/12+1/366 =', (2 / 12 + 1 / 366).toFixed(12));
 assert.ok(Math.abs(tSWD - (2 / 12 + 1 / 366)) < 1e-12, 'Remark-(C)-Zeitbeispiel weicht ab: ' + tSWD);
 
+// 14) Kredit-Richtung für PAngV (alt): Nutzerwedel +12000, −1050×12 (Fallende
+//     Restsaldo-Richtung — Bisektion mit umgekehrtem Vorzeichen nötig)
+const kreditFlows = [
+  { datum: ZZR.toOrdinal(2026, 1, 1), betrag: 12000, notiz: 'Auszahlung' },
+  { datum: ZZR.toOrdinal(2026, 12, 31), betrag: -1050, notiz: '' }
+];
+const pahKredit = ZZR.effPAngV(kreditFlows);
+console.log('EFF PAngV (Kredit-Fall):', pahKredit === null ? 'NULL' : (pahKredit * 100).toFixed(6), '% p.a.');
+assert.ok(pahKredit !== null, 'Kredit-Fall liefert null');
+const restKredit = ZZR.kontoSimulation(kreditFlows, pahKredit).restsald;
+assert.ok(Math.abs(restKredit) < 0.01, 'Konto geht beim PAngV-Ergebnis nicht auf 0: ' + restKredit.toFixed(2));
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');

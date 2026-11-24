@@ -422,10 +422,18 @@
     }
     let lo = -0.9999, hi = 10, flo = rest(lo), fhi = rest(hi);
     if (!(flo < 0 && fhi > 0)) {
-      // Richtung/Bereich bereinigen
-      if (flo > 0) { // Vorzeichen invertieren (Kontorichtung)
-        return null;
+      // FALLende Richtung (Kredit): Restsaldo positiv am unteren Rand, negativ
+      // am oberen — der Konto-Saldo ist eine Schuld, die mit steigendem Zins
+      // wächst. Bisektion mit umgekehrter Richtung:
+      if (flo > 0 && fhi < 0) {
+        for (let it = 0; it < 200; it++) {
+          const mid = (lo + hi) / 2, fm = rest(mid);
+          if (fm > 0) { lo = mid; } else { hi = mid; }
+          if (hi - lo < 1e-14) break;
+        }
+        return (lo + hi) / 2;
       }
+      // steigende Richtung, aber Saldo wächst auch bei hi noch nicht über 0:
       let ok = false;
       for (let h = 10; h <= 1e6; h *= 10) { fhi = rest(h); hi = h; if (fhi > 0) { ok = true; break; } }
       if (!ok) return null;
