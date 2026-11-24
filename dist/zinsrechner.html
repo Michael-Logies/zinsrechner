@@ -77,11 +77,12 @@
         <p><b>PAngV 2011/2026 — Gesamtkreditkosten (heutiges Recht).</b> Anlage zu § 16 PAngV
         (aus der Verbraucherkreditrichtlinie 2008/48/EG, fortgeführt durch die Richtlinie
         (EU) 2023/2225, anwendbar seit 20.11.2026): Barwert der Auszahlungen = Barwert aller
-        Rückzahlungen (Tilgung, Zinsen, Kosten). Die Zeiten in Jahren rechnen mit
-        kalendergenauen Zinstagen — amtlich: „365 Tage (beziehungsweise für ein Schaltjahr
-        366 Tage)“; jeder Tag gehört zu dem Kalenderjahr, in dem er liegt, und wird durch
-        dessen Jahreslänge geteilt (Beginn des Zeitraums zählt, Ende nicht). Für ein echtes
-        Darlehen (eine Auszahlung B, Rückzahlungen A<sub>k</sub>) lautet die amtliche Gleichung
+        Rückzahlungen (Tilgung, Zinsen, Kosten). Die Zeiträume in Jahren zählen ganze Monate
+        rückwärts vom Zahlungstag („1 Monat“ = 1/12 Jahr — unabhängig von seiner tatsächlichen
+        Länge); übrige Tage werden durch die Jahreslänge des Kalenderjahres geteilt, das am
+        Monatsanker endet (365 bzw. 366 Tage, rückwärts bis zum gleichen Tag des Vorjahres).
+        Amtliches Zeitbeispiel des Kommissions-Leitfadens: 1.12.2012 → 2.2.2013 = 2/12 + 1/366.
+        Für ein echtes Darlehen (eine Auszahlung B, Rückzahlungen A<sub>k</sub>) lautet die amtliche Gleichung
         Σ A<sub>k</sub>·(1+X)<sup>−t<sub>k</sub></sup> = B; bei allgemeinen Zahlungsmixen entspricht
         sie der obigen Barwert-Gleichung. Amtliche Anzeige-Rundung: zwei Nachkommastellen —
         diese Fläche zeigt vier Stellen zur Genauigkeitskontrolle. Der Original-ZZR (2007)
@@ -102,11 +103,12 @@
         <a href="https://eur-lex.europa.eu/eli/dir/2023/2225/oj">eur-lex.europa.eu/eli/dir/2023/2225/oj</a> ·
         PAngV-Fassungen und Änderung 12.5.2026 (BGBl. 2026 I Nr. 139, Kraft 20.11.2026):
         <a href="https://www.buzer.de/s1.htm?g=PAngV&amp;f=1">buzer.de — PAngV-Übersicht</a>.
-        Kommissions-Rechenbeispiele (Mitteilung nach RL 2008/48/EG): Amtliches
-        Beispieldokument — EUR-Lex-Fundstelle noch nicht verifiziert (Abruf am 24.11.2026
-        durch Zugriffsprüfung blockiert; die verbreitete Fundstellen-Angabe „ABl. C 127,
-        4.5.2012“ konnte nicht bestätigt werden — Heft C 127 v. 1.5.2012 enthält die
-        Mitteilung nicht).</p>
+        Kommissions-Leitfaden und Zeitbeispiele (RL 2008/48/EG): Arbeitsdokument
+        SWD(2012) 128 final v. 8.5.2012 „Guidelines on the application of Directive
+        2008/48/EC … Annual Percentage Rate of Charge“ —
+        <a href="https://ec.europa.eu/transparency/documents-register/api/files/SWD(2012)128_0/de00000000562627">ec.europa.eu/transparency/documents-register (PDF, amtlich)</a>.
+        (Die in der Literatur verbreitete Angabe „ABl. C 127, 4.5.2012“ konnte nicht
+        bestätigt werden — Heft C 127 v. 1.5.2012 enthält die Mitteilung nicht.)</p>
       </div>
     </details>
     <div style="margin-top:0.5em">
@@ -381,18 +383,22 @@
    * punkte); die Fläche zeigt vier Stellen zur Genauigkeitskontrolle.
    */
   function jahreActAct(d0, d) {
-    // halb-offenes Intervall [d0, d): der Starttag zählt, der Endtag nicht —
-    // so bekommt ein 366-Tage-Intervall innerhalb eines Schaltjahres exakt
-    // 366/366 = 1,0 Jahre (ICMA/ISDA act/act-Attribution je Kalenderjahr)
-    let jahre = 0, von = d0, y = fromOrdinal(d0).y;
-    while (von < d) {
-      const jahresendeExkl = toOrdinal(y, 12, 31) + 1;
-      const bis = Math.min(jahresendeExkl, d);
-      jahre += (bis - von) / (isLeap(y) ? 366 : 365);
-      von = bis;
-      y += 1;
-    }
-    return jahre;
+    // Remark (C), SWD(2012) 128 final — Kommissions-Leitfaden zur APR-Berechnung
+    // (https://ec.europa.eu/transparency/documents-register/api/files/SWD(2012)128_0/
+    //  de00000000562627): Ganze Monate werden vom Zahlungstag RÜCKWÄRTS gezählt
+    // (m/12 Jahre — „1 Monat" ist 1/12, nicht 28-31 Tage), die Resttage (ohne den
+    // ersten, einschließlich des letzten) teilen durch die Jahreslänge des
+    // Kalenderjahres, das am Monatsanker endet (rückwärts bis zum gleichen Tag des
+    // Vorjahres — 365 oder 366). Amtliches Zeitbeispiel des SWD: 1.12.2012 →
+    // 2.2.2013 = 2/12 + 1/366.
+    let m = fromOrdinal(d).y * 12 + fromOrdinal(d).m -
+            (fromOrdinal(d0).y * 12 + fromOrdinal(d0).m);
+    let anchor = addMonths(d, -m);
+    if (anchor < d0) { m -= 1; anchor = addMonths(d, -m); }
+    const rest = anchor - d0;
+    const ay = fromOrdinal(anchor);
+    const vorjahr = toOrdinal(ay.y - 1, ay.m, Math.min(ay.d, daysInMonth(ay.y - 1, ay.m)));
+    return m / 12 + rest / (anchor - vorjahr);
   }
   function effPAngVHeu(flows) {
     if (flows.length === 0) return null;
@@ -667,7 +673,7 @@
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
     effEG, effPAngV, kontoSimulation, kontoAIBD,
-    loeseRatenhoehe, endwert, barwert, effPAngVHeu
+    loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.ZZR = API;

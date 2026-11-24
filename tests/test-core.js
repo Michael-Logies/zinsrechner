@@ -154,4 +154,11 @@ assert.ok(Math.abs(pah366 - 0.10) < 1e-9, 'PAngV-heute 366/366 nicht exakt 10 %:
 const pahGold = ZZR.effPAngVHeu(flows);
 console.log('PAngV 2011/2026 (Goldmaster):', (pahGold * 100).toFixed(6), '% p.a.  (kein Original-Referenzwert — Methode kam 2007 noch nicht; Identitätstests 365/365 und 366/366 grün)');
 
+// Amtliches Zeitbeispiel aus Remark (C), SWD(2012) 128 final: 1.12.2012 →
+// 2.2.2013 = 2/12 + 1/366 (ganze Monate rückwärts, Resttag/Jahreslänge des
+// Kalenderjahres am Monatsanker — Schaltjahr, weil 2.12.2011→2.12.2012 366 Tage)
+const tSWD = ZZR.jahreActAct(ZZR.toOrdinal(2012, 12, 1), ZZR.toOrdinal(2013, 2, 2));
+console.log('Zeit 1.12.2012→2.2.2013:', tSWD.toFixed(12), '| amtlich: 2/12+1/366 =', (2 / 12 + 1 / 366).toFixed(12));
+assert.ok(Math.abs(tSWD - (2 / 12 + 1 / 366)) < 1e-12, 'Remark-(C)-Zeitbeispiel weicht ab: ' + tSWD);
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');

@@ -247,18 +247,22 @@
    * punkte); die Fläche zeigt vier Stellen zur Genauigkeitskontrolle.
    */
   function jahreActAct(d0, d) {
-    // halb-offenes Intervall [d0, d): der Starttag zählt, der Endtag nicht —
-    // so bekommt ein 366-Tage-Intervall innerhalb eines Schaltjahres exakt
-    // 366/366 = 1,0 Jahre (ICMA/ISDA act/act-Attribution je Kalenderjahr)
-    let jahre = 0, von = d0, y = fromOrdinal(d0).y;
-    while (von < d) {
-      const jahresendeExkl = toOrdinal(y, 12, 31) + 1;
-      const bis = Math.min(jahresendeExkl, d);
-      jahre += (bis - von) / (isLeap(y) ? 366 : 365);
-      von = bis;
-      y += 1;
-    }
-    return jahre;
+    // Remark (C), SWD(2012) 128 final — Kommissions-Leitfaden zur APR-Berechnung
+    // (https://ec.europa.eu/transparency/documents-register/api/files/SWD(2012)128_0/
+    //  de00000000562627): Ganze Monate werden vom Zahlungstag RÜCKWÄRTS gezählt
+    // (m/12 Jahre — „1 Monat" ist 1/12, nicht 28-31 Tage), die Resttage (ohne den
+    // ersten, einschließlich des letzten) teilen durch die Jahreslänge des
+    // Kalenderjahres, das am Monatsanker endet (rückwärts bis zum gleichen Tag des
+    // Vorjahres — 365 oder 366). Amtliches Zeitbeispiel des SWD: 1.12.2012 →
+    // 2.2.2013 = 2/12 + 1/366.
+    let m = fromOrdinal(d).y * 12 + fromOrdinal(d).m -
+            (fromOrdinal(d0).y * 12 + fromOrdinal(d0).m);
+    let anchor = addMonths(d, -m);
+    if (anchor < d0) { m -= 1; anchor = addMonths(d, -m); }
+    const rest = anchor - d0;
+    const ay = fromOrdinal(anchor);
+    const vorjahr = toOrdinal(ay.y - 1, ay.m, Math.min(ay.d, daysInMonth(ay.y - 1, ay.m)));
+    return m / 12 + rest / (anchor - vorjahr);
   }
   function effPAngVHeu(flows) {
     if (flows.length === 0) return null;
@@ -533,7 +537,7 @@
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
     effEG, effPAngV, kontoSimulation, kontoAIBD,
-    loeseRatenhoehe, endwert, barwert, effPAngVHeu
+    loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.ZZR = API;
