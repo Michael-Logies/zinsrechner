@@ -219,10 +219,10 @@ document.getElementById('endwertKnopf').onclick = function () {
   const rate = zahl(document.getElementById('ewZins').value) / 100;
   const sText = document.getElementById('ewStichtag').value.trim();
   const stichtag = sText ? parseDatum(sText) : flows[flows.length - 1].datum;
-  const v = ZZR.endwert(flows, rate, stichtag);
+  const v = ZZR.endwert(flows, rate, stichtag, proj.methode);
   document.getElementById('ewAnzeige').innerHTML = (v === null)
     ? 'Endwert ohne Ergebnis (Ströme prüfen).'
-    : 'Endwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a.: <b>' + deZahl(v, 2) + '</b>';
+    : 'Endwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a. (' + (proj.methode === 0 ? 'AIBD' : 'PAngV') + '-Konto): <b>' + deZahl(v, 2) + '</b>';
 };
 document.getElementById('barwertKnopf').onclick = function () {
   tabelleLesen();
@@ -230,10 +230,10 @@ document.getElementById('barwertKnopf').onclick = function () {
   const rate = zahl(document.getElementById('ewZins').value) / 100;
   const sText = document.getElementById('ewStichtag').value.trim();
   const stichtag = sText ? parseDatum(sText) : flows[0].datum;
-  const v = ZZR.barwert(flows, rate, stichtag);
+  const v = ZZR.barwert(flows, rate, stichtag, proj.methode);
   document.getElementById('ewAnzeige').innerHTML = (v === null)
     ? 'Barwert ohne Ergebnis (Ströme prüfen).'
-    : 'Barwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a.: <b>' + deZahl(v, 2) + '</b>';
+    : 'Barwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a. (' + (proj.methode === 0 ? 'AIBD' : 'PAngV') + '-Abzinsung): <b>' + deZahl(v, 2) + '</b>';
 };
 document.getElementById('druckKnopf').onclick = function () { window.print(); };
 document.getElementById('dateiLaden').onchange = function (ev) {

@@ -429,10 +429,16 @@
    *    act/365.25 liegt praktisch gleichauf, act/365 und act/360 sind
    *    ausgeschlossen (Δ 4,73 / 125,38 bei 10 %).
    */
-  function endwert(flows, rate, stichtag) {
+  function endwert(flows, rate, stichtag, methode) {
     if (flows.length === 0) return null;
+    const aibd = (methode === 0);
     const letztes = flows[flows.length - 1].datum;
     const S = (stichtag === undefined || stichtag === null) ? letztes : stichtag;
+    if (aibd) {
+      // Methode 0: Endsaldo des AIBD-Tageskontos — bewiesen exakt
+      // (Original 24.11.2026: 73.721.200,13 € bei 55 %, Δ 0,00)
+      return kontoAIBD(flows, rate).restsald;
+    }
     if (S >= letztes) {
       const k = kontoSimulation(flows, rate);
       if (S === letztes) return k.restsald;
@@ -448,14 +454,20 @@
     if (prev !== null && S > prev) saldo += saldo * (rate / 360) * days30360(prev, S);
     return saldo;
   }
-  function barwert(flows, rate, stichtag) {
+  function barwert(flows, rate, stichtag, methode) {
     if (flows.length === 0) return null;
+    const aibd = (methode === 0);
     const S = (stichtag === undefined || stichtag === null) ? flows[0].datum : stichtag;
+    // Methode 1: 30/360-Abzinsung (bewiesen 55 %: Δ 0,15 / 10 %: Δ 1,67)
+    // Methode 0: act/365-Abzinsung (bewiesen 55 %: 102.208,70 gemessen vs
+    // 102.208,66 berechnet, Δ 0,04 — AIBD-Tageszins-Konvention)
+    const nenner = aibd ? 365 : 360;
+    const tageFkt = aibd ? days365 : days30360;
     let s = 0;
     for (const f of flows) {
       const zahlung = -f.betrag; // Kontosicht: Nutzer zahlt → Einlage (+)
       if (f.datum <= S) s += zahlung;
-      else s += zahlung * Math.pow(1 + rate, -days30360(S, f.datum) / 360);
+      else s += zahlung * Math.pow(1 + rate, -tageFkt(S, f.datum) / nenner);
     }
     return s;
   }

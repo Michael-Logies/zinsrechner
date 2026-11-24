@@ -128,4 +128,14 @@ const bw10 = ZZR.barwert(flows, 0.10, flows[1].datum);
 console.log('Barwert (10 %, 01.01.2000):', bw10.toFixed(2), 'EUR  | Original: 96091.06');
 assert.ok(Math.abs(bw10 - 96091.06) <= 2.0, 'Barwert 10 % weicht ab: ' + bw10.toFixed(2));
 
+// 12) AIBD-Abhängigkeit von End-/Barwert (Original-Messung 24.11.2026, Probe
+//     Methode 0, Zins 55 %): Endwert = AIBD-Konto-Endsaldo (EXAKT Δ 0,00),
+//     Barwert = act/365-Abzinsung (Δ 0,04)
+const ewAibd = ZZR.endwert(flows, 0.55, undefined, 0);
+console.log('Endwert AIBD (55 %, 01.01.2015):', ewAibd.toFixed(2), 'EUR  | Original: 73721200.13');
+assert.ok(Math.abs(ewAibd - 73721200.13) <= 0.01, 'Endwert AIBD weicht ab: ' + ewAibd.toFixed(2));
+const bwAibd = ZZR.barwert(flows, 0.55, flows[1].datum, 0);
+console.log('Barwert AIBD (55 %, 01.01.2000):', bwAibd.toFixed(2), 'EUR  | Original: 102208.70');
+assert.ok(Math.abs(bwAibd - 102208.70) <= 0.2, 'Barwert AIBD weicht ab: ' + bwAibd.toFixed(2));
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');
