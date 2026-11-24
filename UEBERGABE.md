@@ -59,6 +59,27 @@ Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
    statt Tageszählung (vs. Goldmaster) — ±0,04 € Rauschen in PAngV-Tests akzeptiert;
    wer Pixelparität will, muss die Original-Kumulierung nochmal verifizieren.
    (AIBD-Konto: keine Abweichung — max 0,005 € = reine Anzeigerundung.)
+5. **AIBD-Abhängigkeit von End-/Barwert — GEMESSEN UND IMPLEMENTIERT 24.11.2026**:
+   Das Original rechnet End-/Barwert MIT der EZ-Methode der Datei:
+   - Methode 1 (PAngV): Endwert = PAngV-Konto-Endsaldo (73.303.508,71 € @55 %);
+     Barwert = 30/360-Abzinsung (102.208,33 € @55 %)
+   - Methode 0 (AIBD): Endwert = AIBD-Tageskonto-Endsaldo (**73.721.200,13 € @55 % —
+     Kern kontoAIBD EXAKT, Δ 0,00**); Barwert = act/365-Abzinsung (102.208,70 € @55 %;
+     Kern 102.208,66, Δ 0,04)
+   - Kern: `endwert`/`barwert` nehmen Methode-Parameter; HTML übergibt `proj.methode`.
+6. **Rechtsstand-Recherche 24.11.2026 (Nutzerfrage)**: Die vom ZZR zitierten Vorgaben
+   sind veraltet — die EG-Richtlinie (ABl. C155/9 v. 23.06.1989) lief über 98/7/EG und
+   2008/48/EG (Verbraucherkreditrichtlinie; neue Gesamtkreditkosten-Formel, Deutschland
+   PAngV 2010/2011, internem Zinsfuß schon seit ~2000) zur Richtlinie (EU) 2023/2225
+   (CCD2, anwendbar seit 20.11.2026); die deutsche PAngV: Neufassung 12.11.2021 (Kraft
+   28.05.2022), letzte Änderung Art. 8 G v. 12.5.2026 (Kraft 20.11.2026 = CCD2-
+   Anwendungsdatum). Aktuelle Formel (Anlage zu § 16 PAngV): Σ C_k(1+X)^(-t_k) =
+   Σ D_l(1+X)^(-s_l) mit t in Jahren = Tage/365 (Schaltjahr 366) — act/act. Die
+   Vergleichskonto-Methode des ZZR ist seit 2010/2011 aufgehoben; als historische
+   Methode im Rechner behalten. **Nicht umgesetzt (Vorschlag): `effPAngVHeu` — die
+   heutige Effektivzinsformel als dritte Methode (act/act-Variante von effEG);
+   Verifizierung gegen die amtlichen Kommissions-Rechenbeispiele (ABl. C 127/2,
+   4.5.2012) und evtl. Interpolationszins (BaFin-Merkblatt, mehrere Sollzinssätze).**
 
 ## Befehle
 
