@@ -45,9 +45,11 @@ Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
    - **Endwert(Stichtag 01.01.2015, 55 %) = 73.303.508,71 € = Endsaldo des PAngV-Vergleichskontos
      mit dem frei gewählten Zins** — Kern `endwert()` EXAKT (Δ 0,00 €).
    - **Barwert(Stichtag 01.01.2000, 55 %) = 102.208,33 €** = vergangene Zahlungen zum Nennwert +
-     künftige abgezinst mit (1+r)^(−Tage30/360/360) — Kern `barwert()` Δ 0,15 € (Restunsicherheit
-     in der Tageszählung der Zukunftszahlungen; zweiter Messpunkt, z. B. Zins 10 %, steht aus —
-     Prognosen dafür stehen in ~/zzr-analyse/bw-formel.js).
+     künftige abgezinst mit (1+r)^(−Tage30/360/360) — Kern `barwert()` Δ 0,15 €.
+   - **ZWEITMESSUNG 24.11. (Zins 10 %): Barwert = 96.091,06 €** — Kern 30/360 Δ −1,67 €;
+     act/365.25 praktisch gleichauf (−1,28 €); act/365 (+4,73 €) und act/360 (+125 €) AUSGESCHLOSSEN.
+     Struktur bei beiden Zinssätzen bestätigt; Residual < 0,002 % = programminterne Cent-Rundung.
+     Beide Messpunkte im Test verankert (Toleranz 0,5/2 €).
    - HTML-Fläche: Feld Stichtag/Zins + Endwert-/Barwert-Knopf (Berechnung-Gruppe).
    - HINWEIS Orakel: Zinssatz-Dialog ist mit „5“ vorbelegt — Eingaben APPENDEN (unser „5“→„55“-
      Vorfall); Feld vor dem Tippen leeren (End+Backspace). Nach Stichtag-OK fragt ein ZWEITER
