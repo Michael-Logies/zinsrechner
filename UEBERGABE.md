@@ -1,15 +1,17 @@
-# Übergabe ZZR-Neubau (Stand 24.11.2026, ~21:00)
+# Übergabe ZZR-Neubau (Stand 24.11.2026, ~21:40)
 
-**Kurzstand für den nächsten Kontext:** Alle Kernfunktionen Goldmaster-GRÜN (18 Testblöcke
+**Kurzstand für den nächsten Kontext:** Alle Kernfunktionen Goldmaster-GRÜN (19 Testblöcke
 in tests/test-core.js) — PAngV-alt, EG/AIBD, effPAngVHeu (heutige Rechtslage), End-/Barwert
 (beide Methoden), Aktiv-Häkchen-Fix, Raster-Wurzelsuche für alle Kontorichtungen,
 EU-Verbraucherinformationsblatt, AGPL + README. **NEU 24.11. abends: Ultimo-Semantik
 bewiesen und implementiert, gebrochene Raten, 30/360-Februarregel, Kalender-Bugfix
 (Februar = 28 Tage), Löser-BSP_1-Referenzpunkt 1.375,57 DM, Zahlungsplan-Ansicht +
-Laufzeit.** Orakel-Gegenprobe auf Dateiebene bestanden (tests/vk1-ultimo-u1.txt, 8 Zeilen
-≤ 0,0046 €). Repo sauber, nichts Blockierendes. **Fortsetzungsbefehl: „Lies
-/home/ml/zinsrechner/UEBERGABE.md und setze die Arbeit am ZZR-Neubau fort."** Voller
-Wissensstand: Memory-MCP #1467 + neue Notiz „ZZR-Orakel 24.11 abends" (Tags zzr).
+Laufzeit (3 Konventionen), und ALLE 7 Zielgrößen-Löser des Originals (Ratenhöhe,
+Ratenanzahl gebrochen, Zahlungsdatum, Ratenabstand, Dynamik %/absolut, Stufenzahl —
+BSP_3/4/6-Referenzzahlen aus der Zzr.hlp exakt getroffen).** Orakel-Gegenprobe auf
+Dateiebene bestanden (tests/vk1-ultimo-u1.txt, 8 Zeilen ≤ 0,0046 €). Repo sauber, nichts
+Blockierendes. **Fortsetzungsbefehl: „Lies /home/ml/zinsrechner/UEBERGABE.md und setze
+die Arbeit am ZZR-Neubau fort."** Voller Wissensstand: Memory-MCP #1467 + #1479 (Tags zzr).
 
 ## Was steht (alles committet in ~/zinsrechner, lokal, kein Push)
 
@@ -117,12 +119,17 @@ fensterfoto. MDI-Struktur: Hauptfenster „Zuckers Zins Rechner" + Kinder
 6. **Ultimo=0-Zweig und gebrochene Raten**: im Hilfetext eindeutig dokumentiert und
    implementiert, aber nicht separat per Orakel gefahren (Proben probe-ultimo-u3 /
    probe-bruch-u2 liegen bereit; Ablauf wie bei u1)
-7. **5 weitere Löser des Originals** (aus Zzr.hlp belegt): Ratenanzahl (exakt, kann
-   gebrochen zurückgeben!), Zahlungsdatum (Tage-Näherung), Ratenabstand (Monats-Näherung),
-   Dynamik absolut/prozentual (exakt), Stufenzahl (Näherung). Plus: Folge-Ströme
-   verschieben-Nachfrage, Schlußraten über gebrochene Ratenzahl, „Fenster"-Verwaltung.
-   BSP-Referenzpunkte aus der Hilfe: BSP_3 Datum→20.03.2003 @3 %, BSP_4 Abstand→36
-   Monate @5 %, BSP_6 Dynamik→6,46 % @5 % (alle DM-Zahlen in der Hilfe!)
+7. ~~**5 weitere Löser des Originals**~~ **ERLEDIGT 24.11. ~21:40 (Commit fce6e25)**:
+   Ratenanzahl (exakt, gebrochen — letzte Rate trägt den Bruchteil; optional Folgestrom-
+   Verschiebung wie BSP_2), Zahlungsdatum (Tage-Näherung, BSP_3 → 20.03.2003/2,9997 %
+   exakt), Ratenabstand (Monats-Näherung, BSP_4 → 36 exakt), Dynamik absolut/prozentual
+   (exakt, BSP_6 → 6,46 % exakt), Stufenzahl (Näherung). Einheitlicher Sucher
+   `loeseZielgroesse` (gerichtete Wanderung + Bisektion; null = Gültigkeitsbereichsende).
+   Fläche: Zielgrößen-Auswahl (7 Einträge), „Folge-Ströme mitschieben"-Kästchen,
+   Ergebnisse werden wie im Original in den Strom eingetragen. `laufzeit(d1,d2,2)` =
+   heutige Zählung (Remark C); Zahlungsplan-Kopf zeigt sie zusätzlich an. Nicht gebaut
+   aus dem Original-Umfang: Steuer-Berechnungen, Bausparkassen-Simulation, BSB-Benchmark,
+   „Analyse in ZA kopieren" (Zwischenablage-Text), Taschenrechner-Button, Datei-Anhänge.
 8. **Interpolationszins** (BaFin-Merkblatt, mehrere Sollzinssätze) — offen wie gehabt
 9. **Vollständiges EU-Formular** (Anhang I der finalen CCD2 statt COM(2021)347-Entwurf) — offen
 10. **Feinschliff Rundung**: ±0,04 € PAngV-Rauschen (Monatsrhythmus ab Jahr 2) — akzeptiert
