@@ -40,10 +40,19 @@ Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
 1. ~~EG-Methode kalibrieren~~ **ERLEDIGT 24.11.2026** (siehe oben; AIBD-Export
    unter Wine über Datei►Speichern unter… geholt).
 2. **Ultimo-Detail**: Feld vorhanden, Semantik nur für Löser relevant — unaufgeklärt.
-3. **Barwerte/Endwerte-Blätter**: Original hatte Barwerte-/Endwertekurven-Exporte;
-   Kern hat `barwerte`/`endwerte` (unverifiziert gegen Original — Messung unter Wine
-   möglich: Analyse►Endwert-/Barwertberechnung►; die Menüpunkte existieren, wurden
-   24.11. im Analyse-Menü gesichtet).
+3. ~~**Barwerte/Endwerte-Blätter**~~ **GEMESSEN UND IMPLEMENTIERT 24.11.2026** (Original-Dialoglogik:
+   Analyse►Endwert-/Barwertberechnung►der Ein- & Auszahlungen → Stichtag-Dialog → Zinssatz-Dialog → Info-Box):
+   - **Endwert(Stichtag 01.01.2015, 55 %) = 73.303.508,71 € = Endsaldo des PAngV-Vergleichskontos
+     mit dem frei gewählten Zins** — Kern `endwert()` EXAKT (Δ 0,00 €).
+   - **Barwert(Stichtag 01.01.2000, 55 %) = 102.208,33 €** = vergangene Zahlungen zum Nennwert +
+     künftige abgezinst mit (1+r)^(−Tage30/360/360) — Kern `barwert()` Δ 0,15 € (Restunsicherheit
+     in der Tageszählung der Zukunftszahlungen; zweiter Messpunkt, z. B. Zins 10 %, steht aus —
+     Prognosen dafür stehen in ~/zzr-analyse/bw-formel.js).
+   - HTML-Fläche: Feld Stichtag/Zins + Endwert-/Barwert-Knopf (Berechnung-Gruppe).
+   - HINWEIS Orakel: Zinssatz-Dialog ist mit „5“ vorbelegt — Eingaben APPENDEN (unser „5“→„55“-
+     Vorfall); Feld vor dem Tippen leeren (End+Backspace). Nach Stichtag-OK fragt ein ZWEITER
+     Dialog (Verzinsung) nach dem Zins — nicht wundern. Ergebnis = Info-Box (Fenster läuft
+     aus dem Bild, per xdriver holen).
 4. **Feinschliff Rundung**: Live-Wine-Konto akkumuliert ab Jahr 2 mit Monatsrhythmus
    statt Tageszählung (vs. Goldmaster) — ±0,04 € Rauschen in PAngV-Tests akzeptiert;
    wer Pixelparität will, muss die Original-Kumulierung nochmal verifizieren.
