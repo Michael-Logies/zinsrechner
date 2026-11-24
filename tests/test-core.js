@@ -346,4 +346,37 @@ assert.strictEqual(lz2.jahre + '/' + lz2.monate + '/' + lz2.tage, '0/5/152',
   'Laufzeit PAngV 2011/2026 weicht ab: ' + JSON.stringify(lz2));
 console.log('Zielgrößen-Löser (Datum/Abstand/Dynamik/Ratenanzahl/Stufenzahl) + Laufzeit 2011/2026: grün — BSP_3/4/6 exakt nach Zzr.hlp');
 
-console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');
+// ---------------------------------------------------------------------------
+// Orakel-Referenzen 24.11.2026 (Wine-Original; Exporte tests/orakel-*.txt).
+// Probe ultimo-u3 (Ultimo=0, Anker 30.11.1999) — Original-AIBD-Konto (u3a.txt):
+// Valutas 31.10 | 30.11 | 30.12 | 30.01 | 29.02 | 30.03 | 30.04 | 30.04,
+// EFF 0,7431 % p.a. Der Kern expandiert exakt dieselben Daten (29.02 =
+// Monatsende-Kappung) und trifft ALLE DREI EFF-Werte des Originals:
+const u3flows = ZZR.expandiere(ZZR.parseZZR(fs.readFileSync(
+  path.join(__dirname, '..', 'probe-ultimo-u3.zzr'), 'latin1')));
+assert.strictEqual(u3flows.map(f => ZZR.deDate(f.datum)).join(' | '),
+  '31.10.1999 | 30.11.1999 | 30.12.1999 | 30.01.2000 | 29.02.2000 | 30.03.2000 | 30.04.2000 | 30.04.2000',
+  'Ultimo=0-Kappung muss dem Original-Konto entsprechen (29.02 im Schaltjahr)');
+assert.strictEqual((ZZR.effEG(u3flows) * 100).toFixed(4), '0.7431',
+  'u3 AIBD-EFF weicht vom Original ab (orakel-u3-aibd.txt: 0,7431 %)');
+assert.strictEqual((ZZR.effPAngV(u3flows) * 100).toFixed(4), '0.7396',
+  'u3 PAngV-EFF weicht vom Original ab (orakel-u3-pangv.txt: 0,7396 %)');
+assert.strictEqual((ZZR.effAibd360(u3flows) * 100).toFixed(4), '0.7410',
+  'u3 AIBD360-EFF weicht vom Original ab (orakel-u3b-aibd360.txt: 0,7410 %)');
+
+// Probe bruch-u2 (2,5 Raten à 106 DM → Schlußrate 53; orakel-bruch-u2-*.txt):
+const b2flows = ZZR.expandiere(ZZR.parseZZR(fs.readFileSync(
+  path.join(__dirname, '..', 'probe-bruch-u2.zzr'), 'latin1')));
+assert.strictEqual(b2flows.map(f => f.betrag).join('|'), '-10000|106|106|53|9740',
+  'gebrochene Raten: Schlußrate trägt den Bruchteil 0,5');
+assert.strictEqual((ZZR.effPAngV(b2flows) * 100).toFixed(4), '0.2021',
+  'bruch-u2 PAngV-EFF weicht ab (orakel-bruch-u2-pangv.txt: 0,2021 %)');
+assert.strictEqual((ZZR.effEG(b2flows) * 100).toFixed(4), '0.2029',
+  'bruch-u2 AIBD-EFF weicht ab (orakel-bruch-u2-aibd.txt: 0,2029 %)');
+
+// Zweitgrenze am Februar-Ende (orakel-feb-d2-pangv.txt: Valuta 30.02.2000 = 30 Tage):
+assert.strictEqual(ZZR.days30360(ZZR.toOrdinal(2000, 1, 31), ZZR.toOrdinal(2000, 2, 29)), 30,
+  '30/360: 31.01.→29.02. muss 30 Tage zählen (Zweitgrenze als 30 — Orakel feb-d2)');
+console.log('Orakel-Referenzen 24.11.2026 (Ultimo=0, gebrochene Raten, Zweitgrenze, AIBD360): grün — Kern = Original exakt');
+
+console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + AIBD360 + End-/Barwert).');

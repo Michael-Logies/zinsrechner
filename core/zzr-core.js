@@ -286,6 +286,34 @@
     return wurzeln.slice().sort((x, y) => Math.abs(x) - Math.abs(y))[0];
   }
 
+  // ------------------- AIBD 360 (vierte Konto-Variante, 24.11.2026 bewiesen)
+  /*
+   * Das Original-Dropdown nennt vier Varianten: PAngV (alt), AIBD (ISMA),
+   * AIBD 360, PAngV 2000. AIBD 360 ist am Original bewiesen (Orakel 24.11.2026,
+   * Probe ultimo-u3, Export tests/orakel-u3b-aibd360.txt): Effektivzins
+   * 0,7410 % p.a. — exakt die Gleichung
+   *     Σ CF·(1+i)^(-t/360) = 0   mit t = 30/360-Tagezahlen (days30360)
+   * ab der ersten Zahlung, also exponentielle Verzinsung im 30/360-Kalendarium.
+   * AIBD (ISMA) ist dieselbe Formel mit act/365-Tagezahlen (effEG). Nachweis
+   * zugleich in tests/test-core.js (Block „Orakel-Referenzen 24.11.").
+   */
+  function npvAibd360(flows, i) {
+    const S = flows[0].datum;
+    let s = 0;
+    for (const f of flows) {
+      const t = days30360(S, f.datum);
+      s += f.betrag * Math.pow(1 + i, -t / 360);
+    }
+    return s;
+  }
+  function effAibd360(flows) {
+    if (flows.length === 0) return null;
+    const hatVorzeichenwechsel = flows.some(f => f.betrag > 0) && flows.some(f => f.betrag < 0);
+    if (!hatVorzeichenwechsel) return null;
+    const kandidaten = wurzelnSuchen(i => npvAibd360(flows, i), -0.99, 10);
+    return plausibleWurzel(kandidaten);
+  }
+
   // ---------------------------- PAngV 2011/2026 (Gesamtkreditkosten-Formel)
   /*
    * Heutige Rechtslage (Anlage zu § 16 PAngV, Umsetzung der Verbraucherkredit-
@@ -798,7 +826,7 @@
     fromOrdinal, toOrdinal, addMonths, addYears, deDate, isLeap, daysInMonth,
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
-    effEG, effPAngV, kontoSimulation, kontoAIBD,
+    effEG, effPAngV, effAibd360, kontoSimulation, kontoAIBD,
     loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct,
     laufzeit, zahlungsplan,
     loeseRatenanzahl, loeseZahlungsdatum, loeseRatenabstand, loeseDynamik, loeseStufenzahl

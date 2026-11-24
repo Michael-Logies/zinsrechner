@@ -1,0 +1,44 @@
+[Information]
+Typ=ZZR-Datei
+Version=1
+Erzeuger=Zuckers Zins Rechner (Nachbau)
+Titel=feb-d2
+EZ-Methode=1
+Euro=1
+Zahlungsstroeme=3
+
+[Zahlungsstrom1]
+Aktiv=1
+Stufen=1
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 0.00000000000000E+0000
+Realdatum=730059
+Ultimo=0
+Betrag=-1.00000000000000E+0004
+Raten= 1.00000000000000E+0000
+Abstand=1
+Notiz=Anlage 1.12.1999
+
+[Zahlungsstrom2]
+Aktiv=1
+Stufen=1
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 0.00000000000000E+0000
+Realdatum=730150
+Ultimo=0
+Betrag= 1.06000000000000E+0002
+Raten= 1.00000000000000E+0000
+Abstand=1
+Notiz=Rate 31.1.2000
+
+[Zahlungsstrom3]
+Aktiv=1
+Stufen=1
+Dynamik= 0.00000000000000E+0000
+Zuwachs= 0.00000000000000E+0000
+Realdatum=730179
+Ultimo=0
+Betrag= 9.89400000000000E+0003
+Raten= 1.00000000000000E+0000
+Abstand=1
+Notiz=Schluss 29.2.2000
