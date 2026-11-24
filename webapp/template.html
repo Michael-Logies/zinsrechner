@@ -58,6 +58,13 @@
       <button id="loeserKnopf">Ratenhöhe lösen</button>
     </span>
     <div id="effAnzeige" class="ergebnis"></div>
+    <div style="margin-top:0.5em">
+      <label>Endwert/Barwert: Stichtag (TT.MM.JJJJ, leer = letztes/erstes Zahlungsdatum) <input id="ewStichtag" type="text" style="width:7.5em"></label>
+      <label>Zins % <input id="ewZins" type="text" value="5,0" style="width:5em"></label>
+      <button id="endwertKnopf">Endwert</button>
+      <button id="barwertKnopf">Barwert</button>
+      <div id="ewAnzeige" class="ergebnis"></div>
+    </div>
   </fieldset>
 
   <fieldset>
@@ -205,6 +212,28 @@ document.getElementById('loeserKnopf').onclick = function () {
   document.getElementById('effAnzeige').innerHTML = neu === null
     ? 'Löser ohne Ergebnis (Strom/Eingaben prüfen).'
     : 'Ratenhöhe Strom ' + nr + ' bei Zielzins ' + deZahl(ziel * 100, 4) + ' %: <b>' + deZahl(neu, 2) + '</b>';
+};
+document.getElementById('endwertKnopf').onclick = function () {
+  tabelleLesen();
+  const flows = ZZR.expandiere(proj);
+  const rate = zahl(document.getElementById('ewZins').value) / 100;
+  const sText = document.getElementById('ewStichtag').value.trim();
+  const stichtag = sText ? parseDatum(sText) : flows[flows.length - 1].datum;
+  const v = ZZR.endwert(flows, rate, stichtag);
+  document.getElementById('ewAnzeige').innerHTML = (v === null)
+    ? 'Endwert ohne Ergebnis (Ströme prüfen).'
+    : 'Endwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a.: <b>' + deZahl(v, 2) + '</b>';
+};
+document.getElementById('barwertKnopf').onclick = function () {
+  tabelleLesen();
+  const flows = ZZR.expandiere(proj);
+  const rate = zahl(document.getElementById('ewZins').value) / 100;
+  const sText = document.getElementById('ewStichtag').value.trim();
+  const stichtag = sText ? parseDatum(sText) : flows[0].datum;
+  const v = ZZR.barwert(flows, rate, stichtag);
+  document.getElementById('ewAnzeige').innerHTML = (v === null)
+    ? 'Barwert ohne Ergebnis (Ströme prüfen).'
+    : 'Barwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a.: <b>' + deZahl(v, 2) + '</b>';
 };
 document.getElementById('druckKnopf').onclick = function () { window.print(); };
 document.getElementById('dateiLaden').onchange = function (ev) {

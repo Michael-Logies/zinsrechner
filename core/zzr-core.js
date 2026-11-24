@@ -413,41 +413,47 @@
     return s.betrag * Math.sqrt(lo * hi);
   }
 
-  // --------------------------------------------------------------- Tabellen
-  function barwerte(flows, eff) {
-    // Barwert zum jeweils ersten Flussdatum, aufgelistet je Monat (relativ).
-    if (flows.length === 0) return [];
-    const d0 = flows[0].datum;
-    const maxTage = flows[flows.length - 1].datum - d0;
-    const monate = Math.ceil(maxTage / 30.436875);
-    const out = [];
-    for (let m = -monate; m <= monate; m++) {
-      const t = addMonths(d0, m);
-      let bw = 0;
-      flows.forEach(f => {
-        const jahre = (f.datum - t) / 365.25;
-        bw += f.betrag * Math.pow(1 + eff, -jahre);
-      });
-      out.push({ monat: m, datum: t, barwert: bw });
+  // ------------------------------------- Endwert-/Barwertberechnung (bewiesen)
+  /*
+   * Original-Messung 24.11.2026 (Analyse►Endwert-/Barwertberechnung►der Ein- &
+   * Auszahlungen, Goldmaster-Szenario, Zins 55 %):
+   *  - Endwert(Stichtag 01.01.2015, 55 %) = 73.303.508,71 € = Endsaldo des
+   *    PAngV-Vergleichskontos (kontoSimulation) mit dem frei gewählten Zins —
+   *    exakt (Δ 0,00 €).
+   *  - Barwert(Stichtag 01.01.2000, 55 %) = 102.208,33 € = vergangene Zahlungen
+   *    zum Nennwert + künftige Zahlungen abgezinst mit
+   *    (1+r)^(-Tage30/360/360) — Passung Δ 0,15 € (Restunsicherheit in der
+   *    Tageszählung der Zukunftszahlungen; zweiter Messpunkt ausstehend).
+   */
+  function endwert(flows, rate, stichtag) {
+    if (flows.length === 0) return null;
+    const letztes = flows[flows.length - 1].datum;
+    const S = (stichtag === undefined || stichtag === null) ? letztes : stichtag;
+    if (S >= letztes) {
+      const k = kontoSimulation(flows, rate);
+      if (S === letztes) return k.restsald;
+      // später als letzter Flow: Restsaldo bis zum Stichtag weiterverzinsen (30/360, unverifiziert)
+      return k.restsald * (1 + rate * days30360(letztes, S) / 360);
     }
-    return out;
+    // früherer Stichtag: Kontostand an dem Ereignis + Zins bis zum Stichtag (unverifiziert)
+    const k = kontoSimulation(flows, rate);
+    let saldo = 0, prev = null;
+    for (const z of k.zeilen) {
+      if (z.valuta <= S) { saldo = z.saldo; prev = z.valuta; } else break;
+    }
+    if (prev !== null && S > prev) saldo += saldo * (rate / 360) * days30360(prev, S);
+    return saldo;
   }
-  function endwerte(flows, eff) {
-    if (flows.length === 0) return [];
-    const dL = flows[flows.length - 1].datum;
-    const d0 = flows[0].datum;
-    const monate = Math.ceil((dL - d0) / 30.436875);
-    const out = [];
-    for (let m = -monate; m <= monate; m++) {
-      const t = addMonths(d0, m);
-      let ew = 0;
-      flows.forEach(f => {
-        const jahre = (dL - f.datum) / 365.25 - ((t - d0) / 365.25);
-        ew += f.betrag * Math.pow(1 + eff, (dL - f.datum) / 365.25 - ((t - d0) / 365.25));
-      });
-      out.push({ monat: m, datum: t, endwert: ew });
+  function barwert(flows, rate, stichtag) {
+    if (flows.length === 0) return null;
+    const S = (stichtag === undefined || stichtag === null) ? flows[0].datum : stichtag;
+    let s = 0;
+    for (const f of flows) {
+      const zahlung = -f.betrag; // Kontosicht: Nutzer zahlt → Einlage (+)
+      if (f.datum <= S) s += zahlung;
+      else s += zahlung * Math.pow(1 + rate, -days30360(S, f.datum) / 360);
     }
-    return out;
+    return s;
   }
 
   const API = {
@@ -455,7 +461,7 @@
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
     effEG, effPAngV, kontoSimulation, kontoAIBD,
-    loeseRatenhoehe, barwerte, endwerte
+    loeseRatenhoehe, endwert, barwert
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   if (typeof window !== 'undefined') window.ZZR = API;

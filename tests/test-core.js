@@ -113,4 +113,15 @@ for (let i = 0; i < goldAibd.length; i++) {
 console.log('AIBD-Konto: maximale Abweichung über alle Zeilen:', maxAibd.toFixed(4), 'EUR');
 assert.ok(Math.abs(kontoAibd.restsald) < 0.01, 'AIBD Restsaldo ' + kontoAibd.restsald);
 
-console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD).');
+// 11) Endwert/Barwert (Original-Messung 24.11.2026 unter Wine, Zins 55 %):
+//     Endwert(01.01.2015, 55 %) = 73.303.508,71 € (exakt = PAngV-Konto-Endsaldo),
+//     Barwert(01.01.2000, 55 %) = 102.208,33 € (Vergangenheit Nennwert + Zukunft
+//     abgezinst 30/360; Restunsicherheit ±0,15 € — siehe core/zzr-core.js)
+const ewWert = ZZR.endwert(flows, 0.55);
+console.log('Endwert (55 %, 01.01.2015):', ewWert.toFixed(2), 'EUR  | Original: 73303508.71');
+assert.ok(Math.abs(ewWert - 73303508.71) <= 0.01, 'Endwert weicht ab: ' + ewWert.toFixed(2));
+const bwWert = ZZR.barwert(flows, 0.55, flows[1].datum);
+console.log('Barwert (55 %, 01.01.2000):', bwWert.toFixed(2), 'EUR  | Original: 102208.33');
+assert.ok(Math.abs(bwWert - 102208.33) <= 0.5, 'Barwert weicht ab: ' + bwWert.toFixed(2));
+
+console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');
