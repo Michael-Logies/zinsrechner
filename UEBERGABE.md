@@ -111,6 +111,12 @@ Speichern-Dialog daher kurzen NAMEN tippen (Dialog steht im Home) statt Pfad.
   Hilfsfunktion `zeile` (ReferenceError → stummes Scheitern) — ergänzt.
   effKnopf-Label „beide Methoden“ → „3 Methoden“. Veröffentlichungs-Vorabprüfung:
   keine lokalen Pfade/IPs/Keys im Dist ✓.
+- **Aktiv-Fix (Nutzerbefund „funktioniert nicht“)**: die Akt.-Spalte war ein
+  Zahlenfeld, wurde aber als Häkchen gelesen (inp.checked auf Textfeld = immer
+  unwahr) → bei JEDER Aktion wurden alle Zeilen still inaktiv gesetzt (alle
+  Methoden „—“, Blatt leer). Jetzt Häkchen-Spalte wie Ultimo. Nutzer-Beispiel
+  als ~/Downloads/nutzer-beispiel.zzr bereitgestellt (beide Zeilen aktiv;
+  EFF PAngV 2011/2026 = 7,7982 % p.a.).
 
 ## Befehle
 
