@@ -174,7 +174,82 @@ const pahKredit = ZZR.effPAngV(kreditFlows);
 console.log('EFF PAngV (Kredit-Fall):', pahKredit === null ? 'NULL' : (pahKredit * 100).toFixed(6), '% p.a.');
 assert.ok(pahKredit !== null, 'Kredit-Fall liefert null');
 assert.ok(pahKredit > 0 && pahKredit < 1, 'Kredit-Fall außerhalb des plausiblen Bereichs: ' + pahKredit);
+// Wert verankert (Nutzer-Fall 24.11.2026); die frühere Notiz 3,413993 % war mit
+// dem daysInMonth-Bug (Februar = 31 Tage → „31.2.“ lief still als 3.3.) gerechnet.
+// Korrekt (28.02.2027-Termin): 3,415658 % — dicht an AIBD 3,4156 % (Sanity).
+assert.ok(Math.abs(pahKredit * 100 - 3.415658) < 0.0002,
+  'Kredit-Fall PAngV weicht vom verankerten Wert ab: ' + (pahKredit * 100).toFixed(6));
 const restKredit = ZZR.kontoSimulation(kreditFlows, pahKredit).restsald;
 assert.ok(Math.abs(restKredit) < 0.01, 'Konto geht beim PAngV-Ergebnis nicht auf 0: ' + restKredit.toFixed(2));
+
+// 15) Ultimo-Semantik + gebrochene Raten — Beleg: Zzr.hlp des Originals
+//     (Absatz „Monatsultimo“: „wird ‚immer zum Ultimo‘ angekreuzt, erfolgen die
+//     weiteren Ratenzahlungen zum 31.3., 30.4., usw.“; im anderen Fall „mit dem
+//     28. des Monats“; Absatz „Anzahl der Raten“: 2,5 mal DM 100 → letzte Rate 50).
+//     Die ERSTE Zahlung behält stets ihr eingegebenes Datum.
+function stromEin(datum, ultimo, betrag, raten, abstand) {
+  return { titel: 'T', methode: 1, euro: 1, beschreibung: '', strome: [
+    { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:datum, ultimo:ultimo,
+      betrag:betrag, raten:raten, abstand:abstand, notiz:'' } ] };
+}
+const ultF = ZZR.expandiere(stromEin(ZZR.toOrdinal(1999, 2, 28), 1, 100, 4, 1));
+assert.deepStrictEqual(ultF.map(f => ZZR.deDate(f.datum)),
+  ['28.02.1999', '31.03.1999', '30.04.1999', '31.05.1999'],
+  'Ultimo=1: Folgeraten müssen auf die Monatsultimo fallen');
+const ultAus = ZZR.expandiere(stromEin(ZZR.toOrdinal(1999, 2, 28), 0, 100, 4, 1));
+assert.deepStrictEqual(ultAus.map(f => ZZR.deDate(f.datum)),
+  ['28.02.1999', '28.03.1999', '28.04.1999', '28.05.1999'],
+  'Ultimo=0: Folgeraten am gleichen Tag des Monats');
+const ultNov = ZZR.expandiere(stromEin(ZZR.toOrdinal(1999, 11, 30), 1, 1, 4, 1));
+assert.deepStrictEqual(ultNov.map(f => ZZR.deDate(f.datum)),
+  ['30.11.1999', '31.12.1999', '31.01.2000', '29.02.2000'],
+  'Ultimo=1 ab 30.11.: 31.12./31.01./29.02. (Schaltjahr)');
+const ultAb3 = ZZR.expandiere(stromEin(ZZR.toOrdinal(1999, 2, 28), 1, 1, 3, 3));
+assert.deepStrictEqual(ultAb3.map(f => ZZR.deDate(f.datum)),
+  ['28.02.1999', '31.05.1999', '31.08.1999'],
+  'Ultimo=1 mit Abstand 3: Ultimo des Zielmonats');
+// Kalender-Regression: Februar in Gemeinjahren hat 28 Tage — addMonths darf nie
+// einen „31.2.“ erzeugen, der still ins März-Datum überläuft (Bug 24.11.2026)
+assert.strictEqual(ZZR.deDate(ZZR.addMonths(ZZR.toOrdinal(2026, 12, 31), 2)), '28.02.2027',
+  'addMonths 31.12.→+2: kappet auf 28.2. (Gemeinjahr)');
+assert.strictEqual(ZZR.deDate(ZZR.addMonths(ZZR.toOrdinal(2001, 1, 31), 1)), '28.02.2001',
+  'addMonths 31.1.2001→+1: 28.2.2001');
+assert.strictEqual(ZZR.deDate(ZZR.addMonths(ZZR.toOrdinal(2000, 1, 31), 1)), '29.02.2000',
+  'addMonths 31.1.2000→+1: 29.2.2000 (Schaltjahr)');
+const bruchF = ZZR.expandiere(stromEin(ZZR.toOrdinal(2000, 1, 15), 0, 100, 2.5, 1));
+assert.strictEqual(bruchF.length, 3, '2,5 Raten = 3 Zahlungen');
+assert.ok(Math.abs(bruchF[0].betrag - 100) < 1e-9 && Math.abs(bruchF[1].betrag - 100) < 1e-9,
+  'volle Raten unverändert');
+assert.ok(Math.abs(bruchF[2].betrag - 50) < 1e-9, 'Schlußrate = Bruchteil (50)');
+assert.strictEqual(ZZR.deDate(bruchF[2].datum), '15.03.2000', 'Schlußrate am dritten Slot');
+console.log('Ultimo + gebrochene Raten: alle Datums-/Bruchteil-Fälle grün');
+
+// 16) 30/360 Februar-Ende-Regel (Zzr.hlp: „mit dem 30.2. usw. gerechnet“) —
+//     Februar-Ende (28./29.) zählt in der 30/360-Welt als 30; sonst kappet > 30.
+assert.strictEqual(ZZR.days30360(ZZR.toOrdinal(1999, 2, 28), ZZR.toOrdinal(1999, 3, 31)), 30,
+  '28.2.1999→31.3.1999: 30 Tage (vorher 32)');
+assert.strictEqual(ZZR.days30360(ZZR.toOrdinal(2000, 2, 29), ZZR.toOrdinal(2000, 3, 31)), 30,
+  '29.2.2000→31.3.2000: 30 Tage');
+assert.strictEqual(ZZR.days30360(ZZR.toOrdinal(1999, 1, 31), ZZR.toOrdinal(1999, 2, 28)), 30,
+  '31.1.1999→28.2.1999: 30 Tage (Feb-Ende als Zweitgrenze)');
+assert.strictEqual(ZZR.days30360(ZZR.toOrdinal(1999, 12, 30), ZZR.toOrdinal(2000, 1, 1)), 1,
+  '30.12.→1.1.: 1 Tag (Goldmaster-Stütz, unverändert)');
+assert.strictEqual(ZZR.days30360(ZZR.toOrdinal(2000, 1, 1), ZZR.toOrdinal(2001, 1, 1)), 360,
+  'Volljahr: 360 Tage (unverändert)');
+assert.strictEqual(ZZR.days30360(ZZR.toOrdinal(2000, 1, 31), ZZR.toOrdinal(2000, 2, 29)), 30,
+  '31.1.→29.2. (Schaltjahr): 30 Tage');
+console.log('30/360 Februar-Ende-Regel: grün (Goldmaster-Daten ohne Februar-Enden — unbeeinflußt)');
+
+// 17) Ratenhöhe-Löser am Original-Beispiel BSP_1 (DM-Version, Zzr.hlp):
+//     −200.000 DM @30.12.1999, 180×1 DM ab 01.01.2000, +50.000 DM @01.01.2015,
+//     Zielrendite 5 %, PAngV → „Das Ergebnis: DM 1.375,57 bei PAngV“
+const bsp1 = { titel: 'BSP1', methode: 1, euro: 0, beschreibung: '', strome: [
+  { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:ZZR.toOrdinal(1999,12,30), ultimo:0, betrag:-200000, raten:1, abstand:1, notiz:'' },
+  { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:ZZR.toOrdinal(2000,1,1), ultimo:0, betrag:1, raten:180, abstand:1, notiz:'' },
+  { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:ZZR.toOrdinal(2015,1,1), ultimo:0, betrag:50000, raten:1, abstand:1, notiz:'' } ]};
+const bsp1Hoehe = ZZR.loeseRatenhoehe(bsp1, 2, 0.05, 1);
+console.log('Löser BSP_1 (DM, Ziel 5 %):', bsp1Hoehe === null ? 'NULL' : bsp1Hoehe.toFixed(2), 'DM  | Zzr.hlp: 1375,57 DM');
+assert.ok(bsp1Hoehe !== null && Math.abs(bsp1Hoehe - 1375.57) < 0.02,
+  'BSP_1-Ratenhöhe weicht ab: ' + bsp1Hoehe);
 
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + End-/Barwert).');

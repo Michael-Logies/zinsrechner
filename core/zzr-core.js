@@ -41,7 +41,10 @@
   function fromOrdinal(n) { return civilFromDays(n); }
   function toOrdinal(y, m, d) { return daysFromCivil(y, m, d); }
   function isLeap(y) { return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0; }
-  function daysInMonth(y, m) { return m === 2 && isLeap(y) ? 29 : (m === 4 || m === 6 || m === 9 || m === 11 ? 30 : 31); }
+  function daysInMonth(y, m) {
+    if (m === 2) return isLeap(y) ? 29 : 28; // Gemeinjahr-Februar = 28 (Bug 24.11.: sonst 31 → Monatsüberlauf)
+    return (m === 4 || m === 6 || m === 9 || m === 11) ? 30 : 31;
+  }
   function addMonths(ord, k) {
     const c = fromOrdinal(ord);
     const total = c.y * 12 + (c.m - 1) + k;
@@ -63,10 +66,18 @@
   }
 
   // ---------------------------------------------------------- 30/360-Tagezahl
-  // 30E/360 (deutsche Bankenkonvention): Tag 31 wird auf 30 gekappt.
+  // 30E/360 (deutsche Bankenkonvention): Tag 31 wird auf 30 gekappt. Dazu die
+  // Februar-Ende-Regel (Beleg: Zzr.hlp, Absatz „Monatsultimo“, 24.11.2026):
+  // „… bei Vergleichskonto PAngV oder AIBD360 würde mit dem 30.2. usw. gerechnet“ —
+  // ein Datum am Ende des Februar (28./29.) zählt in der 30/360-Welt als 30.
+  function istFebruarEnde(ord) {
+    const c = fromOrdinal(ord);
+    return c.m === 2 && c.d === daysInMonth(c.y, 2);
+  }
   function days30360(ord1, ord2) {
     const a = fromOrdinal(ord1), b = fromOrdinal(ord2);
-    const d1 = Math.min(a.d, 30), d2 = Math.min(b.d, 30);
+    const d1 = istFebruarEnde(ord1) ? 30 : Math.min(a.d, 30);
+    const d2 = istFebruarEnde(ord2) ? 30 : Math.min(b.d, 30);
     return (b.y - a.y) * 360 + (b.m - a.m) * 30 + (d2 - d1);
   }
   function days365(ord1, ord2) { return ord2 - ord1; }
@@ -110,7 +121,7 @@
           case 'Realdatum': strom.datum = parseInt(val, 10); break;
           case 'Ultimo': strom.ultimo = parseInt(val, 10) || 0; break;
           case 'Betrag': strom.betrag = parseFloat(val) || 0; break;
-          case 'Raten': strom.raten = Math.round(parseFloat(val) || 0); break;
+          case 'Raten': strom.raten = parseFloat(val) || 0; break; // gebrochene Ratenzahl zulässig (Zzr.hlp: „2,5 mal DM 100,-“)
           case 'Abstand': strom.abstand = Math.max(1, Math.round(parseFloat(val) || 1)); break;
           case 'Notiz': strom.notiz = val; break;
         }
@@ -181,14 +192,35 @@
     proj.strome.forEach(function (s, i) {
       if (!s.aktiv) return;
       const stufen = Math.max(1, Math.round(s.stufen || 1));
-      const raten = Math.max(0, Math.round(s.raten));
+      // Gebrochene Ratenzahl zulässig (Zzr.hlp „Beispiel: Ratenanzahl“, Absatz
+      // „Anzahl der Raten“: „2,5 mal DM 100,- … beim dritten mal jedoch nur DM 50,-“) —
+      // die letzte Zahlung einer Stufe trägt den Bruchteil des Betrags.
+      const raten = Math.max(0, s.raten || 0);
+      const nStufe = Math.ceil(raten - 1e-6);
+      const anker = fromOrdinal(s.datum);
       for (let st = 0; st < stufen; st++) {
         let betragStufe = s.betrag;
         if (s.zuwachs) betragStufe = betragStufe + st * s.zuwachs;
         if (s.dynamik) betragStufe = betragStufe * Math.pow(1 + s.dynamik / 100, st);
-        for (let k = 0; k < raten; k++) {
-          const datum = addMonths(s.datum, (st * raten + k) * (s.abstand || 1));
-          liste.push({ datum: datum, betrag: betragStufe, notiz: s.notiz || ('Strom ' + (i + 1)), strom: i + 1, ultimo: !!s.ultimo });
+        for (let k = 0; k < nStufe; k++) {
+          const n = st * nStufe + k;              // laufender Raten-Index des Stroms
+          const anteil = Math.min(1, raten - k);  // Bruchteil der Schlußrate
+          if (anteil <= 1e-9) continue;
+          let datum;
+          if (n === 0) {
+            datum = s.datum; // erste Zahlung: Datum wie eingegeben (echter Kalender)
+          } else {
+            // Folgeraten: Monat = Ankermonat + n·Abstand. Ultimo (Zzr.hlp
+            // „Monatsultimo“: „wird ‚immer zum Ultimo‘ angekreuzt, erfolgen die
+            // weiteren Ratenzahlungen zum 31.3., 30.4., usw.“) = letzter Kalender-
+            // tag des Zielmonats; sonst der Ankertag, an kurzen Monaten gekappt.
+            const ziel = anker.y * 12 + (anker.m - 1) + n * (s.abstand || 1);
+            const y = Math.floor(ziel / 12), m = ziel % 12 + 1;
+            datum = s.ultimo
+              ? toOrdinal(y, m, daysInMonth(y, m))
+              : toOrdinal(y, m, Math.min(anker.d, daysInMonth(y, m)));
+          }
+          liste.push({ datum: datum, betrag: betragStufe * anteil, notiz: s.notiz || ('Strom ' + (i + 1)), strom: i + 1, ultimo: !!s.ultimo });
         }
       }
     });
@@ -460,13 +492,17 @@
       return e;
     }
     let lo = 0.05, hi = 20, flo = effMit(lo), fhi = effMit(hi);
-    let guard = 0;
-    // Extremlagen ohne Vorzeichenwechsel haben keinen Effektivzins -> Grenzen einrücken
-    while ((flo === null || fhi === null) && guard++ < 30) {
-      if (flo === null) { lo = lo * 2 + 0.001; flo = effMit(lo); }
-      if (fhi === null) { hi = hi / 2; fhi = effMit(hi); }
-    }
     if (flo === null || fhi === null) return null;
+    // Bracket geometrisch erweitern, bis der Zielzins eingekreist ist — der
+    // fixe [0.05, 20]-Bracket verfehlte das Zzr.hlp-Beispiel BSP_1 (Nennbetrag
+    // 1 DM, Lösung ≈ 1375 DM). Nicht erreichbare Ziele brechen am Wachstums-Limit.
+    let guard = 0;
+    while (guard++ < 200 && (flo - ziel) * (fhi - ziel) > 0) {
+      if (fhi - ziel > 0) { hi = lo; lo = lo / 4; fhi = flo; flo = effMit(lo); }
+      else { lo = hi; hi = hi * 4; flo = fhi; fhi = effMit(hi); }
+      if (!isFinite(lo) || !isFinite(hi)) return null;
+    }
+    if ((flo - ziel) * (fhi - ziel) > 0) return null;
     const steigt = fhi > flo; // Skalierung des Betrags wirkt auf den Effektivzins
     for (let it = 0; it < 200; it++) {
       const mid = Math.sqrt(lo * hi); // geometrisch: Größenordnungen
