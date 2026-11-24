@@ -359,17 +359,44 @@
     const z = zeitenJahre(flows);
     const hatVorzeichenwechsel = flows.some(f => f.betrag > 0) && flows.some(f => f.betrag < 0);
     if (!hatVorzeichenwechsel) return null;
-    let lo = -0.9999, hi = 10, flo = npvEG(flows, lo, z), fhi = npvEG(flows, hi, z);
-    if (flo * fhi > 0) { // Bereich erweitern
-      for (let hi2 = 10; hi2 <= 1e6; hi2 *= 10) { fhi = npvEG(flows, hi2, z); hi = hi2; if (flo * fhi <= 0) break; }
-      if (flo * fhi > 0) return null;
+    const kandidaten = wurzelnSuchen(i => npvEG(flows, i, z), -0.99, 10);
+    return plausibleWurzel(kandidaten);
+  }
+
+  // ---------- gemeinsame Raster-Wurzelsuche (für alle drei EFF-Methoden) ----
+  /*
+   * Beliebige Zahlungsströme (Ansparvorgänge, Kredite, Mischformen) können
+   * nicht-monotone Konto-/NPV-Verläufe mit MEHREREN Wurzeln erzeugen — eine
+   * einfache Grenz-Bisektion verpasst Lösungen oder liefert die absurde.
+   * Das Raster findet alle Vorzeichenwechsel im Bereich −99 % bis +1000 %;
+   * je Bereich wird bisektiert. EU-Konvention: der kleinste positive Zins,
+   * sonst die dem Nullpunkt nächste Lösung.
+   */
+  function wurzelnSuchen(f, eMin, eMax) {
+    const wurzeln = [];
+    let ePrev = eMin, sPrev = f(ePrev);
+    if (!isFinite(sPrev)) return wurzeln;
+    for (let e = eMin + 0.01; e <= eMax + 0.0001; e += 0.01) {
+      const sCur = f(e);
+      if (isFinite(sCur) && sPrev * sCur < 0) {
+        let a = ePrev, b = e, sa = sPrev;
+        for (let it = 0; it < 80; it++) {
+          const mid = (a + b) / 2, sm = f(mid);
+          if (sa * sm <= 0) { b = mid; } else { a = mid; sa = sm; }
+          if (b - a < 1e-14) break;
+        }
+        wurzeln.push((a + b) / 2);
+      }
+      ePrev = e;
+      sPrev = sCur;
     }
-    for (let it = 0; it < 200; it++) {
-      const mid = (lo + hi) / 2, fm = npvEG(flows, mid, z);
-      if (flo * fm <= 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
-      if (hi - lo < 1e-13) break;
-    }
-    return (lo + hi) / 2;
+    return wurzeln;
+  }
+  function plausibleWurzel(wurzeln) {
+    if (!wurzeln.length) return null;
+    const positiv = wurzeln.filter(w => w > 0);
+    if (positiv.length) return Math.min(...positiv);
+    return wurzeln.slice().sort((x, y) => Math.abs(x) - Math.abs(y))[0];
   }
 
   // ---------------------------- PAngV 2011/2026 (Gesamtkreditkosten-Formel)
@@ -414,22 +441,12 @@
     const hatVorzeichenwechsel = flows.some(f => f.betrag > 0) && flows.some(f => f.betrag < 0);
     if (!hatVorzeichenwechsel) return null;
     const z = flows.map(f => jahreActAct(flows[0].datum, f.datum));
-    const npv = i => {
+    const kandidaten = wurzelnSuchen(i => {
       let s = 0;
       for (let k = 0; k < flows.length; k++) s += flows[k].betrag * Math.pow(1 + i, -z[k]);
       return s;
-    };
-    let lo = -0.9999, hi = 10, flo = npv(lo), fhi = npv(hi);
-    if (flo * fhi > 0) {
-      for (let hi2 = 10; hi2 <= 1e6; hi2 *= 10) { fhi = npv(hi2); hi = hi2; if (flo * fhi <= 0) break; }
-      if (flo * fhi > 0) return null;
-    }
-    for (let it = 0; it < 200; it++) {
-      const mid = (lo + hi) / 2, fm = npv(mid);
-      if (flo * fm <= 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
-      if (hi - lo < 1e-13) break;
-    }
-    return (lo + hi) / 2;
+    }, -0.99, 10);
+    return plausibleWurzel(kandidaten);
   }
 
   // ------------------------------------------- AIBD-Vergleichskonto (EG-Methode)
@@ -568,29 +585,8 @@
       const k = kontoSimulation(flows, eff);
       return k ? k.restsald : NaN;
     }
-    // Raster über eff: Vorzeichenwechsel finden, je Bereich bisektieren
-    const wurzeln = [];
-    let ePrev = -0.99, sPrev = rest(ePrev);
-    if (isFinite(sPrev)) {
-      for (let e = -0.98; e <= 10.0001; e += 0.01) {
-        const sCur = rest(e);
-        if (isFinite(sCur) && sPrev * sCur < 0) {
-          let a = ePrev, b = e, sa = sPrev;
-          for (let it = 0; it < 80; it++) {
-            const mid = (a + b) / 2, sm = rest(mid);
-            if (sa * sm <= 0) { b = mid; } else { a = mid; sa = sm; }
-            if (b - a < 1e-14) break;
-          }
-          wurzeln.push((a + b) / 2);
-        }
-        ePrev = e;
-        sPrev = sCur;
-      }
-    }
-    if (!wurzeln.length) return null;
-    const positiv = wurzeln.filter(w => w > 0);
-    if (positiv.length) return Math.min(...positiv);
-    return wurzeln.slice().sort((x, y) => Math.abs(x) - Math.abs(y))[0];
+    const kandidaten = wurzelnSuchen(rest, -0.99, 10);
+    return plausibleWurzel(kandidaten);
   }
 
   // ------------------------------------------------------------- Löser (Ratenhöhe)
