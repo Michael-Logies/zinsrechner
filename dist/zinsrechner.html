@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zinsrechner — Zahlungsströme &amp; Effektivzins</title>
+<style>
+  :root { --grau:#f4f4f0; --linie:#bbb; --blau:#1a4f7a; }
+  * { box-sizing:border-box; }
+  body { font-family:"DejaVu Sans",Verdana,sans-serif; font-size:14px; margin:0; background:#fff; color:#111; }
+  header { background:var(--blau); color:#fff; padding:10px 16px; display:flex; justify-content:space-between; align-items:baseline; }
+  header h1 { font-size:17px; margin:0; }
+  header small { opacity:.85; }
+  main { padding:12px 16px; max-width:1100px; }
+  fieldset { border:1px solid var(--linie); margin:0 0 14px; padding:8px 10px; }
+  legend { font-weight:bold; padding:0 6px; }
+  table { border-collapse:collapse; width:100%; }
+  th, td { border:1px solid var(--linie); padding:2px 4px; font-size:12.5px; text-align:right; }
+  th { background:var(--grau); text-align:center; }
+  td.l, th.l { text-align:left; }
+  input { width:100%; border:1px solid transparent; background:transparent; font:inherit; text-align:right; }
+  input:focus { border-color:var(--blau); background:#fff; }
+  td.l input { text-align:left; }
+  button { font:inherit; padding:3px 10px; margin:2px 4px 2px 0; background:var(--grau); border:1px solid var(--linie); cursor:pointer; }
+  button:hover { background:#e2e2da; }
+  .ergebnis { font-size:15px; margin:8px 0; }
+  .ergebnis b { color:var(--blau); }
+  .hinweis { color:#555; font-size:12px; }
+  .konto-wrap { max-height:420px; overflow:auto; }
+  @media print {
+    header, button, .drucken-nein, legend, fieldset.filter { display:none !important; }
+    table { font-size:10px; }
+    .konto-wrap { max-height:none; overflow:visible; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Zinsrechner — Zahlungsströme &amp; Effektivzins</h1>
+  <small>Nachbau des Zuckers Zins Rechner · PAngV/EG-Methode · Goldmaster-geprüft</small>
+</header>
+<main>
+  <fieldset class="filter">
+    <legend>Zahlungsströme <span class="hinweis">(negativer Betrag = Sie zahlen, positiver = Sie erhalten)</span></legend>
+    <div id="stromTabelle"></div>
+    <button id="plusZeile">+ Zeile</button>
+    <button id="loeschZeile">− Zeile</button>
+  </fieldset>
+
+  <fieldset class="filter">
+    <legend>Berechnung</legend>
+    <button id="effKnopf">Effektivzins berechnen (beide Methoden)</button>
+    <button id="kontoKnopf">Vergleichskonto erstellen</button>
+    <button id="druckKnopf">Drucken</button>
+    <span style="float:right">
+      <label>Zielzins-Löser: Strom-Nr. <input id="loeserStrom" type="number" value="1" min="1" style="width:3.5em"></label>
+      <label>Zielzins % <input id="loeserZiel" type="text" value="5,0" style="width:5em"></label>
+      <button id="loeserKnopf">Ratenhöhe lösen</button>
+    </span>
+    <div id="effAnzeige" class="ergebnis"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Vergleichskonto</legend>
+    <div id="kontoAnzeige"></div>
+  </fieldset>
+
+  <fieldset class="filter">
+    <legend>Datei (.zzr — kompatibel zum Originalprogramm)</legend>
+    <label>Öffnen: <input id="dateiLaden" type="file" accept=".zzr,.ZZR"></label>
+    <button id="speichernKnopf">Speichern unter …</button>
+    <span id="dateiName" class="hinweis"></span>
+  </fieldset>
+</main>
+
+<script>
+/*
+ * ZZR-Neubau — Rechenkern (Zinsrechner)
+ *
+ * Verhaltensgetreue Neuentwicklung des „Zuckers Zins Rechner" (Gabriele Zucker,
+ * Villingen, ca. 1999–2007) nach beobachtbarem Verhalten und öffentlichen
+ * Rechenregeln (PAngV-Vergleichskonto, EG-Richtlinie 87/102/EWG Anhang II).
+ * Es wurde kein Original-Code übernommen (Clean-Room-Nachbau, D1-Fremdcode-Regelwerk).
+ *
+ * Kernbegriffe:
+ *  - Zahlungsstrom: Gruppe gleichartiger Zahlungen (Startdatum, Betrag, Ratenanzahl,
+ *    Abstand in Monaten, Zuwachs je Stufe, Notiz, Ultimo-Flag).
+ *  - Vorzeichen: negativ = Geld fließt vom Nutzer weg (er zahlt), positiv = er erhält.
+ *  - Realdatum: Tagesnummer ab 1.1.0001 (bewiesen an Bsp_1: 730120 = 1.1.2000).
+ */
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------- Kalender
+  // Tagesnummer (Ordinalzahl) <-> Datum, zivilkalenderproleptisch ab 1.1.0001.
+  function daysFromCivil(y, m, d) {
+    y -= m <= 2 ? 1 : 0;
+    const era = Math.floor((y >= 0 ? y : y - 399) / 400);
+    const yoe = y - era * 400;
+    const doy = Math.floor((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5) + d - 1;
+    const doe = yoe * 365 + Math.floor(yoe / 4) - Math.floor(yoe / 100) + doy;
+    return era * 146097 + doe - 719468 + 719163; // 719163 = Ordinalzahl(1.1.0001); 730120 = 1.1.2000 (bewiesen)
+  }
+  function civilFromDays(z) {
+    z -= 719163; // Ordinalzahl ab 1.1.0001 -> Tage seit 1.1.1970
+    z += 719468;
+    const era = Math.floor((z >= 0 ? z : z - 146096) / 146097);
+    const doe = z - era * 146097;
+    const yoe = Math.floor((doe - Math.floor(doe / 1460) + Math.floor(doe / 36524) - Math.floor(doe / 146096)) / 365);
+    const y = yoe + era * 400;
+    const doy = doe - (365 * yoe + Math.floor(yoe / 4) - Math.floor(yoe / 100));
+    const mp = Math.floor((5 * doy + 2) / 153);
+    const d = doy - Math.floor((153 * mp + 2) / 5) + 1;
+    const m = mp + (mp < 10 ? 3 : -9);
+    return { y: y + (m <= 2 ? 1 : 0), m: m, d: d };
+  }
+  function fromOrdinal(n) { return civilFromDays(n); }
+  function toOrdinal(y, m, d) { return daysFromCivil(y, m, d); }
+  function isLeap(y) { return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0; }
+  function daysInMonth(y, m) { return m === 2 && isLeap(y) ? 29 : (m === 4 || m === 6 || m === 9 || m === 11 ? 30 : 31); }
+  function addMonths(ord, k) {
+    const c = fromOrdinal(ord);
+    const total = c.y * 12 + (c.m - 1) + k;
+    const y = Math.floor(total / 12);
+    const m = total % 12 + 1;
+    const d = Math.min(c.d, daysInMonth(y, m));
+    return toOrdinal(y, m, d);
+  }
+  function addYears(ord, k) {
+    const c = fromOrdinal(ord);
+    const y = c.y + k;
+    const d = Math.min(c.d, daysInMonth(y, c.m));
+    return toOrdinal(y, c.m, d);
+  }
+  function deDate(ord) {
+    const c = fromOrdinal(ord);
+    const p = (n) => (n < 10 ? '0' : '') + n;
+    return p(c.d) + '.' + p(c.m) + '.' + c.y;
+  }
+
+  // ---------------------------------------------------------- 30/360-Tagezahl
+  // 30E/360 (deutsche Bankenkonvention): Tag 31 wird auf 30 gekappt.
+  function days30360(ord1, ord2) {
+    const a = fromOrdinal(ord1), b = fromOrdinal(ord2);
+    const d1 = Math.min(a.d, 30), d2 = Math.min(b.d, 30);
+    return (b.y - a.y) * 360 + (b.m - a.m) * 30 + (d2 - d1);
+  }
+  function days365(ord1, ord2) { return ord2 - ord1; }
+
+  // ----------------------------------------------------------- Zahlungsströme
+  // Projekt: { titel, methode (0=EG Anhang II, 1=PAngV Vergleichskonto), euro,
+  //            beschreibung, strome: [ { aktiv, zuwachs, dynamik, datum, ultimo,
+  //            betrag, raten, abstand, notiz } ] }
+  function parseZZR(text) {
+    const proj = { titel: '', methode: 0, euro: 0, beschreibung: '', strome: [] };
+    let sektion = null, strom = null;
+    const zeilen = text.split(/\r?\n/);
+    for (let roh of zeilen) {
+      const zeile = roh.trim();
+      if (zeile === '' || zeile.charAt(0) === ';') continue;
+      const sec = zeile.match(/^\[(.+)\]$/);
+      if (sec) {
+        sektion = sec[1];
+        const m = sektion.match(/^Zahlungsstrom(\d+)$/i);
+        if (m) { strom = { aktiv: 1, zuwachs: 0, dynamik: 0, ultimo: 0, notiz: '', raten: 1, abstand: 1 }; proj.strome.push(strom); }
+        else strom = null;
+        continue;
+      }
+      const kv = zeile.match(/^([^=]+)=(.*)$/);
+      if (!kv) continue;
+      const key = kv[1].trim(), val = kv[2].trim();
+      if (sektion === 'Information') {
+        if (key === 'Titel') proj.titel = val;
+        else if (key === 'EZ-Methode') proj.methode = parseInt(val, 10) || 0;
+        else if (key === 'Euro') proj.euro = parseInt(val, 10) || 0;
+        else if (key === 'Zahlungsstroeme') proj._angesagt = parseInt(val, 10) || 0;
+      } else if (sektion === 'Beschreibung') {
+        if (key === 'Zeilen') proj._beschreibung = [];
+        else { const m = key.match(/^Zeile(\d+)$/); if (m && proj._beschreibung) proj._beschreibung[parseInt(m[1], 10) - 1] = val; }
+      } else if (strom) {
+        switch (key) {
+          case 'Aktiv': strom.aktiv = parseInt(val, 10) || 0; break;
+          case 'Stufen': strom.stufen = parseInt(val, 10) || 1; break;
+          case 'Dynamik': strom.dynamik = parseFloat(val) || 0; break;
+          case 'Zuwachs': strom.zuwachs = parseFloat(val) || 0; break;
+          case 'Realdatum': strom.datum = parseInt(val, 10); break;
+          case 'Ultimo': strom.ultimo = parseInt(val, 10) || 0; break;
+          case 'Betrag': strom.betrag = parseFloat(val) || 0; break;
+          case 'Raten': strom.raten = Math.round(parseFloat(val) || 0); break;
+          case 'Abstand': strom.abstand = Math.max(1, Math.round(parseFloat(val) || 1)); break;
+          case 'Notiz': strom.notiz = val; break;
+        }
+      }
+    }
+    if (proj._beschreibung) proj.beschreibung = proj._beschreibung.filter(x => x !== undefined).join('\n');
+    if (proj._angesagt && proj.strome.length !== proj._angesagt) {
+      proj.strome = proj.strome.slice(0, proj._angesagt);
+    }
+    return proj;
+  }
+
+  function formatZZRFloat(x) {
+    // Original-Schreibweise: "-2.54257900000000E+0002" / " 2.40000000000000E+0001"
+    const neg = x < 0;
+    const v = Math.abs(x);
+    let exp = 0;
+    if (v !== 0) {
+      exp = Math.floor(Math.log10(v));
+      if (v / Math.pow(10, exp) >= 10) exp += 1;
+      if (v / Math.pow(10, exp) < 1) exp -= 1;
+    }
+    const mant = v === 0 ? 0 : v / Math.pow(10, exp);
+    const mantStr = mant.toFixed(14);
+    const expStr = (exp < 0 ? '-' : '+') + ('0000' + Math.abs(exp)).slice(-4);
+    return (neg ? '-' : ' ') + mantStr + 'E' + expStr;
+  }
+
+  function serializeZZR(proj) {
+    const L = [];
+    L.push('[Information]');
+    L.push('Typ=ZZR-Datei');
+    L.push('Version=1');
+    L.push('Erzeuger=Zuckers Zins Rechner (Nachbau)');
+    L.push('Titel=' + (proj.titel || ''));
+    L.push('EZ-Methode=' + (proj.methode || 0));
+    L.push('Euro=' + (proj.euro || 0));
+    L.push('Zahlungsstroeme=' + proj.strome.length);
+    proj.strome.forEach(function (s, i) {
+      L.push('');
+      L.push('[Zahlungsstrom' + (i + 1) + ']');
+      L.push('Aktiv=' + (s.aktiv ? 1 : 0));
+      L.push('Stufen=' + (s.stufen || 1));
+      L.push('Dynamik=' + formatZZRFloat(s.dynamik || 0));
+      L.push('Zuwachs=' + formatZZRFloat(s.zuwachs || 0));
+      L.push('Realdatum=' + s.datum);
+      L.push('Ultimo=' + (s.ultimo ? 1 : 0));
+      L.push('Betrag=' + formatZZRFloat(s.betrag || 0));
+      L.push('Raten=' + formatZZRFloat(s.raten || 0));
+      L.push('Abstand=' + (s.abstand || 1));
+      L.push('Notiz=' + (s.notiz || ''));
+    });
+    if (proj.beschreibung) {
+      const zs = proj.beschreibung.split('\n');
+      L.push('');
+      L.push('[Beschreibung]');
+      L.push('Zeilen=' + zs.length);
+      zs.forEach(function (z, i) { L.push('Zeile' + (i + 1) + '=' + z); });
+    }
+    return L.join('\r\n') + '\r\n';
+  }
+
+  // Alle Einzelzahlungen eines Projekts (kleinste Einheit): { datum, amount, label } —
+  // Stufen-Semantik live bewiesen (23.11.2026): Raten = Anzahl PRO Stufe, Stufe s
+  // trägt Betrag ×(1+Dynamik/100)^s bzw. Betrag + s×Zuwachs, Tage = s×Raten×Abstand.
+  function expandiere(proj) {
+    const liste = [];
+    proj.strome.forEach(function (s, i) {
+      if (!s.aktiv) return;
+      const stufen = Math.max(1, Math.round(s.stufen || 1));
+      const raten = Math.max(0, Math.round(s.raten));
+      for (let st = 0; st < stufen; st++) {
+        let betragStufe = s.betrag;
+        if (s.zuwachs) betragStufe = betragStufe + st * s.zuwachs;
+        if (s.dynamik) betragStufe = betragStufe * Math.pow(1 + s.dynamik / 100, st);
+        for (let k = 0; k < raten; k++) {
+          const datum = addMonths(s.datum, (st * raten + k) * (s.abstand || 1));
+          liste.push({ datum: datum, betrag: betragStufe, notiz: s.notiz || ('Strom ' + (i + 1)), strom: i + 1, ultimo: !!s.ultimo });
+        }
+      }
+    });
+    liste.sort(function (a, b) { return a.datum - b.datum || a.strom - b.strom; });
+    return liste;
+  }
+
+  // ------------------------------------------------------ EG-Methode (Anhang II)
+  // Barwertgleichung mit Zeitmaßen in Jahren (Schalttag zählt ins Schaltjahr, 366):
+  function zeitenJahre(flows) {
+    const d0 = flows[0].datum;
+    return flows.map(function (f) {
+      // Jahr-Zerlegung: Tage / 365 bzw. 366 je Schaltjahrbeteiligung (vereinfacht: 366, wenn das Intervall einen 29.2 enthält)
+      let tage = f.datum - d0;
+      // Schalttage im Intervall zählen → nominell: Jahre = Tage/365.25 wäre ungenau; EG: 365/366
+      // Praxis des Originals unbekannt im Detail; wir rechnen 365 als Basis und beachten
+      // Schaltjahre über den Mittelweg: Jahre = Tage / 365.25 nur bei >1 Jahr.
+      let jahre;
+      if (tage <= 366) {
+        let nenner = 365;
+        for (let y = fromOrdinal(d0).y; y <= fromOrdinal(f.datum).y; y++) {
+          if (isLeap(y)) { const f29 = toOrdinal(y, 2, 29); if (f29 >= d0 && f29 <= f.datum) { nenner = 366; break; } }
+        }
+        jahre = tage / nenner;
+      } else {
+        jahre = tage / 365.25;
+      }
+      return jahre;
+    });
+  }
+  function npvEG(flows, i, z) {
+    let s = 0;
+    for (let k = 0; k < flows.length; k++) s += flows[k].betrag * Math.pow(1 + i, -z[k]);
+    return s;
+  }
+  function effEG(flows) {
+    if (flows.length === 0) return null;
+    const z = zeitenJahre(flows);
+    const hatVorzeichenwechsel = flows.some(f => f.betrag > 0) && flows.some(f => f.betrag < 0);
+    if (!hatVorzeichenwechsel) return null;
+    let lo = -0.9999, hi = 10, flo = npvEG(flows, lo, z), fhi = npvEG(flows, hi, z);
+    if (flo * fhi > 0) { // Bereich erweitern
+      for (let hi2 = 10; hi2 <= 1e6; hi2 *= 10) { fhi = npvEG(flows, hi2, z); hi = hi2; if (flo * fhi <= 0) break; }
+      if (flo * fhi > 0) return null;
+    }
+    for (let it = 0; it < 200; it++) {
+      const mid = (lo + hi) / 2, fm = npvEG(flows, mid, z);
+      if (flo * fm <= 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
+      if (hi - lo < 1e-13) break;
+    }
+    return (lo + hi) / 2;
+  }
+
+  // ------------------------------------------------ PAngV-Vergleichskonto (ZZR-Stil)
+  /*
+   * Bewiesen am Original-Konto.txt:
+   *  - Zinsansatz: Saldo × EFF/360 × Tage(30/360) — Stützperioden 1 Tag und 29 Tage
+   *    trafen die Originalzeilen auf den Cent (−25,04 / −726,05 / −6,26).
+   *  - Ansammlung an jedem Ereignisdatum (Zahlungen), Zinsverrechnung (Kapitalisierung)
+   *    am Jahres-Jubiläum des frühesten Flows; kumulierte Zinsen + Stützanteil werden
+   *    auf das echte Saldo übertragen, kumuliert-Spalte setzt neu.
+   *  - Abschluss am letzten Ereignisdatum: Stützperiode bis zum nächsten
+   *    Jahres-Jubiläum wird als Schluss-Zinsverrechnung gebucht.
+   *  - „Abschluss-Saldo" = echtes Saldo + kumulierte (noch nicht verrechnete) Zinsen.
+   *  - „Tilgung anteilig" = Änderung des Abschluss-Saldos − Zins anteilig.
+   */
+  function kontoSimulation(flows, eff) {
+    if (flows.length === 0) return null;
+    const start = flows[0].datum, ende = flows[flows.length - 1].datum;
+    const rows = [];
+    let saldoReal = 0;        // echtes Konto (Zahlungen + Jahres-Zinsverrechnungen)
+    let kumuliert = 0;        // angesammelte, noch nicht verrechnete Zinsen
+    let letzteAnchor = start;
+    let letzteEreignis = start;
+    const jubilaeum = (ord) => addYears(start, Math.max(1, fromOrdinal(ord).y - fromOrdinal(start).y));
+    // Alle Ereignisdaten + Jahres-Jubiläen zwischen start und ende
+    const termine = [];
+    flows.forEach(f => termine.push(f.datum));
+    for (let y = 1; ; y++) {
+      const a = addYears(start, y);
+      if (a > ende) break;
+      termine.push(a);
+    }
+    const eindeutig = Array.from(new Set(termine)).sort((a, b) => a - b);
+
+    function ansatz(saldo, t1, t2) {
+      return saldo * (eff / 360) * days30360(t1, t2);
+    }
+
+    const fIndex = new Map(); // datum → [flows]
+    flows.forEach(f => { if (!fIndex.has(f.datum)) fIndex.set(f.datum, []); fIndex.get(f.datum).push(f); });
+
+    for (const t of eindeutig) {
+      const jahrAnchor = (addYears(letzteAnchor, 1) === t);
+      const fListe = fIndex.get(t) || [];
+      for (const f of fListe) {
+        const zins = ansatz(saldoReal, letzteEreignis, t);
+        kumuliert += zins;
+        const saldoVorher = saldoReal;
+        saldoReal += -f.betrag; // Kontosicht: Nutzer-Auszahlung (+) → Einlage
+        const abschlussAlt = saldoVorher + kumuliert - zins; // Abschluss vor dieser Zeile
+        const abschlussNeu = saldoReal + kumuliert;
+        rows.push({
+          valuta: t, beschreibung: f.notiz,
+          betrag: -f.betrag, saldoZinsber: saldoReal,
+          zinsAnteilig: zins, tilgungAnteilig: abschlussNeu - abschlussAlt,
+          zinsKumuliert: kumuliert, abschlussSaldo: abschlussNeu,
+          art: 'zahlung'
+        });
+        letzteEreignis = t;
+      }
+      if (jahrAnchor) {
+        const stuetz = ansatz(saldoReal, letzteEreignis, t);
+        kumuliert += stuetz;
+        rows.push({
+          valuta: t, beschreibung: 'Zinsverrechnung',
+          betrag: kumuliert, saldoZinsber: saldoReal + kumuliert,
+          zinsAnteilig: stuetz, tilgungAnteilig: 0,
+          zinsKumuliert: 0, abschlussSaldo: saldoReal + kumuliert,
+          art: 'verrechnung'
+        });
+        saldoReal += kumuliert;
+        kumuliert = 0;
+        letzteAnchor = t;
+        letzteEreignis = t;
+      }
+    }
+    // Abschluss: Rest-Zinsverrechnung am LETZTEN Ereignisdatum (bewiesen am Goldmaster:
+    // 01.01.2015 Entnahme mit 1-Tage-Stütz -6,26, dann Zinsverrechnung -6,26 -> Saldo 0).
+    if (kumuliert !== 0) {
+      rows.push({
+        valuta: letzteEreignis, beschreibung: 'Zinsverrechnung',
+        betrag: kumuliert, saldoZinsber: saldoReal + kumuliert,
+        zinsAnteilig: 0, tilgungAnteilig: 0,
+        zinsKumuliert: 0, abschlussSaldo: saldoReal + kumuliert,
+        art: 'verrechnung'
+      });
+      saldoReal += kumuliert;
+      kumuliert = 0;
+    }
+    return { zeilen: rows, restsald: saldoReal };
+  }
+
+  function effPAngV(flows) {
+    if (flows.length === 0) return null;
+    const hatW = flows.some(f => f.betrag > 0) && flows.some(f => f.betrag < 0);
+    if (!hatW) return null;
+    // Ziel: Restsaldo des Vergleichskontos = 0. S(eff) wächst streng monoton mit eff.
+    function rest(eff) {
+      const k = kontoSimulation(flows, eff);
+      return k ? k.restsald : NaN;
+    }
+    let lo = -0.9999, hi = 10, flo = rest(lo), fhi = rest(hi);
+    if (!(flo < 0 && fhi > 0)) {
+      // Richtung/Bereich bereinigen
+      if (flo > 0) { // Vorzeichen invertieren (Kontorichtung)
+        return null;
+      }
+      let ok = false;
+      for (let h = 10; h <= 1e6; h *= 10) { fhi = rest(h); hi = h; if (fhi > 0) { ok = true; break; } }
+      if (!ok) return null;
+    }
+    for (let it = 0; it < 200; it++) {
+      const mid = (lo + hi) / 2, fm = rest(mid);
+      if (fm < 0) { lo = mid; flo = fm; } else { hi = mid; fhi = fm; }
+      if (hi - lo < 1e-14) break;
+    }
+    return (lo + hi) / 2;
+  }
+
+  // ------------------------------------------------------------- Löser (Ratenhöhe)
+  // Skaliert den Betrag EINES Zahlungsstroms so, dass der gewählte Effektivzins erreicht wird.
+  function loeseRatenhoehe(proj, stromNr, zielEff, methode) {
+    const s = proj.strome[stromNr - 1];
+    if (!s || s.betrag === 0) return null;
+    const ziel = zielEff;
+    function effMit(faktor) {
+      const alt = s.betrag;
+      s.betrag = alt * faktor;
+      const flows = expandiere(proj);
+      let e;
+      if (methode === 1) e = effPAngV(flows); else e = effEG(flows);
+      s.betrag = alt;
+      return e;
+    }
+    let lo = 0.05, hi = 20, flo = effMit(lo), fhi = effMit(hi);
+    let guard = 0;
+    // Extremlagen ohne Vorzeichenwechsel haben keinen Effektivzins -> Grenzen einrücken
+    while ((flo === null || fhi === null) && guard++ < 30) {
+      if (flo === null) { lo = lo * 2 + 0.001; flo = effMit(lo); }
+      if (fhi === null) { hi = hi / 2; fhi = effMit(hi); }
+    }
+    if (flo === null || fhi === null) return null;
+    const steigt = fhi > flo; // Skalierung des Betrags wirkt auf den Effektivzins
+    for (let it = 0; it < 200; it++) {
+      const mid = Math.sqrt(lo * hi); // geometrisch: Größenordnungen
+      const fm = effMit(mid);
+      if (fm === null) return null;
+      const links = steigt ? fm < ziel : fm > ziel;
+      if (links) lo = mid; else hi = mid;
+      if (hi / lo - 1 < 1e-13) break;
+    }
+    return s.betrag * Math.sqrt(lo * hi);
+  }
+
+  // --------------------------------------------------------------- Tabellen
+  function barwerte(flows, eff) {
+    // Barwert zum jeweils ersten Flussdatum, aufgelistet je Monat (relativ).
+    if (flows.length === 0) return [];
+    const d0 = flows[0].datum;
+    const maxTage = flows[flows.length - 1].datum - d0;
+    const monate = Math.ceil(maxTage / 30.436875);
+    const out = [];
+    for (let m = -monate; m <= monate; m++) {
+      const t = addMonths(d0, m);
+      let bw = 0;
+      flows.forEach(f => {
+        const jahre = (f.datum - t) / 365.25;
+        bw += f.betrag * Math.pow(1 + eff, -jahre);
+      });
+      out.push({ monat: m, datum: t, barwert: bw });
+    }
+    return out;
+  }
+  function endwerte(flows, eff) {
+    if (flows.length === 0) return [];
+    const dL = flows[flows.length - 1].datum;
+    const d0 = flows[0].datum;
+    const monate = Math.ceil((dL - d0) / 30.436875);
+    const out = [];
+    for (let m = -monate; m <= monate; m++) {
+      const t = addMonths(d0, m);
+      let ew = 0;
+      flows.forEach(f => {
+        const jahre = (dL - f.datum) / 365.25 - ((t - d0) / 365.25);
+        ew += f.betrag * Math.pow(1 + eff, (dL - f.datum) / 365.25 - ((t - d0) / 365.25));
+      });
+      out.push({ monat: m, datum: t, endwert: ew });
+    }
+    return out;
+  }
+
+  const API = {
+    fromOrdinal, toOrdinal, addMonths, addYears, deDate, isLeap, daysInMonth,
+    days30360, days365,
+    parseZZR, serializeZZR, expandiere,
+    effEG, effPAngV, kontoSimulation,
+    loeseRatenhoehe, barwerte, endwerte
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API;
+  if (typeof window !== 'undefined') window.ZZR = API;
+  return API;
+})();
+
+</script>
+<script>
+'use strict';
+// ------------------------------------------------------------- Projektzustand
+let proj = {
+  titel: 'Neue Berechnung', methode: 1, euro: 1, beschreibung: '',
+  strome: [ { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:ZZR.toOrdinal(new Date().getFullYear(),1,1), ultimo:0, betrag:-1000, raten:12, abstand:1, notiz:'Beispielzahlung' } ]
+};
+let dateiPfad = '';
+
+const SPALTEN = [
+  ['aktiv','Akt.'],['datum','Datum von'],['betrag','Betrag'],['raten','Raten'],
+  ['abstand','Abstand (Mon.)'],['stufen','Stufen'],['dynamik','Dynamik %'],
+  ['zuwachs','Zuwachs'],['ultimo','Ultimo'],['notiz','Beschreibung']
+];
+
+function datumText(ord) { return ZZR.deDate(ord); }
+function parseDatum(t) {
+  const m = t.trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  return m ? ZZR.toOrdinal(+m[3], +m[2], +m[1]) : null;
+}
+function zahl(t) {
+  if (typeof t !== 'string') return parseFloat(t) || 0;
+  return parseFloat(t.trim().replace(/\./g,'').replace(',','.')) || 0;
+}
+function deZahl(x, nk) {
+  return x.toLocaleString('de-DE', { minimumFractionDigits:nk, maximumFractionDigits:nk });
+}
+
+function tabelleZeichnen() {
+  const el = document.getElementById('stromTabelle');
+  let h = '<table><tr>';
+  for (const [,t] of SPALTEN) h += '<th>' + t + '</th>';
+  h += '</tr>';
+  proj.strome.forEach(function (s, i) {
+    h += '<tr data-zeile="' + i + '">';
+    for (const [k] of SPALTEN) {
+      const klasse = (k === 'notiz') ? ' class="l"' : '';
+      if (k === 'ultimo') h += '<td><input type="checkbox" data-feld="ultimo"' + (s.ultimo ? ' checked' : '') + '></td>';
+      else if (k === 'datum') h += '<td' + klasse + '><input data-feld="datum" value="' + datumText(s.datum) + '"></td>';
+      else h += '<td' + klasse + '><input data-feld="' + k + '" value="' + s[k] + '"></td>';
+    }
+    h += '</tr>';
+  });
+  h += '</table>';
+  el.innerHTML = h;
+}
+
+function tabelleLesen() {
+  const trs = document.querySelectorAll('#stromTabelle tbody tr, #stromTabelle tr[data-zeile]');
+  const neu = [];
+  document.querySelectorAll('#stromTabelle tr[data-zeile]').forEach(function (tr) {
+    const s = { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:0, ultimo:0, betrag:0, raten:1, abstand:1, notiz:'' };
+    tr.querySelectorAll('input').forEach(function (inp) {
+      const f = inp.getAttribute('data-feld');
+      if (f === 'ultimo') s.ultimo = inp.checked ? 1 : 0;
+      else if (f === 'datum') s.datum = parseDatum(inp.value) || s.datum;
+      else if (f === 'aktiv') s.aktiv = inp.checked ? 1 : 0;
+      else if (f === 'notiz') s.notiz = inp.value;
+      else s[f] = zahl(inp.value);
+    });
+    if (s.datum) neu.push(s);
+  });
+  if (neu.length) proj.strome = neu;
+}
+
+function beideEffektivzins(flows) {
+  return { pangv: ZZR.effPAngV(flows), eg: ZZR.effEG(flows) };
+}
+
+document.getElementById('plusZeile').onclick = function () {
+  tabelleLesen();
+  const letzte = proj.strome[proj.strome.length - 1];
+  proj.strome.push({ aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:(letzte ? letzte.datum + 30 : ZZR.toOrdinal(new Date().getFullYear(),1,1)), ultimo:0, betrag:-100, raten:1, abstand:1, notiz:'' });
+  tabelleZeichnen();
+};
+document.getElementById('loeschZeile').onclick = function () {
+  tabelleLesen();
+  if (proj.strome.length > 1) proj.strome.pop();
+  tabelleZeichnen();
+};
+document.getElementById('effKnopf').onclick = function () {
+  tabelleLesen();
+  const flows = ZZR.expandiere(proj);
+  const e = beideEffektivzins(flows);
+  const f = function (x) { return x === null ? '—' : deZahl(x * 100, 4) + ' % p.a.'; };
+  document.getElementById('effAnzeige').innerHTML =
+    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (ABD/EFH): <b>' + f(e.eg) + '</b>';
+};
+document.getElementById('kontoKnopf').onclick = function () {
+  tabelleLesen();
+  const flows = ZZR.expandiere(proj);
+  const e = beideEffektivzins(flows);
+  const eff = proj.methode === 0 ? e.eg : e.pangv;
+  const titel = proj.methode === 0 ? 'ABD/EFH-Methode' : 'PAngV';
+  if (eff === null) { document.getElementById('kontoAnzeige').innerHTML = '<p>Keine gültige Berechnung — Zahlungsströme beider Richtungen nötig.</p>'; return; }
+  const k = ZZR.kontoSimulation(flows, eff);
+  let h = '<p class="ergebnis">Vergleichskonto ' + titel + ' Effektivzins: <b>' + deZahl(eff * 100, 4) + ' % p.a.</b>' +
+          ' <span class="hinweis">(' + k.zeilen.length + ' Buchungen)</span></p>';
+  h += '<div class="konto-wrap"><table><tr><th class="l">Valuta</th><th class="l">Beschreibung</th><th>Betrag</th><th>Saldo</th><th>Zins anteilig</th><th>Tilgung</th><th>Zins kum.</th><th>Abschluss</th></tr>';
+  k.zeilen.forEach(function (r) {
+    h += '<tr><td class="l">' + ZZR.deDate(r.valuta) + '</td><td class="l">' + r.beschreibung + '</td>' +
+      ['betrag','saldoZinsber','zinsAnteilig','tilgungAnteilig','zinsKumuliert','abschlussSaldo']
+        .map(function (f) { return '<td>' + deZahl(r[f], 2) + '</td>'; }).join('') + '</tr>';
+  });
+  h += '</table></div>';
+  document.getElementById('kontoAnzeige').innerHTML = h;
+};
+document.getElementById('loeserKnopf').onclick = function () {
+  tabelleLesen();
+  const nr = +document.getElementById('loeserStrom').value;
+  const ziel = zahl(document.getElementById('loeserZiel').value) / 100;
+  const neu = ZZR.loeseRatenhoehe(proj, nr, ziel, proj.methode);
+  document.getElementById('effAnzeige').innerHTML = neu === null
+    ? 'Löser ohne Ergebnis (Strom/Eingaben prüfen).'
+    : 'Ratenhöhe Strom ' + nr + ' bei Zielzins ' + deZahl(ziel * 100, 4) + ' %: <b>' + deZahl(neu, 2) + '</b>';
+};
+document.getElementById('druckKnopf').onclick = function () { window.print(); };
+document.getElementById('dateiLaden').onchange = function (ev) {
+  const datei = ev.target.files[0];
+  if (!datei) return;
+  datei.arrayBuffer().then(function (buf) {
+    const text = new TextDecoder('windows-1252').decode(buf);
+    proj = ZZR.parseZZR(text);
+    dateiPfad = datei.name;
+    document.getElementById('dateiName').textContent = datei.name + ' — ' + proj.strome.length + ' Ströme';
+    tabelleZeichnen();
+    document.getElementById('kontoAnzeige').innerHTML = '';
+    document.getElementById('effAnzeige').innerHTML = '';
+  });
+};
+document.getElementById('speichernKnopf').onclick = function () {
+  tabelleLesen();
+  const text = ZZR.serializeZZR(proj);
+  const blob = new Blob([text], { type: 'text/plain;charset=windows-1252' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (proj.titel || 'zinsrechnung').replace(/[^\wäöüÄÖÜß -]/g, '').trim() + '.zzr';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+tabelleZeichnen();
+</script>
+</body>
+</html>

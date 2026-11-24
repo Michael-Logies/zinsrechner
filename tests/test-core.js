@@ -63,4 +63,15 @@ const ziel = eff;
 const hoehe = ZZR.loeseRatenhoehe(probe, 2, ziel, 1);
 assert.ok(hoehe !== null && Math.abs(hoehe - 0.51) < 0.005, 'Ratenhöhe ' + hoehe);
 
+console.log('Ratenhöhe zurückgerechnet:', hoehe.toFixed(4));
+
+// 8) Stufen-Semantik (live unter Wine vermessen, 23.11.2026)
+const dynFlows = ZZR.expandiere(ZZR.parseZZR(fs.readFileSync('/home/ml/zinsrechner/probe-dynamik.zzr', 'latin1')));
+assert.strictEqual(dynFlows.length, 24, '2 Stufen x 12 Raten');
+assert.ok(Math.abs(dynFlows[0].betrag + 100) < 1e-9 && Math.abs(dynFlows[11].betrag + 100) < 1e-9, 'Stufe 1 = -100');
+assert.ok(Math.abs(dynFlows[12].betrag + 100.05) < 1e-9, 'Stufe 2 = -100,05 (Dynamik 0,05 %)');
+const zuwFlows = ZZR.expandiere(ZZR.parseZZR(fs.readFileSync('/home/ml/zinsrechner/probe-zuwachs.zzr', 'latin1')));
+assert.strictEqual(zuwFlows.length, 24);
+assert.ok(Math.abs(zuwFlows[12].betrag + 50) < 1e-9, 'Stufe 2 = -50 (Zuwachs +50 additiv)');
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original.');

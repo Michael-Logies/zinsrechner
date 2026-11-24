@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zinsrechner — Zahlungsströme &amp; Effektivzins</title>
+<style>
+  :root { --grau:#f4f4f0; --linie:#bbb; --blau:#1a4f7a; }
+  * { box-sizing:border-box; }
+  body { font-family:"DejaVu Sans",Verdana,sans-serif; font-size:14px; margin:0; background:#fff; color:#111; }
+  header { background:var(--blau); color:#fff; padding:10px 16px; display:flex; justify-content:space-between; align-items:baseline; }
+  header h1 { font-size:17px; margin:0; }
+  header small { opacity:.85; }
+  main { padding:12px 16px; max-width:1100px; }
+  fieldset { border:1px solid var(--linie); margin:0 0 14px; padding:8px 10px; }
+  legend { font-weight:bold; padding:0 6px; }
+  table { border-collapse:collapse; width:100%; }
+  th, td { border:1px solid var(--linie); padding:2px 4px; font-size:12.5px; text-align:right; }
+  th { background:var(--grau); text-align:center; }
+  td.l, th.l { text-align:left; }
+  input { width:100%; border:1px solid transparent; background:transparent; font:inherit; text-align:right; }
+  input:focus { border-color:var(--blau); background:#fff; }
+  td.l input { text-align:left; }
+  button { font:inherit; padding:3px 10px; margin:2px 4px 2px 0; background:var(--grau); border:1px solid var(--linie); cursor:pointer; }
+  button:hover { background:#e2e2da; }
+  .ergebnis { font-size:15px; margin:8px 0; }
+  .ergebnis b { color:var(--blau); }
+  .hinweis { color:#555; font-size:12px; }
+  .konto-wrap { max-height:420px; overflow:auto; }
+  @media print {
+    header, button, .drucken-nein, legend, fieldset.filter { display:none !important; }
+    table { font-size:10px; }
+    .konto-wrap { max-height:none; overflow:visible; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Zinsrechner — Zahlungsströme &amp; Effektivzins</h1>
+  <small>Nachbau des Zuckers Zins Rechner · PAngV/EG-Methode · Goldmaster-geprüft</small>
+</header>
+<main>
+  <fieldset class="filter">
+    <legend>Zahlungsströme <span class="hinweis">(negativer Betrag = Sie zahlen, positiver = Sie erhalten)</span></legend>
+    <div id="stromTabelle"></div>
+    <button id="plusZeile">+ Zeile</button>
+    <button id="loeschZeile">− Zeile</button>
+  </fieldset>
+
+  <fieldset class="filter">
+    <legend>Berechnung</legend>
+    <button id="effKnopf">Effektivzins berechnen (beide Methoden)</button>
+    <button id="kontoKnopf">Vergleichskonto erstellen</button>
+    <button id="druckKnopf">Drucken</button>
+    <span style="float:right">
+      <label>Zielzins-Löser: Strom-Nr. <input id="loeserStrom" type="number" value="1" min="1" style="width:3.5em"></label>
+      <label>Zielzins % <input id="loeserZiel" type="text" value="5,0" style="width:5em"></label>
+      <button id="loeserKnopf">Ratenhöhe lösen</button>
+    </span>
+    <div id="effAnzeige" class="ergebnis"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Vergleichskonto</legend>
+    <div id="kontoAnzeige"></div>
+  </fieldset>
+
+  <fieldset class="filter">
+    <legend>Datei (.zzr — kompatibel zum Originalprogramm)</legend>
+    <label>Öffnen: <input id="dateiLaden" type="file" accept=".zzr,.ZZR"></label>
+    <button id="speichernKnopf">Speichern unter …</button>
+    <span id="dateiName" class="hinweis"></span>
+  </fieldset>
+</main>
+
+<script>
+/*__CORE__*/
+</script>
+<script>
+'use strict';
+// ------------------------------------------------------------- Projektzustand
+let proj = {
+  titel: 'Neue Berechnung', methode: 1, euro: 1, beschreibung: '',
+  strome: [ { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:ZZR.toOrdinal(new Date().getFullYear(),1,1), ultimo:0, betrag:-1000, raten:12, abstand:1, notiz:'Beispielzahlung' } ]
+};
+let dateiPfad = '';
+
+const SPALTEN = [
+  ['aktiv','Akt.'],['datum','Datum von'],['betrag','Betrag'],['raten','Raten'],
+  ['abstand','Abstand (Mon.)'],['stufen','Stufen'],['dynamik','Dynamik %'],
+  ['zuwachs','Zuwachs'],['ultimo','Ultimo'],['notiz','Beschreibung']
+];
+
+function datumText(ord) { return ZZR.deDate(ord); }
+function parseDatum(t) {
+  const m = t.trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  return m ? ZZR.toOrdinal(+m[3], +m[2], +m[1]) : null;
+}
+function zahl(t) {
+  if (typeof t !== 'string') return parseFloat(t) || 0;
+  return parseFloat(t.trim().replace(/\./g,'').replace(',','.')) || 0;
+}
+function deZahl(x, nk) {
+  return x.toLocaleString('de-DE', { minimumFractionDigits:nk, maximumFractionDigits:nk });
+}
+
+function tabelleZeichnen() {
+  const el = document.getElementById('stromTabelle');
+  let h = '<table><tr>';
+  for (const [,t] of SPALTEN) h += '<th>' + t + '</th>';
+  h += '</tr>';
+  proj.strome.forEach(function (s, i) {
+    h += '<tr data-zeile="' + i + '">';
+    for (const [k] of SPALTEN) {
+      const klasse = (k === 'notiz') ? ' class="l"' : '';
+      if (k === 'ultimo') h += '<td><input type="checkbox" data-feld="ultimo"' + (s.ultimo ? ' checked' : '') + '></td>';
+      else if (k === 'datum') h += '<td' + klasse + '><input data-feld="datum" value="' + datumText(s.datum) + '"></td>';
+      else h += '<td' + klasse + '><input data-feld="' + k + '" value="' + s[k] + '"></td>';
+    }
+    h += '</tr>';
+  });
+  h += '</table>';
+  el.innerHTML = h;
+}
+
+function tabelleLesen() {
+  const trs = document.querySelectorAll('#stromTabelle tbody tr, #stromTabelle tr[data-zeile]');
+  const neu = [];
+  document.querySelectorAll('#stromTabelle tr[data-zeile]').forEach(function (tr) {
+    const s = { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:0, ultimo:0, betrag:0, raten:1, abstand:1, notiz:'' };
+    tr.querySelectorAll('input').forEach(function (inp) {
+      const f = inp.getAttribute('data-feld');
+      if (f === 'ultimo') s.ultimo = inp.checked ? 1 : 0;
+      else if (f === 'datum') s.datum = parseDatum(inp.value) || s.datum;
+      else if (f === 'aktiv') s.aktiv = inp.checked ? 1 : 0;
+      else if (f === 'notiz') s.notiz = inp.value;
+      else s[f] = zahl(inp.value);
+    });
+    if (s.datum) neu.push(s);
+  });
+  if (neu.length) proj.strome = neu;
+}
+
+function beideEffektivzins(flows) {
+  return { pangv: ZZR.effPAngV(flows), eg: ZZR.effEG(flows) };
+}
+
+document.getElementById('plusZeile').onclick = function () {
+  tabelleLesen();
+  const letzte = proj.strome[proj.strome.length - 1];
+  proj.strome.push({ aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:(letzte ? letzte.datum + 30 : ZZR.toOrdinal(new Date().getFullYear(),1,1)), ultimo:0, betrag:-100, raten:1, abstand:1, notiz:'' });
+  tabelleZeichnen();
+};
+document.getElementById('loeschZeile').onclick = function () {
+  tabelleLesen();
+  if (proj.strome.length > 1) proj.strome.pop();
+  tabelleZeichnen();
+};
+document.getElementById('effKnopf').onclick = function () {
+  tabelleLesen();
+  const flows = ZZR.expandiere(proj);
+  const e = beideEffektivzins(flows);
+  const f = function (x) { return x === null ? '—' : deZahl(x * 100, 4) + ' % p.a.'; };
+  document.getElementById('effAnzeige').innerHTML =
+    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (ABD/EFH): <b>' + f(e.eg) + '</b>';
+};
+document.getElementById('kontoKnopf').onclick = function () {
+  tabelleLesen();
+  const flows = ZZR.expandiere(proj);
+  const e = beideEffektivzins(flows);
+  const eff = proj.methode === 0 ? e.eg : e.pangv;
+  const titel = proj.methode === 0 ? 'ABD/EFH-Methode' : 'PAngV';
+  if (eff === null) { document.getElementById('kontoAnzeige').innerHTML = '<p>Keine gültige Berechnung — Zahlungsströme beider Richtungen nötig.</p>'; return; }
+  const k = ZZR.kontoSimulation(flows, eff);
+  let h = '<p class="ergebnis">Vergleichskonto ' + titel + ' Effektivzins: <b>' + deZahl(eff * 100, 4) + ' % p.a.</b>' +
+          ' <span class="hinweis">(' + k.zeilen.length + ' Buchungen)</span></p>';
+  h += '<div class="konto-wrap"><table><tr><th class="l">Valuta</th><th class="l">Beschreibung</th><th>Betrag</th><th>Saldo</th><th>Zins anteilig</th><th>Tilgung</th><th>Zins kum.</th><th>Abschluss</th></tr>';
+  k.zeilen.forEach(function (r) {
+    h += '<tr><td class="l">' + ZZR.deDate(r.valuta) + '</td><td class="l">' + r.beschreibung + '</td>' +
+      ['betrag','saldoZinsber','zinsAnteilig','tilgungAnteilig','zinsKumuliert','abschlussSaldo']
+        .map(function (f) { return '<td>' + deZahl(r[f], 2) + '</td>'; }).join('') + '</tr>';
+  });
+  h += '</table></div>';
+  document.getElementById('kontoAnzeige').innerHTML = h;
+};
+document.getElementById('loeserKnopf').onclick = function () {
+  tabelleLesen();
+  const nr = +document.getElementById('loeserStrom').value;
+  const ziel = zahl(document.getElementById('loeserZiel').value) / 100;
+  const neu = ZZR.loeseRatenhoehe(proj, nr, ziel, proj.methode);
+  document.getElementById('effAnzeige').innerHTML = neu === null
+    ? 'Löser ohne Ergebnis (Strom/Eingaben prüfen).'
+    : 'Ratenhöhe Strom ' + nr + ' bei Zielzins ' + deZahl(ziel * 100, 4) + ' %: <b>' + deZahl(neu, 2) + '</b>';
+};
+document.getElementById('druckKnopf').onclick = function () { window.print(); };
+document.getElementById('dateiLaden').onchange = function (ev) {
+  const datei = ev.target.files[0];
+  if (!datei) return;
+  datei.arrayBuffer().then(function (buf) {
+    const text = new TextDecoder('windows-1252').decode(buf);
+    proj = ZZR.parseZZR(text);
+    dateiPfad = datei.name;
+    document.getElementById('dateiName').textContent = datei.name + ' — ' + proj.strome.length + ' Ströme';
+    tabelleZeichnen();
+    document.getElementById('kontoAnzeige').innerHTML = '';
+    document.getElementById('effAnzeige').innerHTML = '';
+  });
+};
+document.getElementById('speichernKnopf').onclick = function () {
+  tabelleLesen();
+  const text = ZZR.serializeZZR(proj);
+  const blob = new Blob([text], { type: 'text/plain;charset=windows-1252' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (proj.titel || 'zinsrechnung').replace(/[^\wäöüÄÖÜß -]/g, '').trim() + '.zzr';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+tabelleZeichnen();
+</script>
+</body>
+</html>

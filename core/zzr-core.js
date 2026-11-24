@@ -173,21 +173,23 @@
     return L.join('\r\n') + '\r\n';
   }
 
-  // Alle Einzelzahlungen eines Projekts (kleinste Einheit): { datum, betrag, notiz, strom }
+  // Alle Einzelzahlungen eines Projekts (kleinste Einheit): { datum, amount, label } —
+  // Stufen-Semantik live bewiesen (23.11.2026): Raten = Anzahl PRO Stufe, Stufe s
+  // trägt Betrag ×(1+Dynamik/100)^s bzw. Betrag + s×Zuwachs, Tage = s×Raten×Abstand.
   function expandiere(proj) {
     const liste = [];
     proj.strome.forEach(function (s, i) {
       if (!s.aktiv) return;
-      const n = Math.max(0, Math.round(s.raten));
-      for (let k = 0; k < n; k++) {
-        const datum = addMonths(s.datum, k * (s.abstand || 1));
-        let betrag = s.betrag;
-        // Stufen-Semantik (live unter Wine bewiesen, 23.11.2026):
-        //  - Dynamik-Feld speichert die PROZENT-ZAHL (5.0 = 5 %): multiplikativ je Stufe
-        //  - Zuwachs-Feld ist ABSOLUT-Addend mit Vorzeichen: additiv je Stufe
-        if (s.zuwachs) betrag = betrag + k * s.zuwachs;
-        if (s.dynamik) betrag = betrag * Math.pow(1 + s.dynamik / 100, k);
-        liste.push({ datum: datum, betrag: betrag, notiz: s.notiz || ('Strom ' + (i + 1)), strom: i + 1, ultimo: !!s.ultimo });
+      const stufen = Math.max(1, Math.round(s.stufen || 1));
+      const raten = Math.max(0, Math.round(s.raten));
+      for (let st = 0; st < stufen; st++) {
+        let betragStufe = s.betrag;
+        if (s.zuwachs) betragStufe = betragStufe + st * s.zuwachs;
+        if (s.dynamik) betragStufe = betragStufe * Math.pow(1 + s.dynamik / 100, st);
+        for (let k = 0; k < raten; k++) {
+          const datum = addMonths(s.datum, (st * raten + k) * (s.abstand || 1));
+          liste.push({ datum: datum, betrag: betragStufe, notiz: s.notiz || ('Strom ' + (i + 1)), strom: i + 1, ultimo: !!s.ultimo });
+        }
       }
     });
     liste.sort(function (a, b) { return a.datum - b.datum || a.strom - b.strom; });
