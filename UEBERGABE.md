@@ -1,4 +1,11 @@
-# Übergabe ZZR-Neubau (Stand 24.11.2026, nach AIBD-Kalibrierung)
+# Übergabe ZZR-Neubau (Stand 24.11.2026, ~17:30)
+
+**Kurzstand für den nächsten Kontext:** Alle Kernfunktionen Goldmaster-GRÜN (7 Prüfpunkte
+in tests/test-core.js) — PAngV-alt, EG/AIBD, effPAngVHeu (heutige Rechtslage), End-/Barwert
+(beide Methoden), Aktiv-Häkchen-Fix, vereinheitlichte Raster-Wurzelsuche für alle
+Kontorichtungen, EU-Verbraucherinformationsblatt, AGPL + README. Repo sauber, nichts
+Blockierendes. **Fortsetzungsbefehl: „Lies /home/ml/zinsrechner/UEBERGABE.md und setze
+die Arbeit am ZZR-Neubau fort."** Voller Wissensstand: Memory-MCP #1467.
 
 ## Was steht (alles committet in ~/zinsrechner, lokal, kein Remote)
 
