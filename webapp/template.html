@@ -162,15 +162,29 @@ document.getElementById('effKnopf').onclick = function () {
   const e = beideEffektivzins(flows);
   const f = function (x) { return x === null ? '—' : deZahl(x * 100, 4) + ' % p.a.'; };
   document.getElementById('effAnzeige').innerHTML =
-    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (ABD/EFH): <b>' + f(e.eg) + '</b>';
+    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD): <b>' + f(e.eg) + '</b>';
 };
 document.getElementById('kontoKnopf').onclick = function () {
   tabelleLesen();
   const flows = ZZR.expandiere(proj);
   const e = beideEffektivzins(flows);
   const eff = proj.methode === 0 ? e.eg : e.pangv;
-  const titel = proj.methode === 0 ? 'ABD/EFH-Methode' : 'PAngV';
+  const titel = proj.methode === 0 ? 'AIBD (EG-Anhang II)' : 'PAngV';
   if (eff === null) { document.getElementById('kontoAnzeige').innerHTML = '<p>Keine gültige Berechnung — Zahlungsströme beider Richtungen nötig.</p>'; return; }
+  if (proj.methode === 0) {
+    const k = ZZR.kontoAIBD(flows, eff);
+    let h = '<p class="ergebnis">Vergleichskonto ' + titel + ' Effektivzins: <b>' + deZahl(eff * 100, 4) + ' % p.a.</b>' +
+            ' <span class="hinweis">(' + k.zeilen.length + ' Buchungen, tagesgenaue Zinseszinsrechnung)</span></p>';
+    h += '<div class="konto-wrap"><table><tr><th class="l">Valuta</th><th class="l">Beschreibung</th><th>Betrag anteilig</th><th>Zins anteilig</th><th>Tilgung saldo</th><th>Abschluss-Saldo</th></tr>';
+    k.zeilen.forEach(function (r) {
+      h += '<tr><td class="l">' + ZZR.deDate(r.valuta) + '</td><td class="l">' + r.beschreibung + '</td>' +
+        ['betrag', 'zins', 'tilgung', 'saldo']
+          .map(function (f) { return '<td>' + deZahl(r[f], 2) + '</td>'; }).join('') + '</tr>';
+    });
+    h += '</table></div>';
+    document.getElementById('kontoAnzeige').innerHTML = h;
+    return;
+  }
   const k = ZZR.kontoSimulation(flows, eff);
   let h = '<p class="ergebnis">Vergleichskonto ' + titel + ' Effektivzins: <b>' + deZahl(eff * 100, 4) + ' % p.a.</b>' +
           ' <span class="hinweis">(' + k.zeilen.length + ' Buchungen)</span></p>';
