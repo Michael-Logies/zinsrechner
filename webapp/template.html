@@ -165,14 +165,14 @@
   </fieldset>
 
   <fieldset class="filter">
-    <legend>Datei (.zzr — kompatibel zum Originalprogramm)</legend>
-    <label>Öffnen: <input id="dateiLaden" type="file" accept=".zzr,.ZZR"></label>
-    <button id="lexwareKnopf" title="Lädt die Jahresübersicht (JJ) des Lexware Finanzmanagers: Spalten Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;Einnahmen/Ausgaben;Marktwert. Scheitert der Import, hat sich das Exportformat geändert — dann bitte die eigene KI (z. B. Qwen Code) mit der Anpassung bemühen.">Lexware-CSV importieren …</button>
-    <input id="lexwareDatei" type="file" accept=".csv,text/csv" hidden>
-    <button id="speichernKnopf">Speichern unter …</button>
-    <button id="xlsxKnopf" title="XLSX mit Formeln: Zahlungsströme, Vergleichskonto (Zins in B2 editierbar — Zielwertsuche ermittelt den Effektivzins), Zahlungsplan">Kalkulation exportieren (.xlsx)</button>
-    <span id="dateiName" class="hinweis"></span><br>
-    <span id="lexwareStatus" class="hinweis"></span>
+    <legend>Dateien</legend>
+    <div style="margin:.4em 0"><strong>Import:</strong> <label>.zzr öffnen (Originalprogramm): <input id="dateiLaden" type="file" accept=".zzr,.ZZR"></label>
+      <button id="lexwareKnopf" title="Lädt die Jahresübersicht (JJ) des Lexware Finanzmanagers („Aktienentwicklung alle"): Spalten Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;Einnahmen/Ausgaben;Marktwert — UTF-16- oder CP1252-CSV. Scheitert der Import, hat sich das Exportformat geändert — dann bitte die eigene KI (z. B. Qwen Code) mit der Anpassung bemühen.">Lexware Wertpapier-CSV importieren …</button>
+      <input id="lexwareDatei" type="file" accept=".csv,text/csv" hidden>
+      <span class="hinweis">Erkennt die Jahresübersicht (JJ) des Lexware Finanzmanagers. Scheitert der Import, hat sich das Exportformat geändert — bitte die eigene KI bemühen.</span></div>
+    <div style="margin:.4em 0"><strong>Export:</strong> <button id="speichernKnopf">Speichern unter … (.zzr für das Originalprogramm)</button>
+      <button id="xlsxKnopf" title="XLSX mit Formeln: Zahlungsströme, Vergleichskonto (Zins in B2 editierbar — Zielwertsuche ermittelt den Effektivzins), Zahlungsplan">Kalkulation exportieren (.xlsx)</button></div>
+    <div style="margin:.4em 0"><span id="dateiName" class="hinweis"></span><br><span id="lexwareStatus" class="hinweis"></span></div>
   </fieldset>
 
   <div id="druckBericht"></div>
@@ -563,7 +563,7 @@ document.getElementById('lexwareDatei').onchange = function (ev) {
   if (!datei) return;
   const status = document.getElementById('lexwareStatus');
   datei.arrayBuffer().then(function (buf) {
-    const text = new TextDecoder('windows-1252').decode(buf);
+    const text = ZZR.csvTextAusBytes(new Uint8Array(buf));
     let r;
     try {
       r = ZZR.lexwareCsvZuStrome(text);

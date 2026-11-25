@@ -165,14 +165,14 @@
   </fieldset>
 
   <fieldset class="filter">
-    <legend>Datei (.zzr — kompatibel zum Originalprogramm)</legend>
-    <label>Öffnen: <input id="dateiLaden" type="file" accept=".zzr,.ZZR"></label>
-    <button id="lexwareKnopf" title="Lädt die Jahresübersicht (JJ) des Lexware Finanzmanagers: Spalten Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;Einnahmen/Ausgaben;Marktwert. Scheitert der Import, hat sich das Exportformat geändert — dann bitte die eigene KI (z. B. Qwen Code) mit der Anpassung bemühen.">Lexware-CSV importieren …</button>
-    <input id="lexwareDatei" type="file" accept=".csv,text/csv" hidden>
-    <button id="speichernKnopf">Speichern unter …</button>
-    <button id="xlsxKnopf" title="XLSX mit Formeln: Zahlungsströme, Vergleichskonto (Zins in B2 editierbar — Zielwertsuche ermittelt den Effektivzins), Zahlungsplan">Kalkulation exportieren (.xlsx)</button>
-    <span id="dateiName" class="hinweis"></span><br>
-    <span id="lexwareStatus" class="hinweis"></span>
+    <legend>Dateien</legend>
+    <div style="margin:.4em 0"><strong>Import:</strong> <label>.zzr öffnen (Originalprogramm): <input id="dateiLaden" type="file" accept=".zzr,.ZZR"></label>
+      <button id="lexwareKnopf" title="Lädt die Jahresübersicht (JJ) des Lexware Finanzmanagers („Aktienentwicklung alle"): Spalten Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;Einnahmen/Ausgaben;Marktwert — UTF-16- oder CP1252-CSV. Scheitert der Import, hat sich das Exportformat geändert — dann bitte die eigene KI (z. B. Qwen Code) mit der Anpassung bemühen.">Lexware Wertpapier-CSV importieren …</button>
+      <input id="lexwareDatei" type="file" accept=".csv,text/csv" hidden>
+      <span class="hinweis">Erkennt die Jahresübersicht (JJ) des Lexware Finanzmanagers. Scheitert der Import, hat sich das Exportformat geändert — bitte die eigene KI bemühen.</span></div>
+    <div style="margin:.4em 0"><strong>Export:</strong> <button id="speichernKnopf">Speichern unter … (.zzr für das Originalprogramm)</button>
+      <button id="xlsxKnopf" title="XLSX mit Formeln: Zahlungsströme, Vergleichskonto (Zins in B2 editierbar — Zielwertsuche ermittelt den Effektivzins), Zahlungsplan">Kalkulation exportieren (.xlsx)</button></div>
+    <div style="margin:.4em 0"><span id="dateiName" class="hinweis"></span><br><span id="lexwareStatus" class="hinweis"></span></div>
   </fieldset>
 
   <div id="druckBericht"></div>
@@ -461,6 +461,21 @@
       else bytes[i] = 0x3F;
     }
     return bytes;
+  }
+
+  // Bytes → Text für CSV-Importe: erkennt UTF-16-LE mit BOM (FF FE), UTF-8-BOM
+  // und UTF-16-LE ohne BOM (NUL-Raster im ASCII-Bereich — Lexware JJ-CSV!);
+  // alles andere wird als windows-1252 gelesen (CP1252-Welt). Läuft in Node
+  // und Browser (TextDecoder global).
+  function csvTextAusBytes(bytes) {
+    const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    if (b.length >= 2 && b[0] === 0xFF && b[1] === 0xFE) return new TextDecoder('utf-16le').decode(b.slice(2));
+    if (b.length >= 3 && b[0] === 0xEF && b[1] === 0xBB && b[2] === 0xBF) return new TextDecoder('utf-8').decode(b);
+    let nul = 0;
+    const n = Math.min(b.length, 200);
+    for (let i = 1; i < n; i += 2) if (b[i] === 0) nul++;
+    if (b.length >= 2 && nul >= Math.floor(n / 4)) return new TextDecoder('utf-16le').decode(b);
+    return new TextDecoder('windows-1252').decode(b);
   }
 
   // Alle Einzelzahlungen eines Projekts (kleinste Einheit): { datum, amount, label } —
@@ -1406,7 +1421,7 @@
   const API = {
     fromOrdinal, toOrdinal, addMonths, addYears, deDate, isLeap, daysInMonth,
     days30360, days365,
-    parseZZR, serializeZZR, expandiere, lexwareCsvZuStrome, cp1252Bytes,
+    parseZZR, serializeZZR, expandiere, lexwareCsvZuStrome, cp1252Bytes, csvTextAusBytes,
     effEG, effPAngV, effAibd360, kontoSimulation, kontoAIBD, xlsxExport,
     loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct,
     laufzeit, zahlungsplan,
@@ -1798,7 +1813,7 @@ document.getElementById('lexwareDatei').onchange = function (ev) {
   if (!datei) return;
   const status = document.getElementById('lexwareStatus');
   datei.arrayBuffer().then(function (buf) {
-    const text = new TextDecoder('windows-1252').decode(buf);
+    const text = ZZR.csvTextAusBytes(new Uint8Array(buf));
     let r;
     try {
       r = ZZR.lexwareCsvZuStrome(text);

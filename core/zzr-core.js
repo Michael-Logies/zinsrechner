@@ -280,6 +280,21 @@
     return bytes;
   }
 
+  // Bytes → Text für CSV-Importe: erkennt UTF-16-LE mit BOM (FF FE), UTF-8-BOM
+  // und UTF-16-LE ohne BOM (NUL-Raster im ASCII-Bereich — Lexware JJ-CSV!);
+  // alles andere wird als windows-1252 gelesen (CP1252-Welt). Läuft in Node
+  // und Browser (TextDecoder global).
+  function csvTextAusBytes(bytes) {
+    const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    if (b.length >= 2 && b[0] === 0xFF && b[1] === 0xFE) return new TextDecoder('utf-16le').decode(b.slice(2));
+    if (b.length >= 3 && b[0] === 0xEF && b[1] === 0xBB && b[2] === 0xBF) return new TextDecoder('utf-8').decode(b);
+    let nul = 0;
+    const n = Math.min(b.length, 200);
+    for (let i = 1; i < n; i += 2) if (b[i] === 0) nul++;
+    if (b.length >= 2 && nul >= Math.floor(n / 4)) return new TextDecoder('utf-16le').decode(b);
+    return new TextDecoder('windows-1252').decode(b);
+  }
+
   // Alle Einzelzahlungen eines Projekts (kleinste Einheit): { datum, amount, label } —
   // Stufen-Semantik live bewiesen (23.11.2026): Raten = Anzahl PRO Stufe, Stufe s
   // trägt Betrag ×(1+Dynamik/100)^s bzw. Betrag + s×Zuwachs, Tage = s×Raten×Abstand.
@@ -1223,7 +1238,7 @@
   const API = {
     fromOrdinal, toOrdinal, addMonths, addYears, deDate, isLeap, daysInMonth,
     days30360, days365,
-    parseZZR, serializeZZR, expandiere, lexwareCsvZuStrome, cp1252Bytes,
+    parseZZR, serializeZZR, expandiere, lexwareCsvZuStrome, cp1252Bytes, csvTextAusBytes,
     effEG, effPAngV, effAibd360, kontoSimulation, kontoAIBD, xlsxExport,
     loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct,
     laufzeit, zahlungsplan,

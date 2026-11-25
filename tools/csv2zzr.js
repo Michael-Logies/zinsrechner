@@ -22,7 +22,10 @@ const ZZR = require('../core/zzr-core.js');
 const [src, dst] = process.argv.slice(2);
 if (!src || !dst) { console.error('Aufruf: node tools/csv2zzr.js <quelle.csv> <ziel.zzr>'); process.exit(1); }
 
-const text = fs.readFileSync(src, 'latin1'); // 0x81 (CP1252 ü) bleibt byte-erhaltend
+// Bytes → Text: erkennt UTF-16-LE (BOM oder NUL-Raster — das JJ-Exportformat!),
+// UTF-8-BOM und CP1252. NICHT über cmd „type" holen (Codepage-Transform!) —
+// per scp über eine kopierte Leerzeichen-freie Datei oder PowerShell-Base64.
+const text = ZZR.csvTextAusBytes(fs.readFileSync(src));
 const lines = text.split(/\r\n|\n/);
 const data = lines.filter((ln, i) => i > 0 && ln.trim() && !ln.includes('"'));
 

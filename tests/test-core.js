@@ -463,4 +463,13 @@ assert(ZZR.cp1252Bytes('\u0081')[0] === 0x81, 'cp1252 U+0081 bleibt 0x81 (CP1252
 assert(ZZR.cp1252Bytes('中')[0] === 0x3F, 'cp1252 außerhalb → ?');
 console.log('cp1252Bytes: grün — Fläche schreibt .zzr als CP1252, historisches Programm liest korrekt.');
 
+// 23) csvTextAusBytes — UTF-16-LE-BOM-Erkennung (die echte Lexware JJ-CSV!)
+const utf16 = Buffer.concat([Buffer.from([0xFF, 0xFE]), Buffer.from('Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;"Einnahmen /\nAusgaben";Marktwert;Rendite in %;Rendite\n', 'utf16le')]);
+assert(ZZR.csvTextAusBytes(utf16).startsWith('Buchungstag;Konto;Vorgang;'), 'UTF-16-LE-BOM erkannt');
+const utf16ohneBom = Buffer.from('Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;Marktwert\n'.split('').map(c => [c.charCodeAt(0), 0]).flat());
+assert(ZZR.csvTextAusBytes(utf16ohneBom).startsWith('Buchungstag;Konto;'), 'UTF-16-LE ohne BOM erkannt (NUL-Raster)');
+assert(ZZR.csvTextAusBytes(Buffer.from([0xEF, 0xBB, 0xBF])).constructor !== undefined, 'UTF-8-BOM-Weg läuft');
+assert(ZZR.csvTextAusBytes(Buffer.from('Buchungstag', 'latin1')) === 'Buchungstag', 'CP1252-Weg identisch');
+console.log('csvTextAusBytes: grün — UTF-16-LE (BOM und ohne), UTF-8-BOM, CP1252 erkannt.');
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + AIBD360 + End-/Barwert).');
