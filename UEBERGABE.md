@@ -11,6 +11,11 @@ anwendbar seit 20.11.2026), PAngV 2011/2026 (2026 — Neufassung 2021, geändert
 12.5.2026); AIBD360 = Marktkonvention OHNE gesetzliche Regelung; Erklärbox + ZA-Blatt +
 Ergebniszeile + Konto-/Laufzeit-/Endwert-/Barwert-Texte aktualisiert; Fläche REBUILD +
 vm.Script-Prüfung + Dist-Reinheitsprüfung erledigt.**
+**NEU am 25.11. (2. Runde, Nutzerauftrag): „Effektivzins berechnen" aktualisiert jetzt
+automatisch auch Zahlungsplan und Verbraucherinformationsblatt; neuer „Druck"-Knopf baut
+einen Druckbericht mit Seite 1 = Zahlungsströme + Zahlungsplan und Seite 2 = Verbraucher-
+informationsblatt (print-CSS „druckmodus", afterprint räumt auf). Der alte „Drucken"-
+Knopf druckt unverändert die ganze Seite.**
 **NEU in dieser Runde (24.11. abends, Orakel-Lauf 22:45–23:10): Zweitgrenzen-Regel am
 Original BEWIESEN (Konto-Export feb2.txt: Valuta „30.02.2000" → 30/360 führt auch die
 Zweitgrenze am Februar-Ende als 30), Ultimo=0 orakelt (u3p/u3a: PAngV 0,7396 % / AIBD
@@ -42,9 +47,11 @@ ZZR-Neubau fort."** Voller Wissensstand: Memory-MCP #1467 + #1479 (Tags zzr) + N
      orakel-feb-d2-pangv.txt); Kalender-Bugfix; **Löser** (alle 7, BSP_1/3/4/6 exakt)
    - `zahlungsplan(proj)`, `laufzeit(d1, d2, methode)` (3 Konventionen)
 2. **HTML-Bedienerfläche** `dist/zinsrechner.html` (Einzeldatei, offline, druckbar):
-   Zahlungsstrom-Tabelle, EFF (3 Methoden), Vergleichskonto (AIBD/PAngV-Ansicht),
-   Zahlungsplan-Sektion, Zielzins-Löser, End-/Barwert-Feld, .zzr Laden/Speichern,
-   Drucken, Verbraucherinformationsblatt, Methoden-Erklärbox. Bau: `node webapp/build.js`
+   Zahlungsstrom-Tabelle, EFF (3 Methoden; Knopf aktualisiert auch Zahlungsplan +
+   Verbraucherinformationsblatt), Vergleichskonto (AIBD/PAngV-Ansicht), Zahlungsplan-
+   Sektion, Zielzins-Löser, End-/Barwert-Feld, .zzr Laden/Speichern, Drucken (ganze
+   Seite), **Druck-Bericht** (Seite 1 Ströme+Plan, Seite 2 Blatt), Verbraucherinformationsblatt,
+   Methoden-Erklärbox. Bau: `node webapp/build.js`
    (Kern-Sync-Rebuild + vm.Script-Prüfung + Dist-Reinheit: erledigt 25.11.2026)
 3. **Tests** `tests/test-core.js` — 21 Blöcke grün. Referenzen: goldmaster-konto.json,
    goldmaster-konto-m0.txt, vk1-ultimo-u1.txt, **NEU: orakel-feb-d2-pangv.txt,

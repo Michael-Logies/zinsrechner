@@ -27,10 +27,15 @@
   .ergebnis b { color:var(--blau); }
   .hinweis { color:#555; font-size:12px; }
   .konto-wrap { max-height:420px; overflow:auto; }
+  #druckBericht { display:none; }
+  body.druckmodus main > :not(#druckBericht), body.druckmodus header { display:none !important; }
   @media print {
     header, button, .drucken-nein, legend, fieldset.filter { display:none !important; }
     table { font-size:10px; }
     .konto-wrap { max-height:none; overflow:visible; }
+    body.druckmodus main > :not(#druckBericht), body.druckmodus header { display:none !important; }
+    body.druckmodus #druckBericht { display:block; }
+    .druckseite2 { page-break-before: always; }
   }
 </style>
 </head>
@@ -52,6 +57,7 @@
     <button id="effKnopf">Effektivzins berechnen (3 Methoden)</button>
     <button id="kontoKnopf">Vergleichskonto erstellen</button>
     <button id="druckKnopf">Drucken</button>
+    <button id="druckBerichtKnopf" title="Druckbericht: Seite 1 = Zahlungsströme + Zahlungsplan, Seite 2 = Verbraucherinformationsblatt">Druck</button>
     <span style="float:right">
       <label>Strom-Nr. <input id="loeserStrom" type="number" value="1" min="1" style="width:3.5em"></label>
       <label>Zielgröße <select id="loeserZielgroesse">
@@ -159,6 +165,8 @@
     <button id="speichernKnopf">Speichern unter …</button>
     <span id="dateiName" class="hinweis"></span>
   </fieldset>
+
+  <div id="druckBericht"></div>
 
   <p style="margin:1.2em 0 0;font-size:0.85em" class="hinweis">Zinsrechner — Quelloffen unter der GNU Affero General Public License v3 oder später (AGPL-3.0-or-later) · Copyright © 2026 Michael Logies · Diese Datei enthält den vollständigen Quellcode (Rechenkern eingebettet).</p>
 </main>
@@ -1087,13 +1095,18 @@ document.getElementById('loeschZeile').onclick = function () {
   if (proj.strome.length > 1) proj.strome.pop();
   tabelleZeichnen();
 };
-document.getElementById('effKnopf').onclick = function () {
+function zeigeEffektivzins() {
   tabelleLesen();
   const flows = ZZR.expandiere(proj);
   const e = beideEffektivzins(flows);
   const f = function (x) { return x === null ? '—' : deZahl(x * 100, 4) + ' % p.a.'; };
   document.getElementById('effAnzeige').innerHTML =
     'Effektivzins PAngV (bis 2010): <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD) (2023): <b>' + f(e.eg) + '</b> &nbsp;·&nbsp; PAngV 2011/2026 (2026): <b>' + f(e.heu) + '</b>';
+}
+document.getElementById('effKnopf').onclick = function () {
+  zeigeEffektivzins();
+  zeigeZahlungsplan();
+  zeigeBlatt();
 };
 document.getElementById('kontoKnopf').onclick = function () {
   tabelleLesen();
@@ -1181,11 +1194,9 @@ document.getElementById('loeserKnopf').onclick = function () {
   }
   document.getElementById('effAnzeige').innerHTML = text;
 };
-document.getElementById('planKnopf').onclick = function () {
-  tabelleLesen();
+function bauePlanHTML() {
   const plan = ZZR.zahlungsplan(proj);
-  const el = document.getElementById('planAnzeige');
-  if (!plan.zeilen.length) { el.innerHTML = '<p>Keine aktiven Zahlungsströme.</p>'; return; }
+  if (!plan.zeilen.length) return '<p>Keine aktiven Zahlungsströme.</p>';
   const lzHeute = ZZR.laufzeit(plan.erste, plan.letzte, 2);
   let kumuliert = 0;
   let h = '<p class="ergebnis">Zahlungsplan zu „' + proj.titel + '“ — Erste Zahlung: <b>' + ZZR.deDate(plan.erste) +
@@ -1203,8 +1214,13 @@ document.getElementById('planKnopf').onclick = function () {
   });
   h += '</table></div>';
   h += '<p class="ergebnis">Summe Ihrer Einzahlungen: <b>' + deZahl(plan.summeEin, 2) + '</b> &nbsp;·&nbsp; Summe der Auszahlungen an Sie: <b>' + deZahl(plan.summeAus, 2) + '</b></p>';
-  el.innerHTML = h;
-};
+  return h;
+}
+function zeigeZahlungsplan() {
+  tabelleLesen();
+  document.getElementById('planAnzeige').innerHTML = bauePlanHTML();
+}
+document.getElementById('planKnopf').onclick = zeigeZahlungsplan;
 document.getElementById('endwertKnopf').onclick = function () {
   tabelleLesen();
   const flows = ZZR.expandiere(proj);
@@ -1227,16 +1243,11 @@ document.getElementById('barwertKnopf').onclick = function () {
     ? 'Barwert ohne Ergebnis (Ströme prüfen).'
     : 'Barwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a. (' + (proj.methode === 0 ? 'AIBD (2023)' : 'PAngV (bis 2010)') + '-Abzinsung): <b>' + deZahl(v, 2) + '</b>';
 };
-document.getElementById('vibKnopf').onclick = function () {
-  tabelleLesen();
+function baueBlattHTML() {
   const flows = ZZR.expandiere(proj);
   const C = flows.filter(function (f) { return f.betrag > 0; }); // Auszahlungen an Sie
   const D = flows.filter(function (f) { return f.betrag < 0; }); // Ihre Zahlungen
-  const el = document.getElementById('vibAnzeige');
-  if (C.length === 0 || D.length === 0) {
-    el.innerHTML = '<p>Das Blatt braucht Zahlungen in beiden Richtungen — Auszahlungen an Sie (+) und Ihre Zahlungen (−).</p>';
-    return;
-  }
+  if (C.length === 0 || D.length === 0) return null;
   const gesamtKredit = C.reduce(function (s, f) { return s + f.betrag; }, 0);
   const gesamtZahl = Math.abs(D.reduce(function (s, f) { return s + f.betrag; }, 0));
   const eff = ZZR.effPAngVHeu(flows);
@@ -1270,9 +1281,49 @@ document.getElementById('vibKnopf').onclick = function () {
      + 'Kreditvertragsentwurf: Sie haben auf Verlangen Anspruch auf eine Kopie des Vertragsentwurfs.</p>';
   h += '<p><b>5 Fernabsatz</b><br>— (nur bei Fernabsatzverträgen; hier nicht dargestellt)</p>';
   h += '</div>';
-  el.innerHTML = h;
-};
+  return h;
+}
+function zeigeBlatt() {
+  const h = baueBlattHTML();
+  document.getElementById('vibAnzeige').innerHTML = h || '<p>Das Blatt braucht Zahlungen in beiden Richtungen — Auszahlungen an Sie (+) und Ihre Zahlungen (−).</p>';
+}
+document.getElementById('vibKnopf').onclick = zeigeBlatt;
 document.getElementById('druckKnopf').onclick = function () { window.print(); };
+function baueStromeHTML() {
+  let h = '<table><tr>';
+  for (const [,t] of SPALTEN) h += '<th>' + t + '</th>';
+  h += '</tr>';
+  proj.strome.forEach(function (s) {
+    h += '<tr>';
+    for (const [k] of SPALTEN) {
+      if (k === 'notiz') { h += '<td class="l">' + (s.notiz || '') + '</td>'; continue; }
+      let v = s[k];
+      if (k === 'datum') v = datumText(s.datum);
+      else if (k === 'ultimo' || k === 'aktiv') v = s[k] ? 'ja' : '—';
+      else if (k === 'betrag' || k === 'zuwachs') v = deZahl(s[k], 2);
+      h += '<td>' + v + '</td>';
+    }
+    h += '</tr>';
+  });
+  h += '</table>';
+  return h;
+}
+document.getElementById('druckBerichtKnopf').onclick = function () {
+  tabelleLesen();
+  const planHTML = bauePlanHTML();
+  const blattHTML = baueBlattHTML();
+  document.getElementById('druckBericht').innerHTML =
+    '<div class="druckseite"><h3 style="margin:0.2em 0">Zahlungsströme — „' + proj.titel + '“</h3>' +
+    baueStromeHTML() +
+    '<h3 style="margin:0.8em 0 0.2em">Zahlungsplan</h3>' + planHTML + '</div>' +
+    '<div class="druckseite druckseite2">' + (blattHTML || '<p>Verbraucherinformationsblatt ohne Ergebnis — Zahlungen in beiden Richtungen nötig.</p>') + '</div>';
+  document.body.classList.add('druckmodus');
+  window.print();
+};
+window.addEventListener('afterprint', function () {
+  document.body.classList.remove('druckmodus');
+  document.getElementById('druckBericht').innerHTML = '';
+});
 document.getElementById('dateiLaden').onchange = function (ev) {
   const datei = ev.target.files[0];
   if (!datei) return;
@@ -1284,6 +1335,8 @@ document.getElementById('dateiLaden').onchange = function (ev) {
     tabelleZeichnen();
     document.getElementById('kontoAnzeige').innerHTML = '';
     document.getElementById('effAnzeige').innerHTML = '';
+    document.getElementById('planAnzeige').innerHTML = '';
+    document.getElementById('vibAnzeige').innerHTML = '';
   });
 };
 document.getElementById('speichernKnopf').onclick = function () {
