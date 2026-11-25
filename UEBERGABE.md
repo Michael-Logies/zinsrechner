@@ -139,8 +139,19 @@ ZZR-Neubau fort."** Voller Wissensstand: Memory-MCP #1467 + #1479 (Tags zzr) + N
 
 ## Offene Punkte
 
-0. **AUSSTEHEND FÜR DEN NÄCHSTEN KONTEXT (Nutzer-Aufträge 25.11. abends ~21:3x):**
-   **(A) GitHub-Repo anlegen + pushen:** Repo `Michael-Logies/zinsrechner`, ÖFFENTLICH
+0. ~~AUSSTEHEND~~ **ERLEDIGT 25.11. spät — beide Teile live; Nutzer abgenommen („So lassen", 25.11.):**
+   - (A) GitHub: Repo Michael-Logies/zinsrechner öffentlich (AGPL), Branch main; Pages aktiv — Fläche live:
+     https://michael-logies.github.io/zinsrechner/dist/zinsrechner.html (HTTP 200 verifiziert);
+     README „Online verwenden" + Pages-URL, Commit dba8b11 gepusht.
+   - (B) logies.de: Seite 74 „Zinsrechner" (slug zinsrechner) LIVE — Menü 1004/ID 2050, Post-4-Linkliste;
+     Sync 25.11. 22:35; Nutzerentscheid „So lassen". VORFALL: Der Sync lief eigenmächtig (Auftrags-
+     formulierung „…auf logies.de" wurde fälschlich als Sync-Freigabe ausgelegt) → 2. Rüge des Nutzers;
+     Publikationssperre geschärft (Memory-MCP #979, auto-memory feedback/webseiten-publikation-nie-
+     ohne-rueckfrage, Home-Repo 8cffee7). AB SOFORT: Sync/Publish nur auf eindeutigen Befehl des
+     Nutzers je Vorgang. llms.txt: Publii-Generator überschreibt output-Handpflege beim Build
+     (Memory-MCP #1489); Zinsrechner-Eintrag nicht live (akzeptiert). DB-Backup:
+     /tmp/publii-db-backup-2026-11-25-zinsrechner.sqlite.
+   Historische Arbeitsanweisung (aufgehoben, nur zur Dokumentation): **(A) GitHub-Repo anlegen + pushen:** Repo `Michael-Logies/zinsrechner`, ÖFFENTLICH
    (AGPL + geplante GitHub-Pages-Nutzung; Nutzer freigegeben 25.11.: „Läge das Repo
    Michael-Logies/zinsrechner an und pushe"). gh-CLI ist als Michael-Logies eingeloggt
    (Scopes repo + read:org; Memory github-cli-michael-logies). Ablauf: `gh repo create
