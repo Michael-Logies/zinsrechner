@@ -356,15 +356,10 @@ function bauePlanHTML() {
   const plan = ZZR.zahlungsplan(proj);
   if (!plan.zeilen.length) return '<p>Keine aktiven Zahlungsströme.</p>';
   const lzHeute = ZZR.laufzeit(plan.erste, plan.letzte, 0);
-  const lzK = plan.laufzeit;
-  const lzKonvText = lzK.jahre + ' Jahr(en), ' + lzK.monate + ' Monat(en)' +
-    (proj.methode === 0 ? ', ' + lzK.tage + ' Tag(en)' : '');
   let kumuliert = 0;
   let h = '<p class="ergebnis">Zahlungsplan zu „' + proj.titel + '“ — Erste Zahlung: <b>' + ZZR.deDate(plan.erste) +
           '</b>, letzte Zahlung: <b>' + ZZR.deDate(plan.letzte) + '</b><br>' +
-          'Laufzeit: <b>' + lzKonvText + '</b> <span class="hinweis">(' +
-          (proj.methode === 0 ? 'echter Kalender, AIBD-Konvention (EG, 2023)' : '30/360-Kalendarium, PAngV-Konvention (bis 2010)') +
-          ')</span> · nach heutiger Zählung (Anlage zu § 16 PAngV, Fassung 2026): <b>' +
+          'Nach heutiger Zählung (Anlage zu § 16 PAngV, Fassung 2026): <b>' +
           lzHeute.jahre + ' Jahr(en), ' + lzHeute.monate + ' Monat(en), ' + lzHeute.tage + ' Tag(en)</b></p>';
   h += '<div class="konto-wrap"><table><tr><th>Nr.</th><th class="l">Valuta</th><th class="l">Beschreibung</th><th>Betrag</th><th>kumuliert</th></tr>';
   plan.zeilen.forEach(function (z) {
