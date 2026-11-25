@@ -141,6 +141,13 @@
 
   <fieldset>
     <legend>Vergleichskonto</legend>
+    <label>Kontoart <select id="kontoMethodeWahl">
+      <option value="0">AIBD (EG-Anhang II) (2023)</option>
+      <option value="1">PAngV (alt) (bis 2010)</option>
+    </select></label>
+    <button id="kontoKnopf">Vergleichskonto erstellen</button>
+    <button id="kontoDruckKnopf" disabled title="Nur das erstellte Vergleichskonto drucken">Konto drucken</button>
+    <span class="hinweis">Kontoaufstellung aller Zahlungen mit Zinsanteilen und Saldo — zum Abgleich mit Bankauszügen (wie „Vergleichskonto erstellen“ im Original)</span>
     <div id="kontoAnzeige"></div>
   </fieldset>
 
@@ -181,6 +188,8 @@ let proj = {
   strome: [ { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:ZZR.toOrdinal(new Date().getFullYear(),1,1), ultimo:0, betrag:-1000, raten:12, abstand:1, notiz:'Beispielzahlung' } ]
 };
 let dateiPfad = '';
+let kontoMethode = proj.methode; // Kontoart des Vergleichskontos (wahlbar, Default = EZ-Methode der Datei)
+let lastKontoHTML = '';          // letztes erstelltes Vergleichskonto (für „Konto drucken“)
 
 const SPALTEN = [
   ['aktiv','Akt.'],['datum','Datum von'],['betrag','Betrag'],['raten','Raten'],
@@ -266,14 +275,13 @@ document.getElementById('effKnopf').onclick = function () {
   zeigeZahlungsplan();
   zeigeBlatt();
 };
-document.getElementById('kontoKnopf').onclick = function () {
-  tabelleLesen();
+function baueKontoHTML() {
   const flows = ZZR.expandiere(proj);
   const e = beideEffektivzins(flows);
-  const eff = proj.methode === 0 ? e.eg : e.pangv;
-  const titel = proj.methode === 0 ? 'AIBD (EG-Anhang II) (2023)' : 'PAngV (bis 2010)';
-  if (eff === null) { document.getElementById('kontoAnzeige').innerHTML = '<p>Keine gültige Berechnung — Zahlungsströme beider Richtungen nötig.</p>'; return; }
-  if (proj.methode === 0) {
+  const eff = kontoMethode === 0 ? e.eg : e.pangv;
+  const titel = kontoMethode === 0 ? 'AIBD (EG-Anhang II) (2023)' : 'PAngV (bis 2010)';
+  if (eff === null) return null;
+  if (kontoMethode === 0) {
     const k = ZZR.kontoAIBD(flows, eff);
     let h = '<p class="ergebnis">Vergleichskonto ' + titel + ' Effektivzins: <b>' + deZahl(eff * 100, 4) + ' % p.a.</b>' +
             ' <span class="hinweis">(' + k.zeilen.length + ' Buchungen, tagesgenaue Zinseszinsrechnung)</span></p>';
@@ -284,8 +292,7 @@ document.getElementById('kontoKnopf').onclick = function () {
           .map(function (f) { return '<td>' + deZahl(r[f], 2) + '</td>'; }).join('') + '</tr>';
     });
     h += '</table></div>';
-    document.getElementById('kontoAnzeige').innerHTML = h;
-    return;
+    return h;
   }
   const k = ZZR.kontoSimulation(flows, eff);
   let h = '<p class="ergebnis">Vergleichskonto ' + titel + ' Effektivzins: <b>' + deZahl(eff * 100, 4) + ' % p.a.</b>' +
@@ -297,7 +304,25 @@ document.getElementById('kontoKnopf').onclick = function () {
         .map(function (f) { return '<td>' + deZahl(r[f], 2) + '</td>'; }).join('') + '</tr>';
   });
   h += '</table></div>';
-  document.getElementById('kontoAnzeige').innerHTML = h;
+  return h;
+}
+document.getElementById('kontoKnopf').onclick = function () {
+  tabelleLesen();
+  const h = baueKontoHTML();
+  document.getElementById('kontoAnzeige').innerHTML = h ||
+    '<p>Keine gültige Berechnung — Zahlungsströme beider Richtungen nötig.</p>';
+  lastKontoHTML = h || '';
+  document.getElementById('kontoDruckKnopf').disabled = !lastKontoHTML;
+};
+document.getElementById('kontoMethodeWahl').onchange = function () {
+  kontoMethode = +this.value;
+};
+document.getElementById('kontoDruckKnopf').onclick = function () {
+  if (!lastKontoHTML) return;
+  document.getElementById('druckBericht').innerHTML =
+    '<div class="druckseite">' + lastKontoHTML + '</div>';
+  document.body.classList.add('druckmodus');
+  window.print();
 };
 document.getElementById('loeserKnopf').onclick = function () {
   tabelleLesen();
@@ -485,6 +510,10 @@ document.getElementById('dateiLaden').onchange = function (ev) {
     const text = new TextDecoder('windows-1252').decode(buf);
     proj = ZZR.parseZZR(text);
     dateiPfad = datei.name;
+    kontoMethode = proj.methode;
+    lastKontoHTML = '';
+    document.getElementById('kontoMethodeWahl').value = String(kontoMethode);
+    document.getElementById('kontoDruckKnopf').disabled = true;
     document.getElementById('dateiName').textContent = datei.name + ' — ' + proj.strome.length + ' Ströme';
     tabelleZeichnen();
     document.getElementById('kontoAnzeige').innerHTML = '';
