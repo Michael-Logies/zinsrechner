@@ -11,12 +11,17 @@ Die Rechenregeln wurden am Verhalten des historischen Programms verifiziert
 (Black-Box-Gegenproben unter Wine: Original-Export und Live-Messungen); der
 Code ist vollständig neu geschrieben (keine Übernahme aus dem Original).
 
+## Online verwenden
+
+Die fertige Datei läuft direkt im Browser:
+
+    https://michael-logies.github.io/zinsrechner/dist/zinsrechner.html
+
 ## Entstehung
 
 KI-unterstützt entwickelt: Qwen Code (Agent) mit LLM GLM-5.3-Flash über den
 z.ai-Fallback-Proxy, unter Richtung, Prüfung und Dokumentation von
-Michael Logies. Vermessungsprotokoll und Prüfreferenzen: ~/zzr-analyse
-(lokal) und tests/ (Goldmaster-Datenpunkte).
+Michael Logies. Prüfreferenzen: tests/ (Goldmaster-Datenpunkte).
 
 ## Build & Tests
 
