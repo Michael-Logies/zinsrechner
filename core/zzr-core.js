@@ -711,7 +711,20 @@
     const flows = expandiere(proj);
     const plan = zahlungsplan(proj);
     let kontoZeilen = null, kontoMethode = null, kontoEff = null;
-    if (konto && konto.zeilen && konto.zeilen.length) { kontoZeilen = konto.zeilen; kontoMethode = konto.methode; kontoEff = konto.eff; }
+    if (konto && konto.zeilen && konto.zeilen.length) {
+      kontoZeilen = konto.zeilen; kontoMethode = konto.methode; kontoEff = konto.eff;
+    } else {
+      // Kein Konto vorab erstellt: der Export berechnet es SELBST (mit der
+      // gewählten Kontoart bzw. der EZ-Methode der Datei) — jedes XLSX
+      // enthält damit immer auch die Konto-Formelkette (Nutzer-Bug 25.11.:
+      // ohne vorab erstelltes Konto fehlte das Konto-Blatt komplett).
+      const methode = (konto && konto.methode !== undefined) ? konto.methode : proj.methode;
+      const eff = (methode === 0) ? effEG(flows) : effPAngV(flows);
+      if (eff !== null) {
+        const k = (methode === 0) ? kontoAIBD(flows, eff) : kontoSimulation(flows, eff);
+        if (k && k.zeilen.length) { kontoZeilen = k.zeilen; kontoMethode = methode; kontoEff = eff; }
+      }
+    }
 
     // ---- Zell-/Zeilenbauer: zellTyp 't'=Text, 'n'=Zahl, 'd'=Datum-Serial, 'f'=Formel (v = Cache)
     function zeileXML(nr, zellen) {
@@ -851,6 +864,7 @@
       + '<borders count="1"><border/></borders>'
       + '<cellStyleXfs count="1"><xf/></cellStyleXfs>'
       + '<cellXfs count="2"><xf/><xf numFmtId="164" applyNumberFormat="1"/></cellXfs>'
+      + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
       + '</styleSheet>';
     const sheetFiles = blattXmls.map(function (inhalt, i) {
       return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'

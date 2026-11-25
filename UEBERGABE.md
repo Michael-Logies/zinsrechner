@@ -32,7 +32,11 @@ f0dc679). Blätter: Zahlungsströme / Vergleichskonto (nur nach Konto-Erstellung
 Effektivzins in EINGABEZELLE B2 — Zins ändern rechnet das Konto neu, Daten→Zielwertsuche
 ermittelt den EFF selbst / Pendant zum „Lösen"-Knopf) / Zahlungsplan (kumuliert als
 Formel). Verifiziert: Testsuite 23 Blöcke grün (neu: XLSX-Struktur/CRC/XML/Formeln),
-LibreOffice headless Gegenprobe öffnet und konvertiert sauber.**
+LibreOffice headless Gegenprobe öffnet und konvertiert sauber. Nach-Nutzerfeedback-
+Verfeinerung: der Export berechnet das Vergleichskonto JETZT SELBST (konto-Parameter
+ohne zeilen → Kern rechnet eff + zeilen intern mit der gewählten Kontoart) — jedes XLSX
+enthält damit immer das Konto-Blatt mit Formelkette, auch ohne vorab erstelltes Konto;
+styles.xml um cellStyles ergänzt (Excel-Tauglichkeit).**
 **NEU in dieser Runde (24.11. abends, Orakel-Lauf 22:45–23:10): Zweitgrenzen-Regel am
 Original BEWIESEN (Konto-Export feb2.txt: Valuta „30.02.2000" → 30/360 führt auch die
 Zweitgrenze am Februar-Ende als 30), Ultimo=0 orakelt (u3p/u3a: PAngV 0,7396 % / AIBD

@@ -413,6 +413,9 @@ if (xlsxKonto === null) throw new Error('Konto für XLSX-Test ohne Ergebnis');
 const xlsxBytes = ZZR.xlsxExport(xlsxProj, { methode: 1, eff: 0.05, zeilen: xlsxKonto.zeilen });
 assert(xlsxBytes instanceof Uint8Array && xlsxBytes.length > 1000, 'XLSX-Bytes fehlen');
 assert(xlsxBytes[0] === 0x50 && xlsxBytes[1] === 0x4b, 'XLSX ohne ZIP-Signatur (PK)');
+// Selbst-Berechnungs-Weg: ohne zeilen rechnet der Export das Konto selbst
+const autoBytes = ZZR.xlsxExport(xlsxProj, { methode: 1 });
+assert(autoBytes instanceof Uint8Array && autoBytes.length > 1000 && autoBytes[0] === 0x50, 'XLSX Selbst-Berechnung fehlt');
 const xlsxPfad = require('path').join(require('os').tmpdir(), 'zzr-xlsx-test.xlsx');
 require('fs').writeFileSync(xlsxPfad, Buffer.from(xlsxBytes));
 require('child_process').execSync(

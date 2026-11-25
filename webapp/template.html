@@ -190,7 +190,6 @@ let proj = {
 let dateiPfad = '';
 let kontoMethode = proj.methode; // Kontoart des Vergleichskontos (wahlbar, Default = EZ-Methode der Datei)
 let lastKontoHTML = '';          // letztes erstelltes Vergleichskonto (für „Konto drucken“)
-let lastKontoExportDaten = null; // strukturierte Daten des letzten Kontos (für den XLSX-Export)
 
 const SPALTEN = [
   ['aktiv','Akt.'],['datum','Datum von'],['betrag','Betrag'],['raten','Raten'],
@@ -286,7 +285,7 @@ function baueKontoHTML() {
   const e = beideEffektivzins(flows);
   const eff = kontoMethode === 0 ? e.eg : e.pangv;
   const titel = kontoMethode === 0 ? 'AIBD (EG-Anhang II) (2023)' : 'PAngV (bis 2010)';
-  if (eff === null) { lastKontoExportDaten = null; return null; }
+  if (eff === null) return null;
   if (kontoMethode === 0) {
     const k = ZZR.kontoAIBD(flows, eff);
     let h = '<p class="ergebnis">Vergleichskonto ' + titel + ' Effektivzins: <b>' + deZahl(eff * 100, 4) + ' % p.a.</b>' +
@@ -298,7 +297,6 @@ function baueKontoHTML() {
           .map(function (f) { return '<td>' + deZahl(r[f], 2) + '</td>'; }).join('') + '</tr>';
     });
     h += '</table></div>';
-    lastKontoExportDaten = { methode: kontoMethode, eff, zeilen: k.zeilen };
     return h;
   }
   const k = ZZR.kontoSimulation(flows, eff);
@@ -311,12 +309,11 @@ function baueKontoHTML() {
         .map(function (f) { return '<td>' + deZahl(r[f], 2) + '</td>'; }).join('') + '</tr>';
   });
   h += '</table></div>';
-  lastKontoExportDaten = { methode: kontoMethode, eff, zeilen: k.zeilen };
   return h;
 }
 document.getElementById('xlsxKnopf').onclick = function () {
   tabelleLesen();
-  const bytes = ZZR.xlsxExport(proj, lastKontoExportDaten);
+  const bytes = ZZR.xlsxExport(proj, { methode: kontoMethode });
   const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -536,7 +533,6 @@ document.getElementById('dateiLaden').onchange = function (ev) {
     dateiPfad = datei.name;
     kontoMethode = proj.methode;
     lastKontoHTML = '';
-    lastKontoExportDaten = null;
     document.getElementById('kontoMethodeWahl').value = String(kontoMethode);
     document.getElementById('kontoDruckKnopf').disabled = true;
     document.getElementById('dateiName').textContent = datei.name + ' — ' + proj.strome.length + ' Ströme';

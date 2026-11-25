@@ -891,7 +891,20 @@
     const flows = expandiere(proj);
     const plan = zahlungsplan(proj);
     let kontoZeilen = null, kontoMethode = null, kontoEff = null;
-    if (konto && konto.zeilen && konto.zeilen.length) { kontoZeilen = konto.zeilen; kontoMethode = konto.methode; kontoEff = konto.eff; }
+    if (konto && konto.zeilen && konto.zeilen.length) {
+      kontoZeilen = konto.zeilen; kontoMethode = konto.methode; kontoEff = konto.eff;
+    } else {
+      // Kein Konto vorab erstellt: der Export berechnet es SELBST (mit der
+      // gewählten Kontoart bzw. der EZ-Methode der Datei) — jedes XLSX
+      // enthält damit immer auch die Konto-Formelkette (Nutzer-Bug 25.11.:
+      // ohne vorab erstelltes Konto fehlte das Konto-Blatt komplett).
+      const methode = (konto && konto.methode !== undefined) ? konto.methode : proj.methode;
+      const eff = (methode === 0) ? effEG(flows) : effPAngV(flows);
+      if (eff !== null) {
+        const k = (methode === 0) ? kontoAIBD(flows, eff) : kontoSimulation(flows, eff);
+        if (k && k.zeilen.length) { kontoZeilen = k.zeilen; kontoMethode = methode; kontoEff = eff; }
+      }
+    }
 
     // ---- Zell-/Zeilenbauer: zellTyp 't'=Text, 'n'=Zahl, 'd'=Datum-Serial, 'f'=Formel (v = Cache)
     function zeileXML(nr, zellen) {
@@ -1031,6 +1044,7 @@
       + '<borders count="1"><border/></borders>'
       + '<cellStyleXfs count="1"><xf/></cellStyleXfs>'
       + '<cellXfs count="2"><xf/><xf numFmtId="164" applyNumberFormat="1"/></cellXfs>'
+      + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
       + '</styleSheet>';
     const sheetFiles = blattXmls.map(function (inhalt, i) {
       return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
@@ -1287,7 +1301,6 @@ let proj = {
 let dateiPfad = '';
 let kontoMethode = proj.methode; // Kontoart des Vergleichskontos (wahlbar, Default = EZ-Methode der Datei)
 let lastKontoHTML = '';          // letztes erstelltes Vergleichskonto (für „Konto drucken“)
-let lastKontoExportDaten = null; // strukturierte Daten des letzten Kontos (für den XLSX-Export)
 
 const SPALTEN = [
   ['aktiv','Akt.'],['datum','Datum von'],['betrag','Betrag'],['raten','Raten'],
@@ -1383,7 +1396,7 @@ function baueKontoHTML() {
   const e = beideEffektivzins(flows);
   const eff = kontoMethode === 0 ? e.eg : e.pangv;
   const titel = kontoMethode === 0 ? 'AIBD (EG-Anhang II) (2023)' : 'PAngV (bis 2010)';
-  if (eff === null) { lastKontoExportDaten = null; return null; }
+  if (eff === null) return null;
   if (kontoMethode === 0) {
     const k = ZZR.kontoAIBD(flows, eff);
     let h = '<p class="ergebnis">Vergleichskonto ' + titel + ' Effektivzins: <b>' + deZahl(eff * 100, 4) + ' % p.a.</b>' +
@@ -1395,7 +1408,6 @@ function baueKontoHTML() {
           .map(function (f) { return '<td>' + deZahl(r[f], 2) + '</td>'; }).join('') + '</tr>';
     });
     h += '</table></div>';
-    lastKontoExportDaten = { methode: kontoMethode, eff, zeilen: k.zeilen };
     return h;
   }
   const k = ZZR.kontoSimulation(flows, eff);
@@ -1408,12 +1420,11 @@ function baueKontoHTML() {
         .map(function (f) { return '<td>' + deZahl(r[f], 2) + '</td>'; }).join('') + '</tr>';
   });
   h += '</table></div>';
-  lastKontoExportDaten = { methode: kontoMethode, eff, zeilen: k.zeilen };
   return h;
 }
 document.getElementById('xlsxKnopf').onclick = function () {
   tabelleLesen();
-  const bytes = ZZR.xlsxExport(proj, lastKontoExportDaten);
+  const bytes = ZZR.xlsxExport(proj, { methode: kontoMethode });
   const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1633,7 +1644,6 @@ document.getElementById('dateiLaden').onchange = function (ev) {
     dateiPfad = datei.name;
     kontoMethode = proj.methode;
     lastKontoHTML = '';
-    lastKontoExportDaten = null;
     document.getElementById('kontoMethodeWahl').value = String(kontoMethode);
     document.getElementById('kontoDruckKnopf').disabled = true;
     document.getElementById('dateiName').textContent = datei.name + ' — ' + proj.strome.length + ' Ströme';
