@@ -399,4 +399,26 @@ assert(loeserEff !== null && Math.abs(loeserEff - 0.05) < 0.0001,
   'Ratenhöhe muss den Zielzins 5 % erreichen (ist: ' + (loeserEff * 100).toFixed(4) + ' %)');
 console.log('Löser Nutzerart-Fall (Beidseitig-null-Bracket): grün — Ratenhöhe ' + loeserX.toFixed(2) + ' € trifft 5 % exakt');
 
+// ---------------------------------------------------------------------------
+// XLSX-Export (25.11.2026): Formelhaltiges Tabellenkalkulationsblatt
+// (ZIP/STORE + XML, ECMA-376) — Blätter Zahlungsströme / Vergleichskonto /
+// Zahlungsplan; Formelzellen (<f>) + Kern-Werte als Cache (<v>) +
+// fullCalcOnLoad. Struktur- und CRC-Prüfung via python3 zipfile.
+const xlsxProj = { titel: 'XLSX-Test', methode: 1, euro: 1, beschreibung: '', strome: [
+  { aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: ZZR.toOrdinal(2026, 1, 1), ultimo: 0, betrag: -10000, raten: 1, abstand: 1, notiz: 'Anlage' },
+  { aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: ZZR.toOrdinal(2026, 2, 1), ultimo: 0, betrag: 100, raten: 12, abstand: 1, notiz: 'Raten' },
+] };
+const xlsxKonto = ZZR.kontoSimulation(ZZR.expandiere(xlsxProj), 0.05);
+if (xlsxKonto === null) throw new Error('Konto für XLSX-Test ohne Ergebnis');
+const xlsxBytes = ZZR.xlsxExport(xlsxProj, { methode: 1, eff: 0.05, zeilen: xlsxKonto.zeilen });
+assert(xlsxBytes instanceof Uint8Array && xlsxBytes.length > 1000, 'XLSX-Bytes fehlen');
+assert(xlsxBytes[0] === 0x50 && xlsxBytes[1] === 0x4b, 'XLSX ohne ZIP-Signatur (PK)');
+const xlsxPfad = require('path').join(require('os').tmpdir(), 'zzr-xlsx-test.xlsx');
+require('fs').writeFileSync(xlsxPfad, Buffer.from(xlsxBytes));
+require('child_process').execSync(
+  'python3 -c "import zipfile, xml.etree.ElementTree as ET, sys; z = zipfile.ZipFile(sys.argv[1]); assert z.testzip() is None; [ET.fromstring(z.read(n)) for n in z.namelist() if n.endswith(\'.xml\')]; txt = z.read(\'xl/worksheets/sheet2.xml\').decode(\'utf-8\'); assert \'<f>\' in txt, \'keine Formeln im Vergleichskonto\'; assert \'$B$2\' in txt, \'Zins-Zellbezug fehlt\'" "' + xlsxPfad + '"',
+  { stdio: 'pipe' }
+);
+console.log('XLSX-Export: grün — ZIP/CR C in Ordnung, XML wohlgeformt, Formelkette im Vergleichskonto');
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + AIBD360 + End-/Barwert).');
