@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// CSV (Jahres-Übersicht „Aktienentwicklung alle", Semikolon, CP1252, CRLF)
-// → ZZR-.zzr-Datei (Zahlungsstrom) für den Import in den Zinsrechner.
+// CSV (Lexware Finanzmanager, JJ-Jahresübersicht „Aktienentwicklung alle“,
+// Semikolon, CP1252, CRLF) → ZZR-.zzr-Datei (Zahlungsstrom) für den Import
+// in den Zinsrechner.
 //
 // Abbildung (Kassenstrom des Depots, Vorzeichen: Einzahlung negativ, Rückfluss positiv):
 //   Kauf        -Einstandspreis  (+ Einnahmen/Ausgaben-Spalte zusätzlich, z. B. Gebühr)
@@ -71,7 +72,8 @@ const proj = {
   methode: 0, // EG-Anhang II (AIBD) (2023) — Voreinstellung der Fläche
   euro: 1,
   beschreibung: [
-    'Quelle: "2026 Aktienentwicklung alle JJ_20261125_224733.csv" (Windows, CP1252).',
+    'Quelle: Lexware Finanzmanager, JJ-Jahresübersicht "Aktienentwicklung alle"',
+    '("2026 Aktienentwicklung alle JJ_20261125_224733.csv", Windows, CP1252).',
     'Abbildung als Kassenstrom: Kauf -Einstandspreis; Verkauf +Marktwert;',
     'Einnahme +Einnahmen/Ausgaben (auch negativ); WP-Entnahme -Marktwert;',
     'Ausgabe +Einnahmen/Ausgaben (negativ); letzter End-Marktwert = Schlußzahlung.',
