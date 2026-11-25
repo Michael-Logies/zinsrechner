@@ -548,7 +548,8 @@ document.getElementById('dateiLaden').onchange = function (ev) {
 document.getElementById('speichernKnopf').onclick = function () {
   tabelleLesen();
   const text = ZZR.serializeZZR(proj);
-  const blob = new Blob([text], { type: 'text/plain;charset=windows-1252' });
+  // CP1252-Bytes schreiben — UTF-8-Bytes würde das historische Programm falsch lesen:
+  const blob = new Blob([ZZR.cp1252Bytes(text)], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = (proj.titel || 'zinsrechnung').replace(/[^\wäöüÄÖÜß -]/g, '').trim() + '.zzr';

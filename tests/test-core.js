@@ -451,4 +451,14 @@ try { ZZR.lexwareCsvZuStrome('Datum;Betrag\n01.01.2000;1\n'); } catch (e) { lexF
 assert(lexFehler !== null && /Kopfzeile/.test(lexFehler.message), 'Lexware Scheitern bei fremdem Format');
 console.log('Lexware-CSV-Import: grün — Abbildung, Summen, Nullbeträge weg, unbekannte Zeile gemeldet, fremdes Format scheitert.');
 
+// 22) cp1252Bytes (Browser-Schreibweg für .zzr — CP1252 statt UTF-8)
+const cpText = 'Krüger € „Anführung" — Ende ü ß';
+const cp = ZZR.cp1252Bytes(cpText);
+assert.strictEqual(cp.length, cpText.length, 'cp1252-Länge = Zeichenanzahl (beweist: kein UTF-8)');
+assert.strictEqual(Array.from(cp.slice(0, 3)).join(','), '75,114,252', 'cp1252 „Kru" → 75,114,252 (ü = 252)');
+assert(cp.includes(0x80) && cp.includes(0x84) && cp.includes(0x97) && cp.includes(0xDF), 'cp1252 € „ — ß Bytes');
+assert(ZZR.cp1252Bytes('\u0081')[0] === 0x81, 'cp1252 U+0081 bleibt 0x81 (CP1252-Steuerposition)');
+assert(ZZR.cp1252Bytes('中')[0] === 0x3F, 'cp1252 außerhalb → ?');
+console.log('cp1252Bytes: grün — Fläche schreibt .zzr als CP1252, historisches Programm liest korrekt.');
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + AIBD360 + End-/Barwert).');
