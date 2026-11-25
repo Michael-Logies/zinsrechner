@@ -1,11 +1,13 @@
 # Zinsrechner — Zahlungsströme & Effektivzins
 
 Eigenständiger Zinsrechner als eine HTML-Datei (offline, keine Abhängigkeiten):
-Zahlungsströme erfassen, Effektivzins nach drei Methoden (historische
-PAngV-1985-Vergleichskontomethode, EG-Anhang II/AIBD tagesgenau, PAngV
-2011/2026 amtlich nach Remark (C)), Vergleichskonto, Endwert/Barwert,
-Zielzins-Löser, Verbraucherinformationsblatt (EU-Muster), Laden/Speichern
-im .zzr-Format (kompatibel zum historischen Programm ZZR, 1999–2007).
+Zahlungsströme erfassen oder die Jahresübersicht (.csv) des Lexware
+Finanzmanagers direkt importieren (JJ-„Aktienentwicklung alle"), Effektivzins
+nach drei Methoden (historische PAngV-1985-Vergleichskontomethode,
+EG-Anhang II/AIBD tagesgenau, PAngV 2011/2026 amtlich nach Remark (C)),
+Vergleichskonto, Endwert/Barwert, Zielzins-Löser, Verbraucherinformationsblatt
+(EU-Muster), Laden/Speichern im .zzr-Format (CP1252, kompatibel zum
+historischen Programm ZZR, 1999–2007).
 
 Die Rechenregeln wurden am Verhalten des historischen Programms verifiziert
 (Black-Box-Gegenproben unter Wine: Original-Export und Live-Messungen); der
