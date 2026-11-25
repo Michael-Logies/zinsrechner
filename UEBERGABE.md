@@ -139,6 +139,37 @@ ZZR-Neubau fort."** Voller Wissensstand: Memory-MCP #1467 + #1479 (Tags zzr) + N
 
 ## Offene Punkte
 
+0. **AUSSTEHEND FÜR DEN NÄCHSTEN KONTEXT (Nutzer-Aufträge 25.11. abends ~21:3x):**
+   **(A) GitHub-Repo anlegen + pushen:** Repo `Michael-Logies/zinsrechner`, ÖFFENTLICH
+   (AGPL + geplante GitHub-Pages-Nutzung; Nutzer freigegeben 25.11.: „Läge das Repo
+   Michael-Logies/zinsrechner an und pushe"). gh-CLI ist als Michael-Logies eingeloggt
+   (Scopes repo + read:org; Memory github-cli-michael-logies). Ablauf: `gh repo create
+   Michael-Logies/zinsrechner --public --description …` → `git -C ~/zinsrechner remote
+   add origin https://github.com/Michael-Logies/zinsrechner.git` → push main. VOR dem
+   Push prüfen: git status clean ✓ (Stand e651953 + 5d349d2), Bsp_1_original.zzr NICHT
+   im Repo ✓ (Original-Programmdaten, nur lokal), Dist-Reinheit ✓ (keine Pfade/Keys),
+   Commits: git log — Identität ist VM-noreply-Umschreibung (Memory
+   ti-adresssuche-repo-git-identitaet): prüfen, ob die Zinsrechner-Commits als
+   Qwen-Code-noreply oder Michael-Logies umgeschrieben werden sollen (Kern-Question:
+   Nutzer fragen, NUR wenn unklar — default: lassen wie committet). Optional danach:
+   GitHub Pages aktivieren (Settings → Pages → Branch main) — die Fläche läuft dann
+   direkt im Browser ohne Download; ODS zusätzlich: nur auf Wunsch.
+   **(B) logies.de-Seite für den Zinsrechner unter „Für Kollegen":** Neue Seite im
+   Publii (Site: zahnarzt-michael-logies; DB-Pfad sites/zahnarzt-michael-logies/input/
+   db.sqlite — NICHT die 0-Byte-db.sqlite im Site-Wurzelordner!). Pflichtfelder
+   (Memory publii-db-schema-requirements): featured_image_id=0, template='',
+   posts_additional_data._core JSON mit editor:tinymce. Backup VORHER (VACUUM INTO),
+   assert-Anker, sofort commit (Memory publii-db-update-safety). Menü „Für Kollegen"
+   (menu.config.json, id 1004): Landing „Übersicht" ist erster Unterpunkt (Regel
+   menu-landing); Linkliste am Ende der Seite „Für Kollegen" (Post-ID 4, slug
+   fuer-kollegen) ergänzen (Regel fuer-kollegen-auto-update): Links target="_blank"
+   rel="noopener noreferrer", ohne führenden Schrägstrich (Regel publii-link-paths).
+   Seiteninhalt: Zinsrechner-Fläche verlinken (Download aus dem GitHub-Repo bzw.
+   GitHub Pages) + Kurzbeschreibung + AGPL-Hinweis + Link auf das GitHub-Repo. Nächste
+   freie Menü-ID: 2050+ (checken). Nach dem Seiten-Anlegen: Publii-Sync (Freigabe/
+   Deploy nach Nutzerwort — Regel publii-media-sync/webseiten-publikation-nie-ohne-
+   rueckfrage: Deploy nur nach Nutzerfreigabe!).
+
 1. ~~Ultimo-Detail~~ ERLEDIGT (24.11., vk1 + u3p/u3a)
 2. ~~Barwerte/endwerte-Tabellen deuten~~ ERLEDIGT (Zins-Sensitivitätstabellen; Basis =
    geladener Strom u1-ohne-Schlußzahlung; Referenz in tests/; Feinkonvention der
