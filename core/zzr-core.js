@@ -518,13 +518,28 @@
       const alt = s.betrag;
       s.betrag = alt * faktor;
       const flows = expandiere(proj);
+      // Einseitiger Strom (z. B. winzige skalierte Rate — nur Auszahlungen an
+      // den Nutzer oder nur eigene Zahlungen): kein EFF existiert. Für die
+      // Bracket-Suche wirkt das wie „−unendlich“ — die Lösung liegt zwingend
+      // oberhalb, die Bracket-Erweiterung darf deshalb NICHT abbrechen
+      // (Nutzer-Bug 25.11.2026: Anlage 10.000, Start-Rate 100, Ziel 5 % →
+      // Start-Bracket ×0,05 einseitig → Löser lieferte null).
+      const einseitig = !flows.some(f => f.betrag > 0) || !flows.some(f => f.betrag < 0);
+      if (einseitig) { s.betrag = alt; return -1e9; }
       let e;
       if (methode === 1) e = effPAngV(flows); else e = effEG(flows);
       s.betrag = alt;
       return e;
     }
     let lo = 0.05, hi = 20, flo = effMit(lo), fhi = effMit(hi);
-    if (flo === null || fhi === null) return null;
+    // null = kein EFF im durchsuchten Bereich (−99 %…+1000 %): BEIDE Ränder null
+    // heißt, die Lösung liegt ZWISCHEN ihnen (reale EFFs existieren dann in der
+    // Mitte — der Löser bisektiert zwischen den ±unendlich-Kanten). Ein RAND
+    // null allein: das Ziel liegt jenseits dieses Randes (Nutzer-Bug 25.11.2026:
+    // Anlage 10.000, Start-Rate 100, Ziel 5 % → beide Ränder null, früher
+    // sofortiger Abbruch „Löser ohne Ergebnis“).
+    if (flo === null) flo = -Infinity;
+    if (fhi === null) fhi = +Infinity;
     // Bracket geometrisch erweitern, bis der Zielzins eingekreist ist — der
     // fixe [0.05, 20]-Bracket verfehlte das Zzr.hlp-Beispiel BSP_1 (Nennbetrag
     // 1 DM, Lösung ≈ 1375 DM). Nicht erreichbare Ziele brechen am Wachstums-Limit.
@@ -539,7 +554,13 @@
     for (let it = 0; it < 200; it++) {
       const mid = Math.sqrt(lo * hi); // geometrisch: Größenordnungen
       const fm = effMit(mid);
-      if (fm === null) return null;
+      if (fm === null) {
+        // Kein EFF im Bereich (Konto kann den Zielzins bei dieser Größenordnung
+        // gar nicht erreichen — Rückzahlungen zu klein): unterhalb der Lösung,
+        // weiter nach oben suchen (steigt = true ist hier die Norm).
+        if (steigt) { lo = mid; continue; }
+        return null;
+      }
       const links = steigt ? fm < ziel : fm > ziel;
       if (links) lo = mid; else hi = mid;
       if (hi / lo - 1 < 1e-13) break;

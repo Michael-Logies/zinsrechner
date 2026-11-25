@@ -379,4 +379,24 @@ assert.strictEqual(ZZR.days30360(ZZR.toOrdinal(2000, 1, 31), ZZR.toOrdinal(2000,
   '30/360: 31.01.→29.02. muss 30 Tage zählen (Zweitgrenze als 30 — Orakel feb-d2)');
 console.log('Orakel-Referenzen 24.11.2026 (Ultimo=0, gebrochene Raten, Zweitgrenze, AIBD360): grün — Kern = Original exakt');
 
+// ---------------------------------------------------------------------------
+// Löser „Nutzerart-Fall“ (25.11.2026, Nutzer-Bug „Der Löserbutton berechnet
+// nichts mehr“): Anlage −10.000 €, 12 monatliche Raten (Start-Rate 100 €),
+// Zielzins 5 %. Das Start-Bracket [×0,05, ×20] liefert an BEIDEN Rändern einen
+// Strom ohne EFF im durchsuchten Bereich (kleiner Rand: Anlage dominiert die
+// winzige Rate — kein Vorzeichenwechsel der Kontoauflösung; großer Rand: EFF
+// über +1000 %) — der Löser brach dort mit null ab. Fix: Ränder ohne EFF im
+// Bereich wirken wie ±unendlich, die Bisektion läuft zwischen ihnen.
+const loeserProj = { titel: 'Löser-Nutzerfall', methode: 1, euro: 1, beschreibung: '', strome: [
+  { aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: ZZR.toOrdinal(2026, 1, 1), ultimo: 0, betrag: -10000, raten: 1, abstand: 1, notiz: 'Anlage' },
+  { aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: ZZR.toOrdinal(2026, 2, 1), ultimo: 0, betrag: 100, raten: 12, abstand: 1, notiz: 'Raten' },
+] };
+const loeserX = ZZR.loeseRatenhoehe(loeserProj, 2, 0.05, 1);
+assert(loeserX !== null && loeserX > 0, 'Ratenhöhe-Löser muss im Nutzerart-Fall ein Ergebnis liefern (früher: null)');
+loeserProj.strome[1].betrag = loeserX;
+const loeserEff = ZZR.effPAngV(ZZR.expandiere(loeserProj));
+assert(loeserEff !== null && Math.abs(loeserEff - 0.05) < 0.0001,
+  'Ratenhöhe muss den Zielzins 5 % erreichen (ist: ' + (loeserEff * 100).toFixed(4) + ' %)');
+console.log('Löser Nutzerart-Fall (Beidseitig-null-Bracket): grün — Ratenhöhe ' + loeserX.toFixed(2) + ' € trifft 5 % exakt');
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + AIBD360 + End-/Barwert).');
