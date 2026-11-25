@@ -395,8 +395,11 @@
     const art = { Kauf: 0, Verkauf: 0, Einnahme: 0, 'WP-Entnahme': 0, Ausgabe: 0, Marktwert: 0 };
     for (let i = 0; i < daten.length; i++) {
       const f = daten[i].split(';');
+      if (f.every(function (x) { return !x.trim(); })) continue; // Leer-/Strukturzeile (z. B. Schluß „;;;;;;;;")
       if (f.length < 7) { unbekannt.push(daten[i].slice(0, 80)); continue; }
-      const d = deDatum(f[0]);
+      const tag = f[0].trim();
+      if (!/^\d{2}\.\d{2}\.\d{4}$/.test(tag)) { unbekannt.push(daten[i].slice(0, 80)); continue; }
+      const d = deDatum(tag);
       const konto = f[1].trim(), vorgang = f[2].trim(), besch = f[3].trim();
       const notiz = ((konto ? konto + ': ' : '') + besch).trim() || vorgang || 'Zeile';
       const ep = num(f[4]), ea = num(f[5]), mw = num(f[6]);

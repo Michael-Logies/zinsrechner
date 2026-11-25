@@ -437,6 +437,8 @@ const lexCsv = lexKopf + [
   '18.10.1999;Consors Depot ?;Kauf;Bilfinger+Berger;;-2,55;;;',
   '31.12.1995;;;End-Marktwert;;;4.006,64;;',
   '01.01.2000;?;Sonderfall;unbekannter Vorgang;;0,00;;;',
+  ';;;;;;;;',
+  'Summen-Blatt;;;;',
 ].join('\n') + '\n';
 const lex = ZZR.lexwareCsvZuStrome(lexCsv);
 assert.strictEqual(lex.strome.length, 7, 'Lexware-Import Zahlungen');
@@ -444,7 +446,7 @@ assert.strictEqual(lex.strome.length, 7, 'Lexware-Import Zahlungen');
 // Verkauf +5626,79; WP-Entnahme −10,43; Ausgabe −9,30; Schluß +4006,64; unbekannt übersprungen
 const lexSoll = -3783.56 - 2.55 - 31.65 + 5626.79 - 10.43 - 9.30 + 4006.64;
 assert(Math.abs(lex.summe - lexSoll) < 1e-6, 'Lexware-Import Summe');
-assert(lex.unbekannt.length === 1 && lex.unbekannt[0].indexOf('Sonderfall') !== -1, 'Lexware unbekannter Vorgang');
+assert(lex.unbekannt.length === 2 && lex.unbekannt[0].indexOf('Sonderfall') !== -1 && lex.unbekannt[1].indexOf('Summen-Blatt') !== -1, 'Lexware unbekannte Zeilen (Sonderfall + Zeile ohne Datum); Schluß-„;;;;;;;;" still weg');
 assert(ZZR.deDate(lex.erster) === '28.02.1995' && ZZR.deDate(lex.letzter) === '23.05.2014', 'Lexware Zeitraum (höchstes Zahlungsdatum)');
 let lexFehler = null;
 try { ZZR.lexwareCsvZuStrome('Datum;Betrag\n01.01.2000;1\n'); } catch (e) { lexFehler = e; }
