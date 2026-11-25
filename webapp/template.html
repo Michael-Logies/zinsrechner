@@ -56,7 +56,6 @@
     <legend>Berechnung</legend>
     <button id="effKnopf">Effektivzins berechnen (3 Methoden)</button>
     <button id="kontoKnopf">Vergleichskonto erstellen</button>
-    <button id="druckKnopf">Drucken</button>
     <button id="druckBerichtKnopf" title="Druckbericht: Seite 1 = Zahlungsströme + Zahlungsplan, Seite 2 = Verbraucherinformationsblatt">Druck</button>
     <span style="float:right">
       <label>Strom-Nr. <input id="loeserStrom" type="number" value="1" min="1" style="width:3.5em"></label>
@@ -356,14 +355,16 @@ document.getElementById('loeserKnopf').onclick = function () {
 function bauePlanHTML() {
   const plan = ZZR.zahlungsplan(proj);
   if (!plan.zeilen.length) return '<p>Keine aktiven Zahlungsströme.</p>';
-  const lzHeute = ZZR.laufzeit(plan.erste, plan.letzte, 2);
+  const lzHeute = ZZR.laufzeit(plan.erste, plan.letzte, 0);
+  const lzK = plan.laufzeit;
+  const lzKonvText = lzK.jahre + ' Jahr(en), ' + lzK.monate + ' Monat(en)' +
+    (proj.methode === 0 ? ', ' + lzK.tage + ' Tag(en)' : '');
   let kumuliert = 0;
   let h = '<p class="ergebnis">Zahlungsplan zu „' + proj.titel + '“ — Erste Zahlung: <b>' + ZZR.deDate(plan.erste) +
           '</b>, letzte Zahlung: <b>' + ZZR.deDate(plan.letzte) + '</b><br>' +
-          'Laufzeit: <b>' + plan.laufzeit.jahre + ' Jahr(en), ' + plan.laufzeit.monate + ' Monat(en), ' +
-          plan.laufzeit.tage + ' Tag(en)</b> <span class="hinweis">(' +
+          'Laufzeit: <b>' + lzKonvText + '</b> <span class="hinweis">(' +
           (proj.methode === 0 ? 'echter Kalender, AIBD-Konvention (EG, 2023)' : '30/360-Kalendarium, PAngV-Konvention (bis 2010)') +
-          ')</span> · nach heutiger Zählung (Anlage zu § 16 PAngV, Fassung 2026: ganze Monate rückwärts + Resttage): <b>' +
+          ')</span> · nach heutiger Zählung (Anlage zu § 16 PAngV, Fassung 2026): <b>' +
           lzHeute.jahre + ' Jahr(en), ' + lzHeute.monate + ' Monat(en), ' + lzHeute.tage + ' Tag(en)</b></p>';
   h += '<div class="konto-wrap"><table><tr><th>Nr.</th><th class="l">Valuta</th><th class="l">Beschreibung</th><th>Betrag</th><th>kumuliert</th></tr>';
   plan.zeilen.forEach(function (z) {
@@ -447,7 +448,6 @@ function zeigeBlatt() {
   document.getElementById('vibAnzeige').innerHTML = h || '<p>Das Blatt braucht Zahlungen in beiden Richtungen — Auszahlungen an Sie (+) und Ihre Zahlungen (−).</p>';
 }
 document.getElementById('vibKnopf').onclick = zeigeBlatt;
-document.getElementById('druckKnopf').onclick = function () { window.print(); };
 function baueStromeHTML() {
   let h = '<table><tr>';
   for (const [,t] of SPALTEN) h += '<th>' + t + '</th>';
