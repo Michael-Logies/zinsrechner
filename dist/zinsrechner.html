@@ -1050,6 +1050,11 @@ function deZahl(x, nk) {
   return x.toLocaleString('de-DE', { minimumFractionDigits:nk, maximumFractionDigits:nk });
 }
 
+function zelleWert(v) {
+  // Zahlen in den Zellen deutsch formatieren (Komma, max. 2 Nachkommastellen)
+  return (typeof v === 'number') ? v.toLocaleString('de-DE', { maximumFractionDigits: 2 }) : v;
+}
+
 function tabelleZeichnen() {
   const el = document.getElementById('stromTabelle');
   let h = '<table><tr>';
@@ -1061,7 +1066,7 @@ function tabelleZeichnen() {
       const klasse = (k === 'notiz') ? ' class="l"' : '';
       if (k === 'ultimo' || k === 'aktiv') h += '<td><input type="checkbox" data-feld="' + k + '"' + (s[k] ? ' checked' : '') + '></td>';
       else if (k === 'datum') h += '<td' + klasse + '><input data-feld="datum" value="' + datumText(s.datum) + '"></td>';
-      else h += '<td' + klasse + '><input data-feld="' + k + '" value="' + s[k] + '"></td>';
+      else h += '<td' + klasse + '><input data-feld="' + k + '" value="' + zelleWert(s[k]) + '"></td>';
     }
     h += '</tr>';
   });
@@ -1175,15 +1180,16 @@ document.getElementById('loeserKnopf').onclick = function () {
   let text;
   if (!s) { text = 'Strom-Nr. ungültig.'; }
   else if (zg === 'ratenhoehe') {
-    const neu = ZZR.loeseRatenhoehe(proj, nr, ziel, proj.methode);
+    const exakt = ZZR.loeseRatenhoehe(proj, nr, ziel, proj.methode);
+    const neu = exakt === null ? null : Math.round(exakt * 100) / 100;
     if (neu === null) text = 'Löser ohne Ergebnis (Strom/Eingaben prüfen).';
     else { s.betrag = neu; tabelleZeichnen();
       text = 'Ratenhöhe Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(neu, 2) + '</b> (eingetragen)'; }
   } else if (zg === 'ratenanzahl') {
-    const n = ZZR.loeseRatenanzahl(proj, nr, ziel, proj.methode, schieben);
-    if (n === null) text = 'Löser ohne Ergebnis.';
-    else { tabelleZeichnen();
-      text = 'Anzahl der Raten Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(n, 4) + '</b>' +
+    const exakt = ZZR.loeseRatenanzahl(proj, nr, ziel, proj.methode, schieben);
+    if (exakt === null) text = 'Löser ohne Ergebnis.';
+    else { const n = Math.round(exakt * 100) / 100; s.raten = n; tabelleZeichnen();
+      text = 'Anzahl der Raten Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(n, 2) + '</b>' +
         ' <span class="hinweis">gebrochene Zahl — die letzte Rate trägt den Bruchteil' +
         (schieben ? ' · nachfolgende Ströme mitschoben' : ' · Folge-Ströme unverschoben (Kästchen „mitschieben" setzen, um wie im Original anzugleichen)') + '</span>'; }
   } else if (zg === 'datum') {
@@ -1199,12 +1205,14 @@ document.getElementById('loeserKnopf').onclick = function () {
       text = 'Ratenabstand Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + m + ' Monat(e)</b>' +
         ' <span class="hinweis">beste Monats-Näherung, eingetragen</span>'; }
   } else if (zg === 'dynamik') {
-    const x = ZZR.loeseDynamik(proj, nr, ziel, proj.methode, 'prozent');
+    const exakt = ZZR.loeseDynamik(proj, nr, ziel, proj.methode, 'prozent');
+    const x = exakt === null ? null : Math.round(exakt * 100) / 100;
     if (x === null) text = 'Löser ohne Ergebnis.';
     else { s.dynamik = x; tabelleZeichnen();
-      text = 'Erforderliche Dynamik Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(x, 4) + ' % je Stufe</b> (eingetragen)'; }
+      text = 'Erforderliche Dynamik Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(x, 2) + ' % je Stufe</b> (eingetragen)'; }
   } else if (zg === 'zuwachs') {
-    const x = ZZR.loeseDynamik(proj, nr, ziel, proj.methode, 'absolut');
+    const exakt = ZZR.loeseDynamik(proj, nr, ziel, proj.methode, 'absolut');
+    const x = exakt === null ? null : Math.round(exakt * 100) / 100;
     if (x === null) text = 'Löser ohne Ergebnis.';
     else { s.zuwachs = x; tabelleZeichnen();
       text = 'Erforderlicher Zuwachs Strom ' + nr + ' bei Zielzins ' + zielText + ': <b>' + deZahl(x, 2) + ' je Stufe</b> (eingetragen)'; }
@@ -1216,6 +1224,9 @@ document.getElementById('loeserKnopf').onclick = function () {
         ' <span class="hinweis">beste Näherung (ganze Stufen), eingetragen</span>'; }
   }
   document.getElementById('effAnzeige').innerHTML = text;
+  // Nach jedem Lösen auch die abhängigen Ausgaben auffrischen
+  zeigeZahlungsplan();
+  zeigeBlatt();
 };
 function bauePlanHTML() {
   const plan = ZZR.zahlungsplan(proj);
