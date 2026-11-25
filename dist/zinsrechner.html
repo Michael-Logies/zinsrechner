@@ -166,7 +166,8 @@
 
   <fieldset class="filter">
     <legend>Dateien</legend>
-    <div style="margin:.4em 0"><strong>Import:</strong> <label>.zzr öffnen (Originalprogramm): <input id="dateiLaden" type="file" accept=".zzr,.ZZR"></label>
+    <div style="margin:.4em 0"><strong>Import:</strong> <button id="zzrKnopf" title="Öffnet eine .zzr-Datei des historischen Programms ZZR — der Nachbau liest und schreibt dieses Format">.zzr öffnen (Originalprogramm)</button>
+      <input id="dateiLaden" type="file" accept=".zzr,.ZZR" hidden>
       <button id="lexwareKnopf" title="Lädt die Jahresübersicht (JJ) des Lexware Finanzmanagers („Aktienentwicklung alle"): Spalten Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;Einnahmen/Ausgaben;Marktwert — UTF-16- oder CP1252-CSV. Scheitert der Import, hat sich das Exportformat geändert — dann bitte die eigene KI (z. B. Qwen Code) mit der Anpassung bemühen.">Lexware Wertpapier-CSV importieren …</button>
       <input id="lexwareDatei" type="file" accept=".csv,text/csv" hidden>
       <span class="hinweis">Erkennt die Jahresübersicht (JJ) des Lexware Finanzmanagers. Scheitert der Import, hat sich das Exportformat geändert — bitte die eigene KI bemühen.</span></div>
@@ -1777,6 +1778,7 @@ window.addEventListener('afterprint', function () {
   document.body.classList.remove('druckmodus');
   document.getElementById('druckBericht').innerHTML = '';
 });
+document.getElementById('zzrKnopf').onclick = function () { document.getElementById('dateiLaden').click(); };
 document.getElementById('dateiLaden').onchange = function (ev) {
   const datei = ev.target.files[0];
   if (!datei) return;
