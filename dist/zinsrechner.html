@@ -141,7 +141,7 @@
   <fieldset>
     <legend>Vergleichskonto</legend>
     <label>Kontoart <select id="kontoMethodeWahl">
-      <option value="0">AIBD (EG-Anhang II) (2023)</option>
+      <option value="0" selected>AIBD (EG-Anhang II) (2023)</option>
       <option value="1">PAngV (alt) (bis 2010)</option>
     </select></label>
     <button id="kontoKnopf">Vergleichskonto erstellen</button>
@@ -1299,7 +1299,7 @@ let proj = {
   strome: [ { aktiv:1, stufen:1, dynamik:0, zuwachs:0, datum:ZZR.toOrdinal(new Date().getFullYear(),1,1), ultimo:0, betrag:-1000, raten:12, abstand:1, notiz:'Beispielzahlung' } ]
 };
 let dateiPfad = '';
-let kontoMethode = proj.methode; // Kontoart des Vergleichskontos (wahlbar, Default = EZ-Methode der Datei)
+let kontoMethode = 0; // Kontoart des Vergleichskontos — Voreinstellung = AIBD (EG-Anhang II) (2023), die neueste Konto-Variante
 let lastKontoHTML = '';          // letztes erstelltes Vergleichskonto (für „Konto drucken“)
 
 const SPALTEN = [
@@ -1642,7 +1642,6 @@ document.getElementById('dateiLaden').onchange = function (ev) {
     const text = new TextDecoder('windows-1252').decode(buf);
     proj = ZZR.parseZZR(text);
     dateiPfad = datei.name;
-    kontoMethode = proj.methode;
     lastKontoHTML = '';
     document.getElementById('kontoMethodeWahl').value = String(kontoMethode);
     document.getElementById('kontoDruckKnopf').disabled = true;
