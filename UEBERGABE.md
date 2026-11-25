@@ -1,10 +1,16 @@
-# Übergabe ZZR-Neubau (Stand 24.11.2026, ~23:15)
+# Übergabe ZZR-Neubau (Stand 25.11.2026, ~18:35)
 
 **Kurzstand für den nächsten Kontext:** Alle Kernfunktionen Goldmaster-GRÜN (jetzt 21
 Testblöcke in tests/test-core.js) — PAngV-alt, EG/AIBD, **AIBD360 (NEU, bewiesen)**,
 effPAngVHeu, End-/Barwert, Aktiv-Häkchen-Fix, Raster-Wurzelsuche, EU-Verbraucherinfor-
 mationsblatt, AGPL + README, Ultimo-Semantik, gebrochene Raten, 30/360-Februarregel,
 Kalender-Bugfix, Zahlungsplan-Ansicht + Laufzeit, alle 7 Zielgrößen-Löser.
+**NEU am 25.11.: Methoden-Namen tragen überall Jahres-Klammern (Jahr der letzten
+gesetzlichen Regelung): PAngV (alt) (bis 2010), EG-Anhang II (AIBD) (2023 — CCD2,
+anwendbar seit 20.11.2026), PAngV 2011/2026 (2026 — Neufassung 2021, geändert
+12.5.2026); AIBD360 = Marktkonvention OHNE gesetzliche Regelung; Erklärbox + ZA-Blatt +
+Ergebniszeile + Konto-/Laufzeit-/Endwert-/Barwert-Texte aktualisiert; Fläche REBUILD +
+vm.Script-Prüfung + Dist-Reinheitsprüfung erledigt.**
 **NEU in dieser Runde (24.11. abends, Orakel-Lauf 22:45–23:10): Zweitgrenzen-Regel am
 Original BEWIESEN (Konto-Export feb2.txt: Valuta „30.02.2000" → 30/360 führt auch die
 Zweitgrenze am Februar-Ende als 30), Ultimo=0 orakelt (u3p/u3a: PAngV 0,7396 % / AIBD
@@ -39,7 +45,7 @@ ZZR-Neubau fort."** Voller Wissensstand: Memory-MCP #1467 + #1479 (Tags zzr) + N
    Zahlungsstrom-Tabelle, EFF (3 Methoden), Vergleichskonto (AIBD/PAngV-Ansicht),
    Zahlungsplan-Sektion, Zielzins-Löser, End-/Barwert-Feld, .zzr Laden/Speichern,
    Drucken, Verbraucherinformationsblatt, Methoden-Erklärbox. Bau: `node webapp/build.js`
-   (ACHTUNG: Kern hat eine NEUE Funktion — vor Veröffentlichung rebuild + vm.Script-Prüfung)
+   (Kern-Sync-Rebuild + vm.Script-Prüfung + Dist-Reinheit: erledigt 25.11.2026)
 3. **Tests** `tests/test-core.js` — 21 Blöcke grün. Referenzen: goldmaster-konto.json,
    goldmaster-konto-m0.txt, vk1-ultimo-u1.txt, **NEU: orakel-feb-d2-pangv.txt,
    orakel-bruch-u2-pangv.txt / -aibd.txt, orakel-u3-pangv.txt / -aibd.txt /
@@ -129,9 +135,10 @@ ZZR-Neubau fort."** Voller Wissensstand: Memory-MCP #1467 + #1479 (Tags zzr) + N
 - **LICENSE** = AGPL-3.0-or-later; **README.md** (© 2026 Michael Logies, KI-unterstützt:
   Qwen Code / GLM-5.3-Flash); Lizenz-Fußnote in der Fläche. Veröffentlichung freigegeben
   (Urheberrecht gut vertretbar, Clean-Room; s. auto-memory zzr-veroeffentlichung).
-  Vorabprüfung: keine lokalen Pfade/IPs/Keys im Dist ✓ — nach jedem Rebuild erneut prüfen
-  (und vor dem Rebuild: Kern hat NEUE Funktion effAibd360 — Fläche zeigt weiterhin 3
-  Methoden-Spalten; AIBD360-Nutzung in der Fläche wäre Diskussionspunkt, nicht stillschweigend bauen)
+  Vorabprüfung: keine lokalen Pfade/IPs/Keys im Dist ✓ (erneut geprüft 25.11.2026 nach
+  Rebuild) — nach jedem weiteren Rebuild erneut prüfen. Fläche zeigt weiterhin 3
+  Methoden-Spalten; AIBD360-Nutzung in der Fläche wäre Diskussionspunkt, nicht
+  stillschweigend bauen
 
 ## Befehle
 

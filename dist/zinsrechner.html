@@ -71,20 +71,22 @@
     <details id="methodenErklaerung" style="margin-top:0.4em">
       <summary>Erläuterung: die drei Effektivzins-Methoden</summary>
       <div style="font-size:0.92em; line-height:1.45; margin-top:0.4em">
-        <p><b>PAngV (alt) — Vergleichskonto.</b> Nachbildung des Original-Verfahrens aus der
+        <p><b>PAngV (alt) (bis 2010) — Vergleichskonto.</b> Nachbildung des Original-Verfahrens aus der
         Preisangabenverordnung von 1985: ein „Vergleichskonto“, auf dem das Geschäft mit dem
         effektiven Zins durchgespielt wird (30/360-Banktage, Zinsansammlung an jedem
         Zahlungstermin, Verrechnung am Jahresjubiläum der Einlage). Die Methode ist seit der
         PAngV-Novelle 2010/2011 aufgehoben — sie bleibt hier erhalten, weil der Nachbau das
         Programm von Zucker (1999–2007) exakt wiedergeben soll.</p>
-        <p><b>EG-Anhang II (AIBD) — Tageszins.</b> Anhang II zu Art. 1a der EG-Richtlinie zum
+        <p><b>EG-Anhang II (AIBD) (2023) — Tageszins.</b> Anhang II zu Art. 1a der EG-Richtlinie zum
         Konsumentenkredit (Amtsblatt C 155/9, 23.6.1989, in der Fassung 98/7/EG): Der Zins löst
         Barwert-Gleichheit der Zahlungen bei taggenauer Zinseszinsrechnung (Tage/365). Das
         Original nennt das „AIBD“ — die Renditekonvention der internationalen
         Anleihemärkte (Association of International Bond Dealers, heute ISMA/ICMA). Das
         Originalprogramm berechnet damit auch sein Vergleichskonto (taggenaue Zinsen statt
-        30/360).</p>
-        <p><b>PAngV 2011/2026 — Gesamtkreditkosten (heutiges Recht).</b> Anlage zu § 16 PAngV
+        30/360). Die Formel ist bis heute in Kraft: zuletzt amtlich fortgeführt in Anhang II
+        der Richtlinie (EU) 2023/2225 („CCD2“, anwendbar seit 20.11.2026) — letztmalige
+        gesetzliche Regelung: 2023.</p>
+        <p><b>PAngV 2011/2026 (2026) — Gesamtkreditkosten (heutiges Recht).</b> Anlage zu § 16 PAngV
         (aus der Verbraucherkreditrichtlinie 2008/48/EG, fortgeführt durch die Richtlinie
         (EU) 2023/2225, anwendbar seit 20.11.2026): Barwert der Auszahlungen = Barwert aller
         Rückzahlungen (Tilgung, Zinsen, Kosten). Die Zeiträume in Jahren zählen ganze Monate
@@ -99,8 +101,10 @@
         kannte diese Methode noch nicht; sie ist als Ergänzung für heutige Vergleichswerte
         enthalten.</p>
         <p>End-/Barwert-Messungen mit freiem Zins nutzen je nach EZ-Methode der Datei dieselben
-        Kontomechaniken: PAngV-Konto (30/360) bei „PAngV (alt)“, AIBD-Tageskonto bei
-        „AIBD/ISMA“.</p>
+        Kontomechaniken: PAngV-Konto (30/360) bei „PAngV (alt)“ (bis 2010), AIBD-Tageskonto bei
+        „AIBD/ISMA“ (2023). Das Original-Dropdown nennt als vierte Variante „AIBD 360“ —
+        dieselbe Formel wie AIBD, aber mit 30/360-Tagezahlen; eine Marktkonvention ohne
+        gesetzliche Regelung.</p>
         <p style="font-size:0.85em"><b>Quellen:</b>
         PAngV-Text und Anlage (zu § 16) mit Formel und Anmerkungen:
         <a href="https://www.gesetze-im-internet.de/pangv_2022/">gesetze-im-internet.de/pangv_2022</a> ·
@@ -165,7 +169,8 @@
  *
  * Verhaltensgetreue Neuentwicklung des „Zuckers Zins Rechner" (Gabriele Zucker,
  * Villingen, ca. 1999–2007) nach beobachtbarem Verhalten und öffentlichen
- * Rechenregeln (PAngV-Vergleichskonto, EG-Richtlinie 87/102/EWG Anhang II).
+ * Rechenregeln (PAngV-Vergleichskonto [1985, Geltung bis 2010]; EG-Richtlinie
+ * 87/102/EWG Anhang II [1989, zuletzt fortgeführt 2023 durch CCD2]).
  * Es wurde kein Original-Code übernommen (Clean-Room-Nachbau, D1-Fremdcode-Regelwerk).
  *
  * Kernbegriffe:
@@ -245,7 +250,7 @@
   function days365(ord1, ord2) { return ord2 - ord1; }
 
   // ----------------------------------------------------------- Zahlungsströme
-  // Projekt: { titel, methode (0=EG Anhang II, 1=PAngV Vergleichskonto), euro,
+  // Projekt: { titel, methode (0=EG Anhang II [2023], 1=PAngV Vergleichskonto [bis 2010]), euro,
   //            beschreibung, strome: [ { aktiv, zuwachs, dynamik, datum, ultimo,
   //            betrag, raten, abstand, notiz } ] }
   function parseZZR(text) {
@@ -448,9 +453,40 @@
     return wurzeln.slice().sort((x, y) => Math.abs(x) - Math.abs(y))[0];
   }
 
+  // ------------------- AIBD 360 (vierte Konto-Variante, 24.11.2026 bewiesen)
+  /*
+   * Das Original-Dropdown nennt vier Varianten: PAngV (alt) [bis 2010], AIBD (ISMA)
+   * [2023/CCD2], AIBD 360, PAngV 2000. AIBD 360 ist am Original bewiesen (Orakel 24.11.2026,
+   * Probe ultimo-u3, Export tests/orakel-u3b-aibd360.txt): Effektivzins
+   * 0,7410 % p.a. — exakt die Gleichung
+   *     Σ CF·(1+i)^(-t/360) = 0   mit t = 30/360-Tagezahlen (days30360)
+   * ab der ersten Zahlung, also exponentielle Verzinsung im 30/360-Kalendarium.
+   * AIBD (ISMA) ist dieselbe Formel mit act/365-Tagezahlen (effEG). AIBD 360 ist eine
+   * Marktkonvention (Rentenmärkte) OHNE gesetzliche Regelung — für die drei übrigen
+   * Varianten gelten die Jahre: PAngV (alt) bis 2010, AIBD/CCD2 2023, PAngV 2000 = 2000.
+   * Nachweis zugleich in tests/test-core.js (Block „Orakel-Referenzen 24.11.").
+   */
+  function npvAibd360(flows, i) {
+    const S = flows[0].datum;
+    let s = 0;
+    for (const f of flows) {
+      const t = days30360(S, f.datum);
+      s += f.betrag * Math.pow(1 + i, -t / 360);
+    }
+    return s;
+  }
+  function effAibd360(flows) {
+    if (flows.length === 0) return null;
+    const hatVorzeichenwechsel = flows.some(f => f.betrag > 0) && flows.some(f => f.betrag < 0);
+    if (!hatVorzeichenwechsel) return null;
+    const kandidaten = wurzelnSuchen(i => npvAibd360(flows, i), -0.99, 10);
+    return plausibleWurzel(kandidaten);
+  }
+
   // ---------------------------- PAngV 2011/2026 (Gesamtkreditkosten-Formel)
   /*
-   * Heutige Rechtslage (Anlage zu § 16 PAngV, Umsetzung der Verbraucherkredit-
+   * Heutige Rechtslage (Anlage zu § 16 PAngV, Neufassung 2021 — BGBl. I S. 4921 —,
+   * zuletzt geändert 2026; Umsetzung der Verbraucherkredit-
    * richtlinie 2008/48/EG; fortgeführt durch RL (EU) 2023/2225 „CCD2", seit
    * 20.11.2026 anwendbar): Der effektive Jahreszins X löst
    *     Σ C_k·(1+X)^(-t_k) = Σ D_l·(1+X)^(-s_l)
@@ -960,7 +996,7 @@
     fromOrdinal, toOrdinal, addMonths, addYears, deDate, isLeap, daysInMonth,
     days30360, days365,
     parseZZR, serializeZZR, expandiere,
-    effEG, effPAngV, kontoSimulation, kontoAIBD,
+    effEG, effPAngV, effAibd360, kontoSimulation, kontoAIBD,
     loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct,
     laufzeit, zahlungsplan,
     loeseRatenanzahl, loeseZahlungsdatum, loeseRatenabstand, loeseDynamik, loeseStufenzahl
@@ -1057,14 +1093,14 @@ document.getElementById('effKnopf').onclick = function () {
   const e = beideEffektivzins(flows);
   const f = function (x) { return x === null ? '—' : deZahl(x * 100, 4) + ' % p.a.'; };
   document.getElementById('effAnzeige').innerHTML =
-    'Effektivzins PAngV: <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD): <b>' + f(e.eg) + '</b> &nbsp;·&nbsp; PAngV 2011/2026: <b>' + f(e.heu) + '</b>';
+    'Effektivzins PAngV (bis 2010): <b>' + f(e.pangv) + '</b> &nbsp;·&nbsp; EG-Anhang II (AIBD) (2023): <b>' + f(e.eg) + '</b> &nbsp;·&nbsp; PAngV 2011/2026 (2026): <b>' + f(e.heu) + '</b>';
 };
 document.getElementById('kontoKnopf').onclick = function () {
   tabelleLesen();
   const flows = ZZR.expandiere(proj);
   const e = beideEffektivzins(flows);
   const eff = proj.methode === 0 ? e.eg : e.pangv;
-  const titel = proj.methode === 0 ? 'AIBD (EG-Anhang II)' : 'PAngV';
+  const titel = proj.methode === 0 ? 'AIBD (EG-Anhang II) (2023)' : 'PAngV (bis 2010)';
   if (eff === null) { document.getElementById('kontoAnzeige').innerHTML = '<p>Keine gültige Berechnung — Zahlungsströme beider Richtungen nötig.</p>'; return; }
   if (proj.methode === 0) {
     const k = ZZR.kontoAIBD(flows, eff);
@@ -1156,8 +1192,8 @@ document.getElementById('planKnopf').onclick = function () {
           '</b>, letzte Zahlung: <b>' + ZZR.deDate(plan.letzte) + '</b><br>' +
           'Laufzeit: <b>' + plan.laufzeit.jahre + ' Jahr(en), ' + plan.laufzeit.monate + ' Monat(en), ' +
           plan.laufzeit.tage + ' Tag(en)</b> <span class="hinweis">(' +
-          (proj.methode === 0 ? 'echter Kalender, AIBD-Konvention' : '30/360-Kalendarium, PAngV-Konvention') +
-          ')</span> · nach heutiger Zählung (PAngV 2011/2026: ganze Monate rückwärts + Resttage): <b>' +
+          (proj.methode === 0 ? 'echter Kalender, AIBD-Konvention (EG, 2023)' : '30/360-Kalendarium, PAngV-Konvention (bis 2010)') +
+          ')</span> · nach heutiger Zählung (Anlage zu § 16 PAngV, Fassung 2026: ganze Monate rückwärts + Resttage): <b>' +
           lzHeute.jahre + ' Jahr(en), ' + lzHeute.monate + ' Monat(en), ' + lzHeute.tage + ' Tag(en)</b></p>';
   h += '<div class="konto-wrap"><table><tr><th>Nr.</th><th class="l">Valuta</th><th class="l">Beschreibung</th><th>Betrag</th><th>kumuliert</th></tr>';
   plan.zeilen.forEach(function (z) {
@@ -1178,7 +1214,7 @@ document.getElementById('endwertKnopf').onclick = function () {
   const v = ZZR.endwert(flows, rate, stichtag, proj.methode);
   document.getElementById('ewAnzeige').innerHTML = (v === null)
     ? 'Endwert ohne Ergebnis (Ströme prüfen).'
-    : 'Endwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a. (' + (proj.methode === 0 ? 'AIBD' : 'PAngV') + '-Konto): <b>' + deZahl(v, 2) + '</b>';
+    : 'Endwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a. (' + (proj.methode === 0 ? 'AIBD (2023)' : 'PAngV (bis 2010)') + '-Konto): <b>' + deZahl(v, 2) + '</b>';
 };
 document.getElementById('barwertKnopf').onclick = function () {
   tabelleLesen();
@@ -1189,7 +1225,7 @@ document.getElementById('barwertKnopf').onclick = function () {
   const v = ZZR.barwert(flows, rate, stichtag, proj.methode);
   document.getElementById('ewAnzeige').innerHTML = (v === null)
     ? 'Barwert ohne Ergebnis (Ströme prüfen).'
-    : 'Barwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a. (' + (proj.methode === 0 ? 'AIBD' : 'PAngV') + '-Abzinsung): <b>' + deZahl(v, 2) + '</b>';
+    : 'Barwert aller aktiven Zahlungen zum Stichtag ' + ZZR.deDate(stichtag) + ' bei einer Verzinsung mit ' + deZahl(rate * 100, 2) + ' % p.a. (' + (proj.methode === 0 ? 'AIBD (2023)' : 'PAngV (bis 2010)') + '-Abzinsung): <b>' + deZahl(v, 2) + '</b>';
 };
 document.getElementById('vibKnopf').onclick = function () {
   tabelleLesen();
@@ -1225,7 +1261,7 @@ document.getElementById('vibKnopf').onclick = function () {
   h += zeile('Raten (Betrag, Anzahl, Periodizität)', D.length + ' Zahlung(en) insgesamt; Einzelbeträge siehe Zahlungsstrom');
   h += zeile('Gesamtbetrag, den Sie zu zahlen haben', deZahl(gesamtZahl, 2) + ' € (Kapital zuzüglich Zinsen und etwaiger Kosten)');
   h += zeile('Sollzinssatz', '— (in einem allgemeinen Zahlungsstrom nicht gesondert ausgewiesen)');
-  h += zeile('<b>Effektiver Jahreszins</b>', '<b>' + effText + '</b> — Berechnung nach der Anlage zu § 16 PAngV (Methode „PAngV 2011/2026“); [Repräsentatives Beispiel: sämtliche Annahmen = die hier erfassten Zahlungen]');
+  h += zeile('<b>Effektiver Jahreszins</b>', '<b>' + effText + '</b> — Berechnung nach der Anlage zu § 16 PAngV (Methode „PAngV 2011/2026“, Fassung 2026); [Repräsentatives Beispiel: sämtliche Annahmen = die hier erfassten Zahlungen]');
   h += zeile('Zahlungsverzug', 'Bei Zahlungsverzug werden Verzugskosten berechnet. Ausbleibende Zahlungen können schwerwiegende Folgen für Sie haben (z. B. Zwangsverkauf) und es Ihnen erschweren, in Zukunft Kredite zu erlangen.');
   h += '</table>';
   h += '<p><b>4 Andere wichtige rechtliche Aspekte</b><br>Widerrufsrecht: Sie haben das Recht, innerhalb von 14 Kalendertagen den Kreditvertrag zu widerrufen.<br>'

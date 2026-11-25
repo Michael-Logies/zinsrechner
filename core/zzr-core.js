@@ -3,7 +3,8 @@
  *
  * Verhaltensgetreue Neuentwicklung des „Zuckers Zins Rechner" (Gabriele Zucker,
  * Villingen, ca. 1999–2007) nach beobachtbarem Verhalten und öffentlichen
- * Rechenregeln (PAngV-Vergleichskonto, EG-Richtlinie 87/102/EWG Anhang II).
+ * Rechenregeln (PAngV-Vergleichskonto [1985, Geltung bis 2010]; EG-Richtlinie
+ * 87/102/EWG Anhang II [1989, zuletzt fortgeführt 2023 durch CCD2]).
  * Es wurde kein Original-Code übernommen (Clean-Room-Nachbau, D1-Fremdcode-Regelwerk).
  *
  * Kernbegriffe:
@@ -83,7 +84,7 @@
   function days365(ord1, ord2) { return ord2 - ord1; }
 
   // ----------------------------------------------------------- Zahlungsströme
-  // Projekt: { titel, methode (0=EG Anhang II, 1=PAngV Vergleichskonto), euro,
+  // Projekt: { titel, methode (0=EG Anhang II [2023], 1=PAngV Vergleichskonto [bis 2010]), euro,
   //            beschreibung, strome: [ { aktiv, zuwachs, dynamik, datum, ultimo,
   //            betrag, raten, abstand, notiz } ] }
   function parseZZR(text) {
@@ -288,14 +289,16 @@
 
   // ------------------- AIBD 360 (vierte Konto-Variante, 24.11.2026 bewiesen)
   /*
-   * Das Original-Dropdown nennt vier Varianten: PAngV (alt), AIBD (ISMA),
-   * AIBD 360, PAngV 2000. AIBD 360 ist am Original bewiesen (Orakel 24.11.2026,
+   * Das Original-Dropdown nennt vier Varianten: PAngV (alt) [bis 2010], AIBD (ISMA)
+   * [2023/CCD2], AIBD 360, PAngV 2000. AIBD 360 ist am Original bewiesen (Orakel 24.11.2026,
    * Probe ultimo-u3, Export tests/orakel-u3b-aibd360.txt): Effektivzins
    * 0,7410 % p.a. — exakt die Gleichung
    *     Σ CF·(1+i)^(-t/360) = 0   mit t = 30/360-Tagezahlen (days30360)
    * ab der ersten Zahlung, also exponentielle Verzinsung im 30/360-Kalendarium.
-   * AIBD (ISMA) ist dieselbe Formel mit act/365-Tagezahlen (effEG). Nachweis
-   * zugleich in tests/test-core.js (Block „Orakel-Referenzen 24.11.").
+   * AIBD (ISMA) ist dieselbe Formel mit act/365-Tagezahlen (effEG). AIBD 360 ist eine
+   * Marktkonvention (Rentenmärkte) OHNE gesetzliche Regelung — für die drei übrigen
+   * Varianten gelten die Jahre: PAngV (alt) bis 2010, AIBD/CCD2 2023, PAngV 2000 = 2000.
+   * Nachweis zugleich in tests/test-core.js (Block „Orakel-Referenzen 24.11.").
    */
   function npvAibd360(flows, i) {
     const S = flows[0].datum;
@@ -316,7 +319,8 @@
 
   // ---------------------------- PAngV 2011/2026 (Gesamtkreditkosten-Formel)
   /*
-   * Heutige Rechtslage (Anlage zu § 16 PAngV, Umsetzung der Verbraucherkredit-
+   * Heutige Rechtslage (Anlage zu § 16 PAngV, Neufassung 2021 — BGBl. I S. 4921 —,
+   * zuletzt geändert 2026; Umsetzung der Verbraucherkredit-
    * richtlinie 2008/48/EG; fortgeführt durch RL (EU) 2023/2225 „CCD2", seit
    * 20.11.2026 anwendbar): Der effektive Jahreszins X löst
    *     Σ C_k·(1+X)^(-t_k) = Σ D_l·(1+X)^(-s_l)
