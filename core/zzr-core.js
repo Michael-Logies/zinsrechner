@@ -185,6 +185,72 @@
     return L.join('\r\n') + '\r\n';
   }
 
+  // Lexware Finanzmanager, JJ-Jahresübersicht („Aktienentwicklung alle") → Zahlungs-
+  // strom für den Zinsrechner. Kassenstrom des Depots: Kauf −Einstandspreis (plus
+  // E/A-Spalte zusätzlich, z. B. Gebühr), Verkauf +Marktwert, Einnahme ±E/A (auch
+  // negativ = Kostenbuchung), WP-Entnahme −Marktwert, Ausgabe ±E/A (negativ);
+  // LETZTE End-Marktwert-Zeile = Schlußzahlung; Nullbeträge weg; nach Datum sortiert.
+  // Scheitert bewußt (Exception), wenn die Kopfzeile nicht paßt — das Format ist
+  // dann geändert, kein stillschweigendes Raten.
+  function lexwareCsvZuStrome(text) {
+    const normal = String(text).replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+    if (normal.slice(0, 220).indexOf('Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;') === -1) {
+      throw new Error('Keine Lexware-Jahresübersicht: Kopfzeile „Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;Einnahmen/Ausgaben;Marktwert;…" fehlt.');
+    }
+    const daten = normal.split('\n').filter(function (ln, i) {
+      return i > 0 && ln.trim() && ln.indexOf('"') === -1;
+    });
+    function deDatum(s) {
+      const m = s.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+      if (!m) throw new Error('Unverständliches Datum: ' + JSON.stringify(s));
+      return toOrdinal(+m[3], +m[2], +m[1]);
+    }
+    function num(s) { s = s.trim().replace(/\./g, '').replace(',', '.'); return s ? parseFloat(s) : 0; }
+    const strome = [];
+    const unbekannt = [];
+    let schluß = null;
+    const art = { Kauf: 0, Verkauf: 0, Einnahme: 0, 'WP-Entnahme': 0, Ausgabe: 0, Marktwert: 0 };
+    for (let i = 0; i < daten.length; i++) {
+      const f = daten[i].split(';');
+      if (f.length < 7) { unbekannt.push(daten[i].slice(0, 80)); continue; }
+      const d = deDatum(f[0]);
+      const konto = f[1].trim(), vorgang = f[2].trim(), besch = f[3].trim();
+      const notiz = ((konto ? konto + ': ' : '') + besch).trim() || vorgang || 'Zeile';
+      const ep = num(f[4]), ea = num(f[5]), mw = num(f[6]);
+      if (vorgang === 'Kauf') {
+        art.Kauf++;
+        if (ep !== 0) strome.push({ aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: d, ultimo: 0, betrag: -ep, raten: 1, abstand: 1, notiz: notiz });
+        if (ea !== 0) strome.push({ aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: d, ultimo: 0, betrag: ea, raten: 1, abstand: 1, notiz: notiz + ' (E/A)' });
+      } else if (vorgang === 'Verkauf') {
+        art.Verkauf++;
+        if (mw !== 0) strome.push({ aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: d, ultimo: 0, betrag: mw, raten: 1, abstand: 1, notiz: notiz });
+      } else if (vorgang === 'Einnahme') {
+        art.Einnahme++;
+        if (ea !== 0) strome.push({ aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: d, ultimo: 0, betrag: ea, raten: 1, abstand: 1, notiz: notiz });
+      } else if (vorgang === 'WP-Entnahme') {
+        art['WP-Entnahme']++;
+        if (mw !== 0) strome.push({ aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: d, ultimo: 0, betrag: -mw, raten: 1, abstand: 1, notiz: notiz + ' (WP-Entnahme)' });
+      } else if (vorgang === 'Ausgabe') {
+        art.Ausgabe++;
+        if (ea !== 0) strome.push({ aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: d, ultimo: 0, betrag: ea, raten: 1, abstand: 1, notiz: notiz + ' (Ausgabe)' });
+      } else if (!vorgang && (besch === 'Anfangs-Marktwert' || besch === 'End-Marktwert')) {
+        art.Marktwert++;
+        if (besch === 'End-Marktwert' && mw !== 0) schluß = { datum: d, betrag: mw };
+      } else {
+        unbekannt.push((vorgang || '(ohne Vorgang)') + ': ' + daten[i].slice(0, 70));
+      }
+    }
+    if (schluß) strome.push({ aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: schluß.datum, ultimo: 0, betrag: schluß.betrag, raten: 1, abstand: 1, notiz: 'End-Marktwert lt. Export (Schlußzahlung)' });
+    strome.sort(function (a, b) { return a.datum - b.datum; });
+    let summe = 0;
+    for (let i = 0; i < strome.length; i++) summe += strome[i].betrag;
+    return {
+      strome: strome, unbekannt: unbekannt, art: art, summe: summe,
+      erster: strome.length ? strome[0].datum : null,
+      letzter: strome.length ? strome[strome.length - 1].datum : null
+    };
+  }
+
   // Alle Einzelzahlungen eines Projekts (kleinste Einheit): { datum, amount, label } —
   // Stufen-Semantik live bewiesen (23.11.2026): Raten = Anzahl PRO Stufe, Stufe s
   // trägt Betrag ×(1+Dynamik/100)^s bzw. Betrag + s×Zuwachs, Tage = s×Raten×Abstand.
@@ -1128,7 +1194,7 @@
   const API = {
     fromOrdinal, toOrdinal, addMonths, addYears, deDate, isLeap, daysInMonth,
     days30360, days365,
-    parseZZR, serializeZZR, expandiere,
+    parseZZR, serializeZZR, expandiere, lexwareCsvZuStrome,
     effEG, effPAngV, effAibd360, kontoSimulation, kontoAIBD, xlsxExport,
     loeseRatenhoehe, endwert, barwert, effPAngVHeu, jahreActAct,
     laufzeit, zahlungsplan,

@@ -424,4 +424,31 @@ require('child_process').execSync(
 );
 console.log('XLSX-Export: grün — ZIP/CR C in Ordnung, XML wohlgeformt, Formelkette im Vergleichskonto');
 
+// 21) Lexware-CSV-Import (JJ-Jahresübersicht → Zahlungsstrom)
+const lexKopf = 'Buchungstag;Konto;Vorgang;Beschreibung;Einstandspreis;"Einnahmen /\nAusgaben";Marktwert;Rendite in %;Rendite\n';
+const lexCsv = lexKopf + [
+  '31.12.1994;;;Anfangs-Marktwert;0,00;;;;',
+  '28.02.1995;Glob. Growth;Kauf;Global Growth;3.783,56;;;;',
+  '13.12.1995;Glob. Growth;Einnahme;Global Growth;0,00;0,00;;;',
+  '23.05.2014;Consors Depot ?;Einnahme;E.ON AG NA;;-31,65;;;',
+  '21.03.1997;Glob. Growth;Verkauf;Global Growth;;;5.626,79;;',
+  '11.12.1998;DWS Japan;WP-Entnahme;DWS Japan;;;10,43;;',
+  '14.08.2000;Consors Depot ?;Ausgabe;Dyckerhoff Stamm;;-9,30;;;',
+  '18.10.1999;Consors Depot ?;Kauf;Bilfinger+Berger;;-2,55;;;',
+  '31.12.1995;;;End-Marktwert;;;4.006,64;;',
+  '01.01.2000;?;Sonderfall;unbekannter Vorgang;;0,00;;;',
+].join('\n') + '\n';
+const lex = ZZR.lexwareCsvZuStrome(lexCsv);
+assert.strictEqual(lex.strome.length, 7, 'Lexware-Import Zahlungen');
+// Kauf −3783,56; zweite Kauf-Zeile nur E/A-Gebühr −2,55; Einnahme −31,65 (0,00 weg);
+// Verkauf +5626,79; WP-Entnahme −10,43; Ausgabe −9,30; Schluß +4006,64; unbekannt übersprungen
+const lexSoll = -3783.56 - 2.55 - 31.65 + 5626.79 - 10.43 - 9.30 + 4006.64;
+assert(Math.abs(lex.summe - lexSoll) < 1e-6, 'Lexware-Import Summe');
+assert(lex.unbekannt.length === 1 && lex.unbekannt[0].indexOf('Sonderfall') !== -1, 'Lexware unbekannter Vorgang');
+assert(ZZR.deDate(lex.erster) === '28.02.1995' && ZZR.deDate(lex.letzter) === '23.05.2014', 'Lexware Zeitraum (höchstes Zahlungsdatum)');
+let lexFehler = null;
+try { ZZR.lexwareCsvZuStrome('Datum;Betrag\n01.01.2000;1\n'); } catch (e) { lexFehler = e; }
+assert(lexFehler !== null && /Kopfzeile/.test(lexFehler.message), 'Lexware Scheitern bei fremdem Format');
+console.log('Lexware-CSV-Import: grün — Abbildung, Summen, Nullbeträge weg, unbekannte Zeile gemeldet, fremdes Format scheitert.');
+
 console.log('\nGOLDMASTER GEGENPROBE BESTANDEN — Kern trifft das Original (PAngV + AIBD + AIBD360 + End-/Barwert).');
