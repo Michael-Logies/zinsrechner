@@ -764,18 +764,45 @@
       blattXmls.push(rows.join(''));
     }
 
-    // ---- Blatt 2: Vergleichskonto (Formelkette) — nur wenn ein Konto erstellt wurde
+    // ---- Blatt 2: Zahlungen (expandiert) + Effektivzins als XIRR-FORMEL
+    // XIRR(values, dates) = interner Zinsfuß mit echten Tagesdaten /365 — das
+    // ist exakt die EG/AIBD-Methode (effEG). Ändert der Nutzer eine Zahlung,
+    // berechnet der Effektivzins sich selbst neu.
+    {
+      const aktiveFlows = flows.filter(function (f) { return true; });
+      const ersteZeile = 5, letzteZeile = ersteZeile + aktiveFlows.length - 1;
+      const rows = [];
+      rows.push(zeileXML(1, [{ t: 't', v: 'Effektivzins EG/AIBD (XIRR aus den Zahlungen unten):' },
+        { f: 'XIRR(B' + ersteZeile + ':B' + letzteZeile + ',A' + ersteZeile + ':A' + letzteZeile + ')', v: effEG(aktiveFlows) }]));
+      rows.push(zeileXML(2, [{ t: 't', v: 'PAngV-Effektivzins (30/360-Sparbuch — Wert vom Rechenkern):' },
+        { v: effPAngV(aktiveFlows) !== null ? effPAngV(aktiveFlows) : '' }]));
+      rows.push(zeileXML(3, [{ t: 't', v: 'PAngV-Formel gibt es in Tabellenkalkulationen nicht — nur über Zielwertsuche im Vergleichskonto-Blatt.' }]));
+      rows.push(zeileXML(4, [{ t: 't', v: 'Datum' }, { t: 't', v: 'Betrag' }]));
+      aktiveFlows.forEach(function (f, i) {
+        rows.push(zeileXML(ersteZeile + i, [{ v: f.datum - 693594, s: 1 }, { v: f.betrag }]));
+      });
+      blattXmls.push(rows.join(''));
+    }
+
+    // ---- Blatt: Vergleichskonto (Formelkette)
     if (kontoZeilen) {
       const rows = [];
       rows.push(zeileXML(1, [{ t: 't', v: 'Kontoart:' }, { t: 't', v: kontoMethode === 0 ? 'AIBD (EG-Anhang II) (2023)' : 'PAngV (alt) (bis 2010)' }]));
-      rows.push(zeileXML(2, [{ t: 't', v: 'Effektivzins (Dezimal — editierbar):' }, { v: kontoEff }]));
+      // B2: bei AIBD = Verweis auf die XIRR-Formel im Blatt „Zahlungen“
+      // (Änderung einer Zahlung zieht das Konto nach); bei PAngV = Wert vom
+      // Rechenkern (30/360-Sparbuch-EFF ist als Tabellenfunktion nicht
+      // verfügbar — Ermittlung über Zielwertsuche).
+      const b2 = (kontoMethode === 0)
+        ? { f: 'Zahlungen!B1', v: kontoEff }
+        : { v: kontoEff };
+      rows.push(zeileXML(2, [{ t: 't', v: 'Effektivzins (Dezimal — editierbar):' }, b2]));
       rows.push(zeileXML(3, [{ t: 't', v: 'Zelle B2 ändern = Konto rechnet neu. Effektivzins selbst ermitteln: Daten → Zielwertsuche, Zielzelle = letzte Abschluss-Saldo-Zelle (Ziel 0), veränderbare Zelle = B2.' }]));
       const istAibd = (kontoMethode === 0);
       const kopf = istAibd
         ? ['Valuta', 'Beschreibung', 'Betrag', 'Tage', 'Zins anteilig', 'Tilgung', 'Saldo']
         : ['Valuta', 'Beschreibung', 'Betrag', 'Tage', 'Saldo für Zinsber.', 'Zins anteilig', 'Zins kumuliert', 'Tilgung anteilig', 'Abschluss-Saldo'];
       rows.push(zeileXML(4, kopf.map(function (t) { return { t: 't', v: t }; })));
-      let prevDatum = null, prevH = null, prevG = null, prevF = null, prevE = null;
+      let prevDatum = null;
       kontoZeilen.forEach(function (r, i) {
         const nr = i + 5;
         const tage = (prevDatum === null) ? 0 : (istAibd ? (r.valuta - prevDatum) : days30360(prevDatum, r.valuta));
@@ -786,7 +813,7 @@
         z.push({ v: tage });
         if (istAibd) {
           z.push((i === 0) ? { v: 0 } : { f: 'G' + (nr - 1) + '*((1+$B$2)^(D' + nr + '/365)-1)', v: r.zins });
-          z.push((i === 0) ? { f: 'C' + nr + '+E' + nr, v: r.tilgung } : { f: 'C' + nr + '+E' + nr, v: r.tilgung });
+          z.push({ f: 'C' + nr + '+E' + nr, v: r.tilgung });
           z.push((i === 0) ? { f: 'F' + nr, v: r.saldo } : { f: 'G' + (nr - 1) + '+F' + nr, v: r.saldo });
         } else {
           z.push((i === 0) ? { v: 0 } : { f: 'I' + (nr - 1) + '-G' + (nr - 1), v: r.saldoZinsber });
@@ -803,7 +830,7 @@
       blattXmls.push(rows.join(''));
     }
 
-    // ---- Blatt 3 (bzw. 2): Zahlungsplan (kumulierte Spalte als Formel)
+    // ---- Blatt: Zahlungsplan (kumulierte Spalte als Formel)
     {
       const rows = [];
       rows.push(zeileXML(1, [{ t: 't', v: 'Zahlungsplan zu „' + proj.titel + '“' }]));
@@ -828,7 +855,9 @@
 
     // ---- XML-Teile
     const hatKonto = !!kontoZeilen;
-    const blattNamen = hatKonto ? ['Zahlungsströme', 'Vergleichskonto', 'Zahlungsplan'] : ['Zahlungsströme', 'Zahlungsplan'];
+    const blattNamen = hatKonto
+      ? ['Zahlungsströme', 'Zahlungen', 'Vergleichskonto', 'Zahlungsplan']
+      : ['Zahlungsströme', 'Zahlungen', 'Zahlungsplan'];
     const sheetOverrides = blattNamen.map(function (_, i) {
       return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
     }).join('');

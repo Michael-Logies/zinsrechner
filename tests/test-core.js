@@ -408,9 +408,9 @@ const xlsxProj = { titel: 'XLSX-Test', methode: 1, euro: 1, beschreibung: '', st
   { aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: ZZR.toOrdinal(2026, 1, 1), ultimo: 0, betrag: -10000, raten: 1, abstand: 1, notiz: 'Anlage' },
   { aktiv: 1, stufen: 1, dynamik: 0, zuwachs: 0, datum: ZZR.toOrdinal(2026, 2, 1), ultimo: 0, betrag: 100, raten: 12, abstand: 1, notiz: 'Raten' },
 ] };
-const xlsxKonto = ZZR.kontoSimulation(ZZR.expandiere(xlsxProj), 0.05);
+const xlsxKonto = ZZR.kontoAIBD(ZZR.expandiere(xlsxProj), 0.05);
 if (xlsxKonto === null) throw new Error('Konto für XLSX-Test ohne Ergebnis');
-const xlsxBytes = ZZR.xlsxExport(xlsxProj, { methode: 1, eff: 0.05, zeilen: xlsxKonto.zeilen });
+const xlsxBytes = ZZR.xlsxExport(xlsxProj, { methode: 0, eff: 0.05, zeilen: xlsxKonto.zeilen });
 assert(xlsxBytes instanceof Uint8Array && xlsxBytes.length > 1000, 'XLSX-Bytes fehlen');
 assert(xlsxBytes[0] === 0x50 && xlsxBytes[1] === 0x4b, 'XLSX ohne ZIP-Signatur (PK)');
 // Selbst-Berechnungs-Weg: ohne zeilen rechnet der Export das Konto selbst
@@ -419,7 +419,7 @@ assert(autoBytes instanceof Uint8Array && autoBytes.length > 1000 && autoBytes[0
 const xlsxPfad = require('path').join(require('os').tmpdir(), 'zzr-xlsx-test.xlsx');
 require('fs').writeFileSync(xlsxPfad, Buffer.from(xlsxBytes));
 require('child_process').execSync(
-  'python3 -c "import zipfile, xml.etree.ElementTree as ET, sys; z = zipfile.ZipFile(sys.argv[1]); assert z.testzip() is None; [ET.fromstring(z.read(n)) for n in z.namelist() if n.endswith(\'.xml\')]; txt = z.read(\'xl/worksheets/sheet2.xml\').decode(\'utf-8\'); assert \'<f>\' in txt, \'keine Formeln im Vergleichskonto\'; assert \'$B$2\' in txt, \'Zins-Zellbezug fehlt\'" "' + xlsxPfad + '"',
+  'python3 -c "import zipfile, xml.etree.ElementTree as ET, sys; z = zipfile.ZipFile(sys.argv[1]); assert z.testzip() is None; [ET.fromstring(z.read(n)) for n in z.namelist() if n.endswith(\'.xml\')]; names = z.namelist(); assert \'xl/worksheets/sheet2.xml\' in names and \'xl/worksheets/sheet3.xml\' in names; s2 = z.read(\'xl/worksheets/sheet2.xml\').decode(\'utf-8\'); assert \'XIRR(\' in s2, \'XIRR-Formel fehlt\'; s3 = z.read(\'xl/worksheets/sheet3.xml\').decode(\'utf-8\'); assert \'Zahlungen!B1\' in s3, \'B2-Verweis auf Zahlungen fehlt im Vergleichskonto\'" "' + xlsxPfad + '"',
   { stdio: 'pipe' }
 );
 console.log('XLSX-Export: grün — ZIP/CR C in Ordnung, XML wohlgeformt, Formelkette im Vergleichskonto');
