@@ -12,6 +12,9 @@ historischen Programm ZZR, 1999–2007).
 Die Rechenregeln wurden am Verhalten des historischen Programms verifiziert
 (Black-Box-Gegenproben unter Wine: Original-Export und Live-Messungen); der
 Code ist vollständig neu geschrieben (keine Übernahme aus dem Original).
+Das Datenformat .zzr ist für KI-Agenten dokumentiert: siehe
+[ZZR-FORMAT.md](ZZR-FORMAT.md) — die Dokumentation ist auch in die
+HTML-Datei selbst eingebettet (Abschnitt „ZZR-Datenformat“).
 
 ## Online verwenden
 
