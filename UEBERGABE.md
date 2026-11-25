@@ -29,7 +29,8 @@ Ziel 5 % lieferte null; Ränder ohne EFF wirken wie ±unendlich, Bisektion zwisc
 unten im Datei-Feld — XLSX (Office Open XML) MIT Zellformeln, erzeugt im Browser ohne
 externe Bibliothek (eigener ZIP/STORE-Schreiber, Kern-Funktion xlsxExport, Commit
 f0dc679). Blätter: Zahlungsströme / Vergleichskonto (nur nach Konto-Erstellung;
-Effektivzins in EINGABEZELLE B2 — Zins ändern rechnet das Konto neu, Daten→Zielwertsuche
+Effektivzins in EINGABEZELLE B2 — Zins ändern rechnet das Konto neu, EFF-Ermittlung in
+der Tabelle über Extras → Zielwertsuche (LibreOffice-Menüpfad; Ziel: Endsaldo-Zelle = 0)
 ermittelt den EFF selbst / Pendant zum „Lösen"-Knopf) / Zahlungsplan (kumuliert als
 Formel). Verifiziert: Testsuite 23 Blöcke grün (neu: XLSX-Struktur/CRC/XML/Formeln),
 LibreOffice headless Gegenprobe öffnet und konvertiert sauber. Nach-Nutzerfeedback-

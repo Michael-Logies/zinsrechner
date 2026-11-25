@@ -796,7 +796,7 @@
         ? { f: 'Zahlungen!B1', v: kontoEff }
         : { v: kontoEff };
       rows.push(zeileXML(2, [{ t: 't', v: 'Effektivzins (Dezimal — editierbar):' }, b2]));
-      rows.push(zeileXML(3, [{ t: 't', v: 'Zelle B2 ändern = Konto rechnet neu. Effektivzins selbst ermitteln: Daten → Zielwertsuche, Zielzelle = letzte Abschluss-Saldo-Zelle (Ziel 0), veränderbare Zelle = B2.' }]));
+      rows.push(zeileXML(3, [{ t: 't', v: 'Zelle B2 ändern = Konto rechnet neu. Effektivzins selbst ermitteln: Extras → Zielwertsuche, Zielzelle = letzte Abschluss-Saldo-Zelle (Ziel 0), veränderbare Zelle = B2.' }]));
       const istAibd = (kontoMethode === 0);
       const kopf = istAibd
         ? ['Valuta', 'Beschreibung', 'Betrag', 'Tage', 'Zins anteilig', 'Tilgung', 'Saldo']
@@ -826,7 +826,7 @@
         rows.push(zeileXML(nr, z));
         prevDatum = r.valuta;
       });
-      rows.push(zeileXML(kontoZeilen.length + 6, [{ t: 't', v: 'Letzte Abschluss-Saldo-Zelle muss 0 sein — Daten → Zielwertsuche ermittelt den Effektivzins in B2 neu.' }]));
+      rows.push(zeileXML(kontoZeilen.length + 6, [{ t: 't', v: 'Letzte Abschluss-Saldo-Zelle muss 0 sein — Extras → Zielwertsuche ermittelt den Effektivzins in B2 neu.' }]));
       blattXmls.push(rows.join(''));
     }
 
