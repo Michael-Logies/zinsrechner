@@ -16,6 +16,23 @@ automatisch auch Zahlungsplan und Verbraucherinformationsblatt; neuer „Druck"-
 einen Druckbericht mit Seite 1 = Zahlungsströme + Zahlungsplan und Seite 2 = Verbraucher-
 informationsblatt (print-CSS „druckmodus", afterprint räumt auf). Der alte „Drucken"-
 Knopf druckt unverändert die ganze Seite.**
+**NEU am 25.11. (3. Runde): Vergleichskonto-Ausbau — Kontoart wählbar (AIBD/PAngV-
+Dropdown im Vergleichskonto-Feld, Default = EZ-Methode, beim Laden resynchronisiert),
+separater „Konto drucken"-Knopf (nach Konto-Erstellung aktiv), Löser rundet auf 2
+Nachkommastellen mit Komma (Tabellenzellen deutsch formatiert), „Lösen" aktualisiert
+Plan+Blatt, Laufzeit-Zeile zeigt nur die heutige Zählung (echte Kalenderdifferenz,
+keine 30/360-Tagesangabe), doppelten Vergleichskonto-Knopf beseitigt (6dacb19),
+Löser-Kern-Fix: Beidseitig-null-Bracket brach ab (28a33f2 — Anlage 10.000 + 12×100,
+Ziel 5 % lieferte null; Ränder ohne EFF wirken wie ±unendlich, Bisektion zwischen ihnen
+→ 855,40 € trifft 5,0000 % exakt; 22 Testblöcke grün).**
+**NEU am 25.11. (4. Runde, Nutzerauftrag XLSX): „Kalkulation exportieren (.xlsx)"-Knopf
+unten im Datei-Feld — XLSX (Office Open XML) MIT Zellformeln, erzeugt im Browser ohne
+externe Bibliothek (eigener ZIP/STORE-Schreiber, Kern-Funktion xlsxExport, Commit
+f0dc679). Blätter: Zahlungsströme / Vergleichskonto (nur nach Konto-Erstellung;
+Effektivzins in EINGABEZELLE B2 — Zins ändern rechnet das Konto neu, Daten→Zielwertsuche
+ermittelt den EFF selbst / Pendant zum „Lösen"-Knopf) / Zahlungsplan (kumuliert als
+Formel). Verifiziert: Testsuite 23 Blöcke grün (neu: XLSX-Struktur/CRC/XML/Formeln),
+LibreOffice headless Gegenprobe öffnet und konvertiert sauber.**
 **NEU in dieser Runde (24.11. abends, Orakel-Lauf 22:45–23:10): Zweitgrenzen-Regel am
 Original BEWIESEN (Konto-Export feb2.txt: Valuta „30.02.2000" → 30/360 führt auch die
 Zweitgrenze am Februar-Ende als 30), Ultimo=0 orakelt (u3p/u3a: PAngV 0,7396 % / AIBD
